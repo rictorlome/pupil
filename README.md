@@ -19,8 +19,10 @@ Layout:
 | **2** | 08  | 09  | 10  | 11  | 12  | 13  | 14  | 15  |
 | **1** | 00  | 01  | 02  | 03  | 04  | 05  | 06  | 07  |
 
-A8 - Most significant bit
-H1 - Least significant bit
+H8 - Most significant bit
+A1 - Least significant bit
+
+H8 H7 ... G8 G7 ... A2 A1
 
 Bitboard
 64 bit uint64. Each bit represent presence or absence of a piece.

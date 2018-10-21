@@ -1,6 +1,11 @@
 package main
 
-// import "fmt"
+import (
+	"fmt"
+	"math/bits"
+	"strings"
+	// "strconv"
+)
 
 type Bitboard uint64
 
@@ -47,7 +52,6 @@ var RANK_8BB Bitboard = RANK_1BB >> (NORTH * 7)
 
 // SQUARES
 type Square uint
-
 const (
 	SQ_A1 Square = iota
 	SQ_B1
@@ -116,21 +120,82 @@ const (
 	NULL_SQ // NULL SQUARE = 64
 )
 
-var SQUARE_BBS []Bitboard
+var SQUARE_BBS [64]Bitboard
 
-func shift_by(b Bitboard, d uint, amount uint) Bitboard {
-	return b >> (d * amount)
+func dup(b Bitboard) Bitboard {
+	r := b
+	return r
+}
+
+func binary(b Bitboard) string {
+	return fmt.Sprintf("%v%b", strings.Repeat("0", leading_zeros(b)), uint64(b))
+}
+
+func leading_zeros(b Bitboard) int {
+	return bits.LeadingZeros64(uint64(b))
+}
+
+func popcount(b Bitboard) int {
+	return bits.OnesCount64(uint64(b))
+}
+
+func Reverse(s string) string {
+    runes := []rune(s)
+    for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+        runes[i], runes[j] = runes[j], runes[i]
+    }
+    return string(runes)
+}
+
+func trailing_zeros(b Bitboard) int {
+	return bits.TrailingZeros64(uint64(b))
 }
 
 // func shift_by(b Bitboard, d uint, amount uint) Bitboard {
-// 	switch d {
-// 	case NORTH, EAST:
-// 		return b >> (d * amount)
-// 	case SOUTH, WEST:
-// 		return b << (d * amount)
-// 	default:
-// 		return b
-// 	}
+// 	return b >> (d * amount)
 // }
+
+func shift_by(b Bitboard, d uint, amount uint) Bitboard {
+	switch d {
+	case NORTH, EAST:
+		return b >> (d * amount)
+	case SOUTH, WEST:
+		return b << (d * amount)
+	default:
+		return b
+	}
+}
+
+func make_square(r uint, f uint) Square {
+	return Square(r * f - 1)
+}
+
+var RANK_8 uint = 8
+var RANK_7 uint = 7
+var RANK_6 uint = 6
+var RANK_5 uint = 5
+var RANK_4 uint = 4
+var RANK_3 uint = 3
+var RANK_2 uint = 2
+var RANK_1 uint = 1
+
+var FILE_A uint = 1
+var FILE_B uint = 2
+var FILE_C uint = 3
+var FILE_D uint = 4
+var FILE_E uint = 5
+var FILE_F uint = 6
+var FILE_G uint = 7
+var FILE_H uint = 8
+
+func (b Bitboard) String() string {
+	var s string
+	runes := []rune(binary(b))
+	for i := 0; i <= 7; i++ {
+		s += Reverse(string(runes[(8*i):(8*(i+1))]))
+		s += "\n"
+	}
+	return s
+}
 
 // type Move uint16

@@ -25,7 +25,7 @@ var ShiftByTests = []ShiftByTest{
 
 func TestShiftBy(t *testing.T) {
   for i, test := range ShiftByTests {
-    if test.end != shift_by(test.start, test.d, test.a) {
+    if test.end != shift_by(dup(test.start), test.d, test.a) {
       t.Error(fmt.Sprintf("Test %v: Expected %v, got %v", i, test.end, shift_by(test.start, test.d, test.a)))
     }
   }

@@ -1,10 +1,21 @@
 package main
 
-// import "fmt"
+import "fmt"
+
+func setup() {
+	// Initialize Square Bitboards
+	var x Bitboard = 0x1
+	for s := SQ_A1; s <= SQ_H8; s++ {
+		SQUARE_BBS[s] = x << s
+	}
+}
+
 
 func main() {
-	// fmt.Println(RANK_6BB)
-	// for s := SQ_A1; s <= SQ_H8; s++ {
-	// 	SQUARE_BBS[s] = 0x1 >> s
-	// }
+	fmt.Println("OK")
+	setup()
+
+	for _, sq := range SQUARE_BBS {
+		fmt.Println(sq)
+	}
 }
