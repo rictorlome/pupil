@@ -32,23 +32,31 @@ var ALL_SQS Bitboard = 0xffffffffffffffff
 
 // FILES
 var FILE_ABB Bitboard = 0x101010101010101
-var FILE_BBB Bitboard = FILE_ABB >> 1
-var FILE_CBB Bitboard = FILE_ABB >> 2
-var FILE_DBB Bitboard = FILE_ABB >> 3
-var FILE_EBB Bitboard = FILE_ABB >> 4
-var FILE_FBB Bitboard = FILE_ABB >> 5
-var FILE_GBB Bitboard = FILE_ABB >> 6
-var FILE_HBB Bitboard = FILE_ABB >> 7
+var FILE_BBB Bitboard = FILE_ABB << 1
+var FILE_CBB Bitboard = FILE_ABB << 2
+var FILE_DBB Bitboard = FILE_ABB << 3
+var FILE_EBB Bitboard = FILE_ABB << 4
+var FILE_FBB Bitboard = FILE_ABB << 5
+var FILE_GBB Bitboard = FILE_ABB << 6
+var FILE_HBB Bitboard = FILE_ABB << 7
+var FILE_BBS = []Bitboard{
+		FILE_ABB, FILE_BBB, FILE_CBB, FILE_DBB,
+		FILE_EBB, FILE_FBB, FILE_GBB, FILE_HBB,
+	}
 
 // RANKS
 var RANK_1BB Bitboard = 0xff
-var RANK_2BB Bitboard = RANK_1BB >> (NORTH * 1)
-var RANK_3BB Bitboard = RANK_1BB >> (NORTH * 2)
-var RANK_4BB Bitboard = RANK_1BB >> (NORTH * 3)
-var RANK_5BB Bitboard = RANK_1BB >> (NORTH * 4)
-var RANK_6BB Bitboard = RANK_1BB >> (NORTH * 5)
-var RANK_7BB Bitboard = RANK_1BB >> (NORTH * 6)
-var RANK_8BB Bitboard = RANK_1BB >> (NORTH * 7)
+var RANK_2BB Bitboard = RANK_1BB << (NORTH * 1)
+var RANK_3BB Bitboard = RANK_1BB << (NORTH * 2)
+var RANK_4BB Bitboard = RANK_1BB << (NORTH * 3)
+var RANK_5BB Bitboard = RANK_1BB << (NORTH * 4)
+var RANK_6BB Bitboard = RANK_1BB << (NORTH * 5)
+var RANK_7BB Bitboard = RANK_1BB << (NORTH * 6)
+var RANK_8BB Bitboard = RANK_1BB << (NORTH * 7)
+var RANK_BBS = []Bitboard{
+	RANK_1BB, RANK_2BB, RANK_3BB, RANK_4BB,
+	RANK_5BB, RANK_6BB, RANK_7BB, RANK_8BB,
+}
 
 // SQUARES
 type Square uint
@@ -139,6 +147,7 @@ func popcount(b Bitboard) int {
 	return bits.OnesCount64(uint64(b))
 }
 
+// https://stackoverflow.com/questions/1752414/how-to-reverse-a-string-in-go
 func Reverse(s string) string {
     runes := []rune(s)
     for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {

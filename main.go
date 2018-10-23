@@ -15,7 +15,7 @@ func main() {
 	fmt.Println("OK")
 	setup()
 
-	for _, sq := range SQUARE_BBS {
-		fmt.Println(sq)
+	for _, rank := range RANK_BBS {
+		fmt.Println(rank)
 	}
 }
