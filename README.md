@@ -1,9 +1,8 @@
 TODO:
 
-[] - Ensure same layout as stockfish (to use their bitstuff)
-[] - Create parse fen and generate fen functions to place pieces
-[] - Create API to visually test results
-[] - Create test suite
+- [ ] - Create parse fen and generate fen functions to place pieces
+- [ ] - Create API to visually test results
+- [ ] - Create test suite
 
 REFERENCE:
 Layout:
