@@ -11,34 +11,36 @@ type Bitboard uint64
 
 // COLORS
 type Color bool
-
 var WHITE Color = true
 var BLACK Color = false
 var COLORS = []Color{WHITE, BLACK}
 
 // DIRECTIONS
-var NORTH uint = 8
-var EAST uint = 1
-var SOUTH uint = -NORTH
-var WEST uint = -EAST
+var NORTH int = 8
+var EAST int = 1
+var SOUTH int = -NORTH
+var WEST int = -EAST
 
-var NORTH_WEST uint = NORTH + WEST
-var NORTH_EAST uint = NORTH + EAST
-var SOUTH_WEST uint = SOUTH + WEST
-var SOUTH_EAST uint = SOUTH + EAST
-
+var NORTH_WEST int = NORTH + WEST
+var NORTH_EAST int = NORTH + EAST
+var SOUTH_WEST int = SOUTH + WEST
+var SOUTH_EAST int = SOUTH + EAST
+var DIRECTIONS = []int {
+	NORTH, EAST, SOUTH, WEST,
+	NORTH_WEST, NORTH_EAST, SOUTH_WEST, SOUTH_EAST,
+}
 // BITBOARDS
 var ALL_SQS Bitboard = 0xffffffffffffffff
 
 // FILES
 var FILE_ABB Bitboard = 0x101010101010101
-var FILE_BBB Bitboard = FILE_ABB << 1
-var FILE_CBB Bitboard = FILE_ABB << 2
-var FILE_DBB Bitboard = FILE_ABB << 3
-var FILE_EBB Bitboard = FILE_ABB << 4
-var FILE_FBB Bitboard = FILE_ABB << 5
-var FILE_GBB Bitboard = FILE_ABB << 6
-var FILE_HBB Bitboard = FILE_ABB << 7
+var FILE_BBB Bitboard = shift_by(FILE_ABB, EAST, 1)
+var FILE_CBB Bitboard = shift_by(FILE_ABB, EAST, 2)
+var FILE_DBB Bitboard = shift_by(FILE_ABB, EAST, 3)
+var FILE_EBB Bitboard = shift_by(FILE_ABB, EAST, 4)
+var FILE_FBB Bitboard = shift_by(FILE_ABB, EAST, 5)
+var FILE_GBB Bitboard = shift_by(FILE_ABB, EAST, 6)
+var FILE_HBB Bitboard = shift_by(FILE_ABB, EAST, 7)
 var FILE_BBS = []Bitboard{
 		FILE_ABB, FILE_BBB, FILE_CBB, FILE_DBB,
 		FILE_EBB, FILE_FBB, FILE_GBB, FILE_HBB,
@@ -46,13 +48,13 @@ var FILE_BBS = []Bitboard{
 
 // RANKS
 var RANK_1BB Bitboard = 0xff
-var RANK_2BB Bitboard = RANK_1BB << (NORTH * 1)
-var RANK_3BB Bitboard = RANK_1BB << (NORTH * 2)
-var RANK_4BB Bitboard = RANK_1BB << (NORTH * 3)
-var RANK_5BB Bitboard = RANK_1BB << (NORTH * 4)
-var RANK_6BB Bitboard = RANK_1BB << (NORTH * 5)
-var RANK_7BB Bitboard = RANK_1BB << (NORTH * 6)
-var RANK_8BB Bitboard = RANK_1BB << (NORTH * 7)
+var RANK_2BB Bitboard = shift_by(RANK_1BB, NORTH, 1)
+var RANK_3BB Bitboard = shift_by(RANK_1BB, NORTH, 2)
+var RANK_4BB Bitboard = shift_by(RANK_1BB, NORTH, 3)
+var RANK_5BB Bitboard = shift_by(RANK_1BB, NORTH, 4)
+var RANK_6BB Bitboard = shift_by(RANK_1BB, NORTH, 5)
+var RANK_7BB Bitboard = shift_by(RANK_1BB, NORTH, 6)
+var RANK_8BB Bitboard = shift_by(RANK_1BB, NORTH, 7)
 var RANK_BBS = []Bitboard{
 	RANK_1BB, RANK_2BB, RANK_3BB, RANK_4BB,
 	RANK_5BB, RANK_6BB, RANK_7BB, RANK_8BB,
@@ -130,11 +132,6 @@ const (
 
 var SQUARE_BBS [64]Bitboard
 
-func dup(b Bitboard) Bitboard {
-	r := b
-	return r
-}
-
 func binary(b Bitboard) string {
 	return fmt.Sprintf("%v%b", strings.Repeat("0", leading_zeros(b)), uint64(b))
 }
@@ -160,16 +157,16 @@ func trailing_zeros(b Bitboard) int {
 	return bits.TrailingZeros64(uint64(b))
 }
 
-// func shift_by(b Bitboard, d uint, amount uint) Bitboard {
-// 	return b >> (d * amount)
-// }
+func shift(b Bitboard, d int) Bitboard {
+	return shift_by(b, d, 1)
+}
 
-func shift_by(b Bitboard, d uint, amount uint) Bitboard {
-	switch d {
-	case NORTH, EAST:
-		return b >> (d * amount)
-	case SOUTH, WEST:
-		return b << (d * amount)
+func shift_by(b Bitboard, d int, amount int) Bitboard {
+	switch d > 0 {
+	case true:
+		return b << uint(d * amount)
+	case false:
+		return b >> uint(-d * amount)
 	default:
 		return b
 	}
@@ -179,14 +176,14 @@ func make_square(r uint, f uint) Square {
 	return Square(r * f - 1)
 }
 
-var RANK_8 uint = 8
-var RANK_7 uint = 7
-var RANK_6 uint = 6
-var RANK_5 uint = 5
-var RANK_4 uint = 4
-var RANK_3 uint = 3
-var RANK_2 uint = 2
 var RANK_1 uint = 1
+var RANK_2 uint = 2
+var RANK_3 uint = 3
+var RANK_4 uint = 4
+var RANK_5 uint = 5
+var RANK_6 uint = 6
+var RANK_7 uint = 7
+var RANK_8 uint = 8
 
 var FILE_A uint = 1
 var FILE_B uint = 2

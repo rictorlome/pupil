@@ -15,7 +15,7 @@ func main() {
 	fmt.Println("OK")
 	setup()
 
-	for _, rank := range RANK_BBS {
-		fmt.Println(rank)
+	for _, dir := range DIRECTIONS {
+		fmt.Println(shift(SQUARE_BBS[SQ_E4], dir))
 	}
 }
