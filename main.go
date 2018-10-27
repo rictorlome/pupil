@@ -10,12 +10,11 @@ func setup() {
 	}
 }
 
-
 func main() {
 	fmt.Println("OK")
 	setup()
 
 	for _, dir := range DIRECTIONS {
-		fmt.Println(shift(SQUARE_BBS[SQ_E4], dir))
+		fmt.Println(signed_shift(SQUARE_BBS[SQ_E4], dir))
 	}
 }
