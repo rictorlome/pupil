@@ -186,6 +186,7 @@ const (
 	BR
 	BP
 )
+
 var PIECES = []Piece{
 	WK, WQ, WB, WN, WR, WP,
 	BK, BQ, BB, BN, BR, BP,
