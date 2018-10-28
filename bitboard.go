@@ -8,7 +8,7 @@ import (
 )
 
 func binary(b Bitboard) string {
-	return fmt.Sprintf("%v%b", strings.Repeat("0", leading_zeros(b)), uint64(b))
+	return fmt.Sprintf("%064b", uint64(b))
 }
 
 func leading_zeros(b Bitboard) int {
@@ -48,12 +48,12 @@ func signed_shift(b Bitboard, amount int) Bitboard {
 	return b >> uint(-amount)
 }
 
-func square_rank(sq Square) int {
-	return int(sq / 8)
-}
-
 func square_file(sq Square) int {
 	return int(sq % 8)
+}
+
+func square_rank(sq Square) int {
+	return int(sq / 8)
 }
 
 func (b Bitboard) String() string {
@@ -67,6 +67,11 @@ func (b Bitboard) String() string {
 
 func (p Piece) String() string {
 	return string([]rune(PIECE_STRING)[p])
+}
+
+func (s Square) String() string {
+	files := "abcdefgh"
+	return fmt.Sprintf("%c%d", files[square_file(s)], square_rank(s)+1)
 }
 
 func trailing_zeros(b Bitboard) int {

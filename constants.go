@@ -13,11 +13,21 @@ Table of Contents:
 8. Files (int)
 9. Pieces (int)
 10. FEN (string)
+11. StateInfo
+
 */
-type Color bool
+
 type Bitboard uint64
-type Square uint
+type Color bool
 type Piece uint
+type Square uint
+type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
+type StaticPosition struct {
+	pieces     [12]Bitboard
+	state      StateInfo
+	to_move    Color
+	move_count int
+}
 
 // 1. COLORS
 var WHITE Color = true
@@ -196,3 +206,25 @@ var PIECE_STRING string = "KQBNRPkqbnrp"
 // 10. FEN
 var INITIAL_FEN string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 var INITIAL_FEN_JUST_PIECES string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+
+// 11. STATE INFO. 16 bits. From least to most significant
+// 4 for castling rights. 6 for en passant sq. 6 for half move count.
+// Ex: 13-17-KQk
+// CASTLING RIGHTS - KQkq
+var BQ_CASTLE StateInfo = 1
+var BK_CASTLE StateInfo = BQ_CASTLE << 1
+var WQ_CASTLE StateInfo = BQ_CASTLE << 2
+var WK_CASTLE StateInfo = BQ_CASTLE << 3
+
+var BLACK_CASTLES StateInfo = BQ_CASTLE & BK_CASTLE
+var WHITE_CASLTES StateInfo = WQ_CASTLE & BK_CASTLE
+var NO_CASTLE StateInfo = 0
+
+var CHAR_TO_CASTLE = map[string]StateInfo{
+	"q": BQ_CASTLE, "k": BK_CASTLE,
+	"Q": WQ_CASTLE, "K": WK_CASTLE,
+	"-": NO_CASTLE,
+}
+
+// EN PASSANT SQ - A1, 0 used for null square.
+var ENPASSANT_SQS [64]StateInfo // Initialized in main.init
