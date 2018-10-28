@@ -15,8 +15,16 @@ func leading_zeros(b Bitboard) int {
 	return bits.LeadingZeros64(uint64(b))
 }
 
-func make_square(r uint, f uint) Square {
-	return Square(r*f - 1)
+func make_piece(s string) Piece {
+	return Piece(strings.Index(PIECE_STRING, s))
+}
+
+func make_square(r int, f int) Square {
+	return Square(r*8 + f)
+}
+
+func occupied_at(b Bitboard, sq Square) bool {
+	return (b>>sq)&1 == 1
 }
 
 func popcount(b Bitboard) int {
@@ -40,6 +48,14 @@ func signed_shift(b Bitboard, amount int) Bitboard {
 	return b >> uint(-amount)
 }
 
+func square_rank(sq Square) int {
+	return int(sq / 8)
+}
+
+func square_file(sq Square) int {
+	return int(sq % 8)
+}
+
 func (b Bitboard) String() string {
 	var s string
 	runes := []rune(binary(b))
@@ -47,6 +63,10 @@ func (b Bitboard) String() string {
 		s += reverse(string(runes[(8*i):(8*(i+1))])) + "\n"
 	}
 	return s
+}
+
+func (p Piece) String() string {
+	return string([]rune(PIECE_STRING)[p])
 }
 
 func trailing_zeros(b Bitboard) int {

@@ -2,19 +2,18 @@ package main
 
 import "fmt"
 
-func setup() {
+func init() {
 	// Initialize Square Bitboards
 	var x Bitboard = 0x1
-	for s := SQ_A1; s <= SQ_H8; s++ {
+	for _, s := range SQUARES {
 		SQUARE_BBS[s] = x << s
 	}
 }
 
 func main() {
 	fmt.Println("OK")
-	setup()
-
-	for _, dir := range DIRECTIONS {
-		fmt.Println(signed_shift(SQUARE_BBS[SQ_E4], dir))
+	grid := bitboards_to_grid(parse_positions(INITIAL_FEN_JUST_PIECES))
+	for _, row := range grid {
+		fmt.Println(row)
 	}
 }
