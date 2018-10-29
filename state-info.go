@@ -17,6 +17,9 @@ func make_castle_state_info(available string) StateInfo {
 }
 
 func make_enpassant_square_info(sq Square) StateInfo {
+	if !possible_enpassant_sq(sq) {
+		return StateInfo(0)
+	}
 	return StateInfo(sq << 4)
 }
 

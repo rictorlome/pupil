@@ -11,7 +11,7 @@ func bitboards_to_grid(bitboards [12]Bitboard) [8][8]string {
 	for _, s := range SQUARES {
 		for _, piece := range PIECES {
 			if occupied_at(bitboards[piece], s) {
-				grid[square_rank(s)][square_file(s)] = piece.String()
+				grid[7-square_rank(s)][square_file(s)] = piece.String()
 			}
 		}
 	}
@@ -40,7 +40,7 @@ func generate_color_string(pos StaticPosition) string {
 
 func generate_enpassant_string(s StateInfo) string {
 	just_sq := Square((s >> 4) & 0x3F)
-	if square_rank(just_sq) != 2 || square_rank(just_sq) != 5 {
+	if !possible_enpassant_sq(just_sq) {
 		return "-"
 	}
 	return just_sq.String()
@@ -116,10 +116,19 @@ func parse_positions(positions string) [12]Bitboard {
 	return result_bbs
 }
 
+func parse_square(sq string) Square {
+	// Since a1 cannot be an en-passant square, it's being used for null.
+	if sq == "-" {
+		return make_square(0, 0)
+	}
+	cols := "abcdefgh"
+	rank := int(sq[1]-'0') - 1
+	return make_square(rank, strings.Index(cols, sq[0:1]))
+}
+
 func parse_state_fields(castles string, enps string, rule50 string) StateInfo {
-	enps_int, _ := strconv.Atoi(enps)
 	rule50_int, _ := strconv.Atoi(rule50)
 	return make_castle_state_info(castles) |
-		make_enpassant_square_info(Square(enps_int)) |
+		make_enpassant_square_info(parse_square(enps)) |
 		make_rule_50(rule50_int)
 }

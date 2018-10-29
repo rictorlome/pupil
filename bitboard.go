@@ -31,6 +31,10 @@ func popcount(b Bitboard) int {
 	return bits.OnesCount64(uint64(b))
 }
 
+func possible_enpassant_sq(sq Square) bool {
+	return square_rank(sq) == 2 || square_rank(sq) == 5
+}
+
 // https://stackoverflow.com/questions/1752414/how-to-reverse-a-string-in-go
 func reverse(s string) string {
 	runes := []rune(s)
