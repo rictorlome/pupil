@@ -20,6 +20,7 @@ func bitboards_to_grid(bitboards [12]Bitboard) [8][8]string {
 
 func generate_castle_string(s StateInfo) string {
 	var castle_string string
+	// Reversed because bit indices are right to left
 	for idx, char := range "qkQK" {
 		if has_bit(s, uint(idx)) {
 			castle_string = string(char) + castle_string
@@ -121,9 +122,9 @@ func parse_square(sq string) Square {
 	if sq == "-" {
 		return make_square(0, 0)
 	}
-	cols := "abcdefgh"
+	files := "abcdefgh"
 	rank := int(sq[1]-'0') - 1
-	return make_square(rank, strings.Index(cols, sq[0:1]))
+	return make_square(rank, strings.Index(files, sq[0:1]))
 }
 
 func parse_state_fields(castles string, enps string, rule50 string) StateInfo {

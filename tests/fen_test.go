@@ -38,7 +38,7 @@ var tests = []string{
 }
 
 func TestParseAndGenerateFen(t *testing.T) {
-  for i, test := range tests {
+  for _, test := range tests {
     if generate_fen(parse_fen(test)) != test {
       t.Error(fmt.Sprintf("Expected fen %v, got %v", test, generate_fen(parse_fen(test))))
     }

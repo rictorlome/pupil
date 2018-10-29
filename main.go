@@ -4,11 +4,9 @@ import "fmt"
 
 func init() {
 	// Initialize Square Bitboards
-	// Initialize En Passant Sqs
 	var x Bitboard = 0x1
 	for _, s := range SQUARES {
 		SQUARE_BBS[s] = x << s
-		ENPASSANT_SQS[s] = make_enpassant_square_info(s)
 	}
 }
 

@@ -13,7 +13,7 @@ Table of Contents:
 8. Files (int)
 9. Pieces (int)
 10. FEN (string)
-11. StateInfo
+11. CastlingRights StateInfo (uint16)
 
 */
 
@@ -207,17 +207,14 @@ var PIECE_STRING string = "KQBNRPkqbnrp"
 var INITIAL_FEN string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 var INITIAL_FEN_JUST_PIECES string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
-// 11. STATE INFO. 16 bits. From least to most significant
-// 4 for castling rights. 6 for en passant sq. 6 for half move count.
-// Ex: 13-17-KQk
-// CASTLING RIGHTS - KQkq
-var BQ_CASTLE StateInfo = 1
+// 11. CASTLING RIGHTS - KQkq
+var BQ_CASTLE StateInfo = 0x1
 var BK_CASTLE StateInfo = BQ_CASTLE << 1
 var WQ_CASTLE StateInfo = BQ_CASTLE << 2
 var WK_CASTLE StateInfo = BQ_CASTLE << 3
 
-var BLACK_CASTLES StateInfo = BQ_CASTLE & BK_CASTLE
-var WHITE_CASLTES StateInfo = WQ_CASTLE & BK_CASTLE
+var BLACK_CASTLES StateInfo = BQ_CASTLE | BK_CASTLE
+var WHITE_CASLTES StateInfo = WQ_CASTLE | BK_CASTLE
 var NO_CASTLE StateInfo = 0
 
 var CHAR_TO_CASTLE = map[string]StateInfo{
@@ -225,6 +222,3 @@ var CHAR_TO_CASTLE = map[string]StateInfo{
 	"Q": WQ_CASTLE, "K": WK_CASTLE,
 	"-": NO_CASTLE,
 }
-
-// EN PASSANT SQ - A1, 0 used for null square.
-var ENPASSANT_SQS [64]StateInfo // Initialized in main.init
