@@ -78,7 +78,11 @@ var RANK_BBS = []Bitboard{
 
 // 5. OTHER BITBOARDS
 var ALL_SQS Bitboard = 0xffffffffffffffff
-var SQUARE_BBS [64]Bitboard // Initialized in main.init
+
+// Initialized in main.init
+var SQUARE_BBS [64]Bitboard
+var KNIGHT_ATTACK_BBS [64]Bitboard
+var KING_ATTACK_BBS [64]Bitboard
 
 // 6. SQUARES
 const (

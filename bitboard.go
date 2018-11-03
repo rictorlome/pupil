@@ -11,6 +11,25 @@ func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
 
+func king_attacks(b Bitboard) Bitboard {
+	var x Bitboard
+	for _, direction := range DIRECTIONS {
+		x |= shift_direction(b, direction)
+	}
+	return x
+}
+
+func knight_attacks(b Bitboard) Bitboard {
+	return shift_direction(shift_direction(b, NORTH), NORTH_EAST) |
+		shift_direction(shift_direction(b, NORTH), NORTH_WEST) |
+		shift_direction(shift_direction(b, EAST), NORTH_EAST) |
+		shift_direction(shift_direction(b, EAST), SOUTH_EAST) |
+		shift_direction(shift_direction(b, SOUTH), SOUTH_EAST) |
+		shift_direction(shift_direction(b, SOUTH), SOUTH_WEST) |
+		shift_direction(shift_direction(b, WEST), NORTH_WEST) |
+		shift_direction(shift_direction(b, WEST), SOUTH_WEST)
+}
+
 func leading_zeros(b Bitboard) int {
 	return bits.LeadingZeros64(uint64(b))
 }
@@ -42,6 +61,17 @@ func reverse(s string) string {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
+}
+
+// shifts bitboard in a direction, prevents wrapping
+func shift_direction(b Bitboard, direction int) Bitboard {
+	if direction == NORTH_EAST || direction == EAST || direction == SOUTH_EAST {
+		return signed_shift(b&^FILE_HBB, direction)
+	}
+	if direction == NORTH_WEST || direction == WEST || direction == SOUTH_WEST {
+		return signed_shift(b&^FILE_ABB, direction)
+	}
+	return signed_shift(b, direction)
 }
 
 // shifts bitboard by an amount (which can be a positive or negative number)
