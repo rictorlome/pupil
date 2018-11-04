@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// From msb -> lsb: rule-50 (6)/enpassant (6)/castling rights (4)
+
 func has_bit(s StateInfo, bit uint) bool {
 	return (s>>bit)&1 == 1
 }

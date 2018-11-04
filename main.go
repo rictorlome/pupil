@@ -15,7 +15,6 @@ func init() {
 
 func main() {
 	fmt.Println("OK")
-	for _, s := range SQUARES {
-		fmt.Println(KING_ATTACK_BBS[s])
-	}
+	x := parse_positions(INITIAL_FEN_JUST_PIECES)
+	fmt.Println(queen_attacks(occupied_squares(x), SQ_E4))
 }

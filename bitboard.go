@@ -11,23 +11,8 @@ func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
 
-func king_attacks(b Bitboard) Bitboard {
-	var x Bitboard
-	for _, direction := range DIRECTIONS {
-		x |= shift_direction(b, direction)
-	}
-	return x
-}
-
-func knight_attacks(b Bitboard) Bitboard {
-	return shift_direction(shift_direction(b, NORTH), NORTH_EAST) |
-		shift_direction(shift_direction(b, NORTH), NORTH_WEST) |
-		shift_direction(shift_direction(b, EAST), NORTH_EAST) |
-		shift_direction(shift_direction(b, EAST), SOUTH_EAST) |
-		shift_direction(shift_direction(b, SOUTH), SOUTH_EAST) |
-		shift_direction(shift_direction(b, SOUTH), SOUTH_WEST) |
-		shift_direction(shift_direction(b, WEST), NORTH_WEST) |
-		shift_direction(shift_direction(b, WEST), SOUTH_WEST)
+func empty(b Bitboard) bool {
+	return b == 0
 }
 
 func leading_zeros(b Bitboard) int {
@@ -43,7 +28,24 @@ func make_square(r int, f int) Square {
 }
 
 func occupied_at(b Bitboard, sq Square) bool {
+	// return b & SQUARE_BBS[sq] != 0
 	return (b>>sq)&1 == 1
+}
+
+func occupied_at_sq_bb(b Bitboard, sq Bitboard) bool {
+	return b&sq != 0
+}
+
+func occupied_squares(pieces [12]Bitboard) Bitboard {
+	var x Bitboard
+	for _, piece := range pieces {
+		x |= piece
+	}
+	return x
+}
+
+func on_board(sq Square) bool {
+	return SQ_A1 <= sq && sq <= SQ_H8
 }
 
 func popcount(b Bitboard) int {
@@ -61,6 +63,14 @@ func reverse(s string) string {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
+}
+
+func rook_attacks(occ Bitboard, square Square) Bitboard {
+	return slider_attacks(occ, square, ROOK_DIRECTIONS)
+}
+
+func set_square(original Bitboard, sq Square) Bitboard {
+	return original | SQUARE_BBS[sq]
 }
 
 // shifts bitboard in a direction, prevents wrapping
