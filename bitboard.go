@@ -27,21 +27,21 @@ func make_square(r int, f int) Square {
 	return Square(r*8 + f)
 }
 
-func occupied_at(b Bitboard, sq Square) bool {
+func occupied_at_bb(b Bitboard, sq Bitboard) bool {
+	return b&sq != 0
+}
+
+func occupied_at_sq(b Bitboard, sq Square) bool {
 	// return b & SQUARE_BBS[sq] != 0
 	return (b>>sq)&1 == 1
 }
 
-func occupied_at_sq_bb(b Bitboard, sq Bitboard) bool {
-	return b&sq != 0
-}
-
 func occupied_squares(pieces [12]Bitboard) Bitboard {
-	var x Bitboard
+	var occupied Bitboard
 	for _, piece := range pieces {
-		x |= piece
+		occupied |= piece
 	}
-	return x
+	return occupied
 }
 
 func on_board(sq Square) bool {
@@ -63,10 +63,6 @@ func reverse(s string) string {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
-}
-
-func rook_attacks(occ Bitboard, square Square) Bitboard {
-	return slider_attacks(occ, square, ROOK_DIRECTIONS)
 }
 
 func set_square(original Bitboard, sq Square) Bitboard {

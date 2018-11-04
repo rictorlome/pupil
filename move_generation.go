@@ -5,19 +5,19 @@ func bishop_attacks(occ Bitboard, square Square) Bitboard {
 }
 
 func king_attacks(b Bitboard) Bitboard {
-	var x Bitboard
+	var attacks Bitboard
 	for _, direction := range DIRECTIONS {
-		x |= shift_direction(b, direction)
+		attacks |= shift_direction(b, direction)
 	}
-	return x
+	return attacks
 }
 
 func knight_attacks(b Bitboard) Bitboard {
-	var result Bitboard
+	var attacks Bitboard
 	for i := 0; i < 8; i++ {
-		result |= shift_direction(shift_direction(b, KNIGHT_DIRECTIONS[i]), KNIGHT_DIRECTIONS[i+1])
+		attacks |= shift_direction(shift_direction(b, KNIGHT_DIRECTIONS[i]), KNIGHT_DIRECTIONS[i+1])
 	}
-	return result
+	return attacks
 }
 
 func pawn_attacks(pawns Bitboard, color Color) Bitboard {
@@ -31,17 +31,21 @@ func queen_attacks(occ Bitboard, square Square) Bitboard {
 	return slider_attacks(occ, square, DIRECTIONS)
 }
 
+func rook_attacks(occ Bitboard, square Square) Bitboard {
+	return slider_attacks(occ, square, ROOK_DIRECTIONS)
+}
+
 func slider_attacks(occ Bitboard, sq Square, directions []int) Bitboard {
-	var result Bitboard
+	var attacks Bitboard
 	for _, direction := range directions {
 		cursor := shift_direction(SQUARE_BBS[sq], direction)
-		for i := 1; !empty(cursor); i++ {
-			result |= cursor
-			if occupied_at_sq_bb(occ, cursor) {
+		for i := 0; !empty(cursor); i++ {
+			attacks |= cursor
+			if occupied_at_bb(occ, cursor) {
 				break
 			}
 			cursor = shift_direction(cursor, direction)
 		}
 	}
-	return result
+	return attacks
 }

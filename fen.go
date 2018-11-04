@@ -10,7 +10,7 @@ func bitboards_to_grid(bitboards [12]Bitboard) [8][8]string {
 	var grid [8][8]string
 	for _, s := range SQUARES {
 		for _, piece := range PIECES {
-			if occupied_at(bitboards[piece], s) {
+			if occupied_at_sq(bitboards[piece], s) {
 				grid[7-square_rank(s)][square_file(s)] = piece.String()
 			}
 		}
