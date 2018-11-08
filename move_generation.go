@@ -38,13 +38,11 @@ func rook_attacks(occ Bitboard, square Square) Bitboard {
 func slider_attacks(occ Bitboard, sq Square, directions []int) Bitboard {
 	var attacks Bitboard
 	for _, direction := range directions {
-		cursor := shift_direction(SQUARE_BBS[sq], direction)
-		for i := 0; !empty(cursor); i++ {
+		for cursor := shift_direction(SQUARE_BBS[sq], direction); !empty(cursor); cursor = shift_direction(cursor, direction) {
 			attacks |= cursor
 			if occupied_at_bb(occ, cursor) {
 				break
 			}
-			cursor = shift_direction(cursor, direction)
 		}
 	}
 	return attacks

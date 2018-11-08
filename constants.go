@@ -103,6 +103,8 @@ var ALL_SQS Bitboard = 0xffffffffffffffff
 var SQUARE_BBS [64]Bitboard
 var KNIGHT_ATTACK_BBS [64]Bitboard
 var KING_ATTACK_BBS [64]Bitboard
+var ROOK_ATTACK_MASKS [64]Bitboard
+var BISHOP_ATTACK_MASKS [64]Bitboard
 
 // 6. SQUARES
 const (
