@@ -1,5 +1,9 @@
 package main
 
+import (
+	// "fmt"
+)
+
 func bishop_attacks(occ Bitboard, square Square) Bitboard {
 	return slider_attacks(occ, square, BISHOP_DIRECTIONS)
 }
@@ -18,6 +22,20 @@ func knight_attacks(b Bitboard) Bitboard {
 		attacks |= shift_direction(shift_direction(b, KNIGHT_DIRECTIONS[i]), KNIGHT_DIRECTIONS[i+1])
 	}
 	return attacks
+}
+
+// Mask over occupancy to exclude outermost squares
+// where occupancy is irrelevant to calculating attack
+func occupancy_mask(sq Square, directions []int) Bitboard {
+	var mask Bitboard
+	for _, direction := range directions {
+		for cursor := shift_direction(SQUARE_BBS[sq], direction); !empty(cursor); cursor = shift_direction(cursor, direction) {
+			if empty(shift_direction(cursor, direction)) {
+				mask |= cursor
+			}
+		}
+	}
+	return mask
 }
 
 func pawn_attacks(pawns Bitboard, color Color) Bitboard {

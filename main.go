@@ -12,6 +12,10 @@ func init() {
 		KNIGHT_ATTACK_BBS[s] = knight_attacks(SQUARE_BB)
 		ROOK_ATTACK_MASKS[s] = rook_attacks(Bitboard(0), s)
 		BISHOP_ATTACK_MASKS[s] = bishop_attacks(Bitboard(0), s)
+		ROOK_OCCUPANCY_MASKS[s] = occupancy_mask(s, ROOK_DIRECTIONS)
+		BISHOP_OCCUPANCY_MASKS[s] = occupancy_mask(s, BISHOP_DIRECTIONS)
+		RELEVANT_ROOK_OCCUPANCY[s] = ROOK_ATTACK_MASKS[s] &^ ROOK_OCCUPANCY_MASKS[s]
+		RELEVANT_BISHOP_OCCUPANCY[s] = BISHOP_ATTACK_MASKS[s] &^ BISHOP_OCCUPANCY_MASKS[s]
 	}
 }
 

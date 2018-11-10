@@ -103,8 +103,36 @@ var ALL_SQS Bitboard = 0xffffffffffffffff
 var SQUARE_BBS [64]Bitboard
 var KNIGHT_ATTACK_BBS [64]Bitboard
 var KING_ATTACK_BBS [64]Bitboard
+
 var ROOK_ATTACK_MASKS [64]Bitboard
 var BISHOP_ATTACK_MASKS [64]Bitboard
+
+var ROOK_OCCUPANCY_MASKS [64]Bitboard
+var BISHOP_OCCUPANCY_MASKS [64]Bitboard
+
+var RELEVANT_ROOK_OCCUPANCY [64]Bitboard
+var RELEVANT_BISHOP_OCCUPANCY [64]Bitboard
+
+var RELEVANT_ROOK_OCCUPANCY_BITS = [64]int{
+  12, 11, 11, 11, 11, 11, 11, 12,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  12, 11, 11, 11, 11, 11, 11, 12,
+};
+var RELEVANT_BISHOP_OCCUPANCY_BITS = [64]int{
+  6, 5, 5, 5, 5, 5, 5, 6,
+  5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 7, 7, 7, 7, 5, 5,
+  5, 5, 7, 9, 9, 7, 5, 5,
+  5, 5, 7, 9, 9, 7, 5, 5,
+  5, 5, 7, 7, 7, 7, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5,
+  6, 5, 5, 5, 5, 5, 5, 6,
+};
 
 // 6. SQUARES
 const (

@@ -19,12 +19,22 @@ func leading_zeros(b Bitboard) int {
 	return bits.LeadingZeros64(uint64(b))
 }
 
+// NOTE: returns 64 for empty bitboard
+func lsb(b Bitboard) int {
+	return trailing_zeros(b)
+}
+
 func make_piece(s string) Piece {
 	return Piece(strings.Index(PIECE_STRING, s))
 }
 
 func make_square(r int, f int) Square {
 	return Square(r*8 + f)
+}
+
+// NOTE: returns -1 for empty bitboard
+func msb(b Bitboard) int {
+	return 63 - leading_zeros(b)
 }
 
 func occupied_at_bb(b Bitboard, sq Bitboard) bool {
