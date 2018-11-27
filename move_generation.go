@@ -18,7 +18,7 @@ func king_attacks(b Bitboard) Bitboard {
 
 func knight_attacks(b Bitboard) Bitboard {
 	var attacks Bitboard
-	for i := 0; i < 8; i++ {
+	for i := 0; i <= 14; i += 2 {
 		attacks |= shift_direction(shift_direction(b, KNIGHT_DIRECTIONS[i]), KNIGHT_DIRECTIONS[i+1])
 	}
 	return attacks

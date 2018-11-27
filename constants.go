@@ -23,7 +23,7 @@ type Piece uint
 type Square uint
 type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
 type StaticPosition struct {
-	pieces     [12]Bitboard
+	pieces     []Bitboard
 	state      StateInfo
 	to_move    Color
 	move_count int

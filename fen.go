@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func bitboards_to_grid(bitboards [12]Bitboard) [8][8]string {
+func bitboards_to_grid(bitboards []Bitboard) [8][8]string {
 	var grid [8][8]string
 	for _, s := range SQUARES {
 		for _, piece := range PIECES {
@@ -99,8 +99,8 @@ func parse_fen(fen string) StaticPosition {
 	}
 }
 
-func parse_positions(positions string) [12]Bitboard {
-	var result_bbs [12]Bitboard
+func parse_positions(positions string) []Bitboard {
+	result_bbs := make([]Bitboard,0,12)
 	ranks := strings.Split(positions, "/")
 	for rank, rank_string := range ranks {
 		offset := 0

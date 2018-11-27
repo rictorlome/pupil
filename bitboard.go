@@ -46,7 +46,7 @@ func occupied_at_sq(b Bitboard, sq Square) bool {
 	return (b>>sq)&1 == 1
 }
 
-func occupied_squares(pieces [12]Bitboard) Bitboard {
+func occupied_squares(pieces []Bitboard) Bitboard {
 	var occupied Bitboard
 	for _, piece := range pieces {
 		occupied |= piece
