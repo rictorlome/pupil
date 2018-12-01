@@ -32,7 +32,7 @@ func generate_castle_string(s StateInfo) string {
 	return castle_string
 }
 
-func generate_color_string(pos StaticPosition) string {
+func generate_color_string(pos Position) string {
 	if pos.to_move {
 		return "w"
 	}
@@ -52,9 +52,9 @@ func generate_rule50_string(s StateInfo) string {
 	return strconv.Itoa(just_rule50)
 }
 
-func generate_fen(pos StaticPosition) string {
+func generate_fen(pos Position) string {
 	var fenArr []string
-	fenArr = append(fenArr, grid_to_fen(bitboards_to_grid(pos.pieces)))
+	fenArr = append(fenArr, grid_to_fen(bitboards_to_grid(pos.placement)))
 	fenArr = append(fenArr, generate_color_string(pos))
 	fenArr = append(fenArr, generate_castle_string(pos.state))
 	fenArr = append(fenArr, generate_enpassant_string(pos.state))
@@ -88,10 +88,10 @@ func grid_to_fen(grid [8][8]string) string {
 	return strings.Join(fenArr, "/")
 }
 
-func parse_fen(fen string) StaticPosition {
+func parse_fen(fen string) Position {
 	fields := strings.Split(fen, " ")
 	move_count, _ := strconv.Atoi(fields[5])
-	return StaticPosition{
+	return Position{
 		parse_positions(fields[0]),
 		parse_state_fields(fields[2], fields[3], fields[4]),
 		Color(fields[1] == "w"),

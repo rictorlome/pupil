@@ -26,15 +26,15 @@ type Move uint16
 type MoveType uint16
 type Piece uint
 type PieceType uint
+type Position struct {
+	move_count int
+	placement  []Bitboard
+	state      StateInfo
+	to_move    Color
+}
 type PromotionType uint16
 type Square uint
 type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
-type StaticPosition struct {
-	pieces     []Bitboard
-	state      StateInfo
-	to_move    Color
-	move_count int
-}
 
 // 1. COLORS
 var WHITE Color = true
@@ -256,6 +256,7 @@ const (
 	BN
 	BR
 	BP
+	NULL_PIECE
 )
 
 var WHITE_PIECES = []Piece{

@@ -8,8 +8,8 @@ func init() {
 	for _, s := range SQUARES {
 		var SQUARE_BB Bitboard = x << s
 		SQUARE_BBS[s] = SQUARE_BB
-		KING_ATTACK_BBS[s] = king_attacks(SQUARE_BB)
-		KNIGHT_ATTACK_BBS[s] = knight_attacks(SQUARE_BB)
+		KING_ATTACK_BBS[s] = precompute_king_attacks(SQUARE_BB)
+		KNIGHT_ATTACK_BBS[s] = precompute_knight_attacks(SQUARE_BB)
 		ROOK_ATTACK_MASKS[s] = rook_attacks(Bitboard(0), s)
 		BISHOP_ATTACK_MASKS[s] = bishop_attacks(Bitboard(0), s)
 		ROOK_OCCUPANCY_MASKS[s] = occupancy_mask(s, ROOK_DIRECTIONS)
@@ -21,9 +21,6 @@ func init() {
 
 func main() {
 	fmt.Println("OK")
-	// x := parse_positions(INITIAL_FEN_JUST_PIECES)
-	// fmt.Println(queen_attacks(occupied_squares(x), SQ_E4))
-	for _, s := range SQUARES {
-		fmt.Println(BISHOP_ATTACK_MASKS[s])
-	}
+	x := parse_positions(INITIAL_FEN_JUST_PIECES)
+	fmt.Println(piece_on_sq(x, SQ_A8))
 }
