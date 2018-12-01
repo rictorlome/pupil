@@ -12,14 +12,21 @@ Table of Contents:
 7. Ranks (int)
 8. Files (int)
 9. Pieces (int)
-10. FEN (string)
-11. CastlingRights StateInfo (uint16)
+10. PieceType (int)
+11. FEN (string)
+12. CastlingRights StateInfo (uint16)
+13. Move
+14. AttackFuncs
 
 */
-
+type AttackFunc func(Bitboard, Square) Bitboard
 type Bitboard uint64
 type Color bool
+type Move uint16
+type MoveType uint16
 type Piece uint
+type PieceType uint
+type PromotionType uint16
 type Square uint
 type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
 type StaticPosition struct {
@@ -114,25 +121,25 @@ var RELEVANT_ROOK_OCCUPANCY [64]Bitboard
 var RELEVANT_BISHOP_OCCUPANCY [64]Bitboard
 
 var RELEVANT_ROOK_OCCUPANCY_BITS = [64]int{
-  12, 11, 11, 11, 11, 11, 11, 12,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  12, 11, 11, 11, 11, 11, 11, 12,
-};
+	12, 11, 11, 11, 11, 11, 11, 12,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	12, 11, 11, 11, 11, 11, 11, 12,
+}
 var RELEVANT_BISHOP_OCCUPANCY_BITS = [64]int{
-  6, 5, 5, 5, 5, 5, 5, 6,
-  5, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 7, 7, 7, 7, 5, 5,
-  5, 5, 7, 9, 9, 7, 5, 5,
-  5, 5, 7, 9, 9, 7, 5, 5,
-  5, 5, 7, 7, 7, 7, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5,
-  6, 5, 5, 5, 5, 5, 5, 6,
-};
+	6, 5, 5, 5, 5, 5, 5, 6,
+	5, 5, 5, 5, 5, 5, 5, 5,
+	5, 5, 7, 7, 7, 7, 5, 5,
+	5, 5, 7, 9, 9, 7, 5, 5,
+	5, 5, 7, 9, 9, 7, 5, 5,
+	5, 5, 7, 7, 7, 7, 5, 5,
+	5, 5, 5, 5, 5, 5, 5, 5,
+	6, 5, 5, 5, 5, 5, 5, 6,
+}
 
 // 6. SQUARES
 const (
@@ -251,17 +258,38 @@ const (
 	BP
 )
 
+var WHITE_PIECES = []Piece{
+	WK, WQ, WB, WN, WR, WP,
+}
+var BLACK_PIECES = []Piece{
+	BK, BQ, BB, BN, BR, BP,
+}
 var PIECES = []Piece{
 	WK, WQ, WB, WN, WR, WP,
 	BK, BQ, BB, BN, BR, BP,
 }
 var PIECE_STRING string = "KQBNRPkqbnrp"
 
-// 10. FEN
+// 10. PieceType
+const (
+	KING PieceType = iota
+	QUEEN
+	BISHOP
+	KNIGHT
+	ROOK
+	PAWN
+	NULL_PIECE_TYPE
+)
+
+var PIECE_TYPES = []PieceType{
+	KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN, NULL_PIECE_TYPE,
+}
+
+// 11. FEN
 var INITIAL_FEN string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 var INITIAL_FEN_JUST_PIECES string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
-// 11. CASTLING RIGHTS - KQkq
+// 12. CASTLING RIGHTS - KQkq
 var BQ_CASTLE StateInfo = 0x1
 var BK_CASTLE StateInfo = BQ_CASTLE << 1
 var WQ_CASTLE StateInfo = BQ_CASTLE << 2
@@ -275,4 +303,32 @@ var CHAR_TO_CASTLE = map[string]StateInfo{
 	"q": BQ_CASTLE, "k": BK_CASTLE,
 	"Q": WQ_CASTLE, "K": WK_CASTLE,
 	"-": NO_CASTLE,
+}
+
+// 13. MOVE (uin16)
+// bit 0 - 5 (dest sq)
+// bit 6 - 11 (source sq)
+// bit 12 - 13 (promotion piece type knight or q)
+// bit 14 - 15 move type (0 - normal, 1 - promotion, 2 - en passant, 3 - castling)
+const (
+	NO_PROMOTION PromotionType = iota << 12
+	KNIGHT_PROMOTION
+	QUEEN_PROMOTION
+)
+const (
+	NORMAL MoveType = iota << 14
+	PROMOTION
+	EN_PASSANT
+	CASTLING
+)
+
+var MOVE_TYPES = []MoveType{
+	NORMAL, PROMOTION, EN_PASSANT, CASTLING,
+}
+
+// 14. AttackFuncs
+// For indexing by PieceType.
+// PAWN returns null_attacks because pawn attacks are computed separately, in bulk.
+var AttackFuncs = []AttackFunc{
+	king_attacks, queen_attacks, bishop_attacks, knight_attacks, rook_attacks, null_attacks,
 }

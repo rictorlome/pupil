@@ -100,7 +100,7 @@ func parse_fen(fen string) StaticPosition {
 }
 
 func parse_positions(positions string) []Bitboard {
-	result_bbs := make([]Bitboard,0,12)
+	result_bbs := make([]Bitboard, 12)
 	ranks := strings.Split(positions, "/")
 	for rank, rank_string := range ranks {
 		offset := 0

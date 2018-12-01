@@ -1,14 +1,40 @@
 package main
 
 import (
-	// "fmt"
+// "fmt"
 )
+
+func attacks_by_color(pieces []Bitboard, color Color) Bitboard {
+	occ := occupied_squares(pieces)
+	var attacks Bitboard
+	for _, piece := range piece_range_by_color(color) {
+		t := piece_to_type(piece)
+		if t == PAWN {
+			attacks |= pawn_attacks(pieces[piece], color)
+		} else {
+			attacks |= serialize_for_attacks(pieces[piece], occ, get_attack_func(t))
+		}
+	}
+	return attacks
+}
 
 func bishop_attacks(occ Bitboard, square Square) Bitboard {
 	return slider_attacks(occ, square, BISHOP_DIRECTIONS)
 }
 
-func king_attacks(b Bitboard) Bitboard {
+func get_attack_func(pt PieceType) AttackFunc {
+	return AttackFuncs[pt]
+}
+
+func king_attacks(occ Bitboard, square Square) Bitboard {
+	return KING_ATTACK_BBS[square]
+}
+
+func knight_attacks(occ Bitboard, square Square) Bitboard {
+	return KNIGHT_ATTACK_BBS[square]
+}
+
+func precompute_king_attacks(b Bitboard) Bitboard {
 	var attacks Bitboard
 	for _, direction := range DIRECTIONS {
 		attacks |= shift_direction(b, direction)
@@ -16,12 +42,16 @@ func king_attacks(b Bitboard) Bitboard {
 	return attacks
 }
 
-func knight_attacks(b Bitboard) Bitboard {
+func precompute_knight_attacks(b Bitboard) Bitboard {
 	var attacks Bitboard
 	for i := 0; i <= 14; i += 2 {
 		attacks |= shift_direction(shift_direction(b, KNIGHT_DIRECTIONS[i]), KNIGHT_DIRECTIONS[i+1])
 	}
 	return attacks
+}
+
+func null_attacks(occ Bitboard, sq Square) Bitboard {
+	return Bitboard(0)
 }
 
 // Mask over occupancy to exclude outermost squares
@@ -51,6 +81,15 @@ func queen_attacks(occ Bitboard, square Square) Bitboard {
 
 func rook_attacks(occ Bitboard, square Square) Bitboard {
 	return slider_attacks(occ, square, ROOK_DIRECTIONS)
+}
+
+func serialize_for_attacks(piece_bb Bitboard, occ Bitboard, fn AttackFunc) Bitboard {
+	var attacks Bitboard
+	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
+		sq := Square(lsb(cursor))
+		attacks |= fn(occ, sq)
+	}
+	return attacks
 }
 
 func slider_attacks(occ Bitboard, sq Square, directions []int) Bitboard {

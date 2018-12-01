@@ -54,8 +54,23 @@ func occupied_squares(pieces []Bitboard) Bitboard {
 	return occupied
 }
 
+func occupied_squares_by_color(pieces []Bitboard, color Color) Bitboard {
+	var occupied Bitboard
+	for _, piece := range piece_range_by_color(color) {
+		occupied |= pieces[piece]
+	}
+	return occupied
+}
+
 func on_board(sq Square) bool {
 	return SQ_A1 <= sq && sq <= SQ_H8
+}
+
+func piece_range_by_color(color Color) []Piece {
+	if color == WHITE {
+		return WHITE_PIECES
+	}
+	return BLACK_PIECES
 }
 
 func popcount(b Bitboard) int {
