@@ -311,11 +311,24 @@ var CHAR_TO_CASTLE = map[string]StateInfo{
 // bit 6 - 11 (source sq)
 // bit 12 - 13 (promotion piece type knight or q)
 // bit 14 - 15 move type (0 - normal, 1 - promotion, 2 - en passant, 3 - castling)
+var DST_MASK Move = 0xFFC0
+var SRC_MASK Move = 0xF03F
+var PROMOTION_MASK Move = 0xCFFF
+
 const (
 	NO_PROMOTION PromotionType = iota << 12
 	KNIGHT_PROMOTION
 	QUEEN_PROMOTION
 )
+
+var PROMOTION_TYPES = []PromotionType{
+	NO_PROMOTION, KNIGHT_PROMOTION, QUEEN_PROMOTION,
+}
+
+var PROMOTION_STRINGS = []string{
+	"", "n", "q",
+}
+
 const (
 	NORMAL MoveType = iota << 14
 	PROMOTION

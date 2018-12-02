@@ -21,6 +21,6 @@ func init() {
 
 func main() {
 	fmt.Println("OK")
-	x := parse_positions(INITIAL_FEN_JUST_PIECES)
-	fmt.Println(piece_on_sq(x, SQ_A8))
+	pos := parse_fen(INITIAL_FEN)
+	fmt.Println(pseudolegals_by_color(pos.placement, BLACK, pos.state))
 }

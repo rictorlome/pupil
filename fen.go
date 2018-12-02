@@ -92,10 +92,10 @@ func parse_fen(fen string) Position {
 	fields := strings.Split(fen, " ")
 	move_count, _ := strconv.Atoi(fields[5])
 	return Position{
+		move_count,
 		parse_positions(fields[0]),
 		parse_state_fields(fields[2], fields[3], fields[4]),
 		Color(fields[1] == "w"),
-		move_count,
 	}
 }
 
