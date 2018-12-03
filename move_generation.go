@@ -59,6 +59,14 @@ func pawn_attacks(pawns Bitboard, color Color) Bitboard {
 	return shift_direction(pawns, NORTH_EAST) | shift_direction(pawns, NORTH_WEST)
 }
 
+func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
+	pushes := signed_shift(SQUARE_BBS[sq], dir) &^ occ
+	if square_rank(sq) == second_rank(dir) {
+		pushes |= signed_shift(pushes, dir) &^ occ
+	}
+	return pushes
+}
+
 func precompute_king_attacks(b Bitboard) Bitboard {
 	var attacks Bitboard
 	for _, direction := range DIRECTIONS {
@@ -81,7 +89,10 @@ func pseudolegals_by_color(pieces []Bitboard, color Color, st StateInfo) []Move 
 
 	for _, piece := range piece_range_by_color(color) {
 		t := piece_to_type(piece)
-		if not_k_or_p(t) {
+		switch t {
+		case PAWN:
+			move_list = append(move_list, serialize_for_pseudos_pawns(pieces[piece], occ, self_occ, color, st)...)
+		default:
 			move_list = append(move_list, serialize_for_pseudos(pieces[piece], occ, self_occ, get_attack_func(t))...)
 		}
 	}
@@ -113,6 +124,29 @@ func serialize_for_pseudos(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, f
 		for dst_cursor := pseudos; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
 			dst := Square(lsb(dst_cursor))
 			move_list = append(move_list, to_move(dst, src, NORMAL, NO_PROMOTION))
+		}
+	}
+	return move_list
+}
+
+func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard, color Color, st StateInfo) []Move {
+	var move_list []Move
+	f_dir, l_rank, idx := forward(color), last_rank(color), color_to_int(color)
+	enp_sq := get_enp_sq(st)
+	for cursor := pawns; cursor != 0; cursor &= cursor - 1 {
+		src := Square(lsb(cursor))
+		attacks := (PAWN_ATTACK_BBS[src][idx] & (occ | SQUARE_BBS[enp_sq])) &^ self_occ
+		pseudos := attacks | pawn_pushes(src, f_dir, occ)
+		for dst_cursor := pseudos; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
+			dst := Square(lsb(dst_cursor))
+			switch {
+			case square_rank(dst) == l_rank:
+				move_list = append(move_list, to_move(dst, src, PROMOTION, KNIGHT_PROMOTION), to_move(dst, src, PROMOTION, QUEEN_PROMOTION))
+			case dst == enp_sq:
+				move_list = append(move_list, to_move(dst, src, EN_PASSANT, NO_PROMOTION))
+			default:
+				move_list = append(move_list, to_move(dst, src, NORMAL, NO_PROMOTION))
+			}
 		}
 	}
 	return move_list

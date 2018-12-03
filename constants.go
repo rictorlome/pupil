@@ -110,6 +110,7 @@ var ALL_SQS Bitboard = 0xffffffffffffffff
 var SQUARE_BBS [64]Bitboard
 var KNIGHT_ATTACK_BBS [64]Bitboard
 var KING_ATTACK_BBS [64]Bitboard
+var PAWN_ATTACK_BBS [64][2]Bitboard
 
 var ROOK_ATTACK_MASKS [64]Bitboard
 var BISHOP_ATTACK_MASKS [64]Bitboard

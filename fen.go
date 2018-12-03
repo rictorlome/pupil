@@ -40,7 +40,7 @@ func generate_color_string(pos Position) string {
 }
 
 func generate_enpassant_string(s StateInfo) string {
-	just_sq := Square((s >> 4) & 0x3F)
+	just_sq := get_enp_sq(s)
 	if !possible_enpassant_sq(just_sq) {
 		return "-"
 	}

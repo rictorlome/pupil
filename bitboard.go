@@ -11,8 +11,29 @@ func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
 
+func color_to_int(c Color) int {
+	if c == WHITE {
+		return 0
+	}
+	return 1
+}
+
 func empty(b Bitboard) bool {
 	return b == 0
+}
+
+func forward(color Color) int {
+	if color == WHITE {
+		return NORTH
+	}
+	return SOUTH
+}
+
+func last_rank(color Color) int {
+	if color == WHITE {
+		return 7
+	}
+	return 0
 }
 
 func leading_zeros(b Bitboard) int {
@@ -88,6 +109,13 @@ func reverse(s string) string {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
+}
+
+func second_rank(dir int) int {
+	if dir == NORTH {
+		return 1
+	}
+	return 6
 }
 
 func set_square(original Bitboard, sq Square) Bitboard {
