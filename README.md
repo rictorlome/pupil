@@ -1,37 +1,37 @@
-TODO:
+# Pupil
 
-- [ ] - Create parse fen and generate fen functions to place pieces
-- [ ] - Create API to visually test results
-- [ ] - Create test suite
+A WIP `Go`-based chess engine destined to beat me in a 10 minute game.
 
-REFERENCE:
-Layout:
+---
 
-|       | A   | B   | C   | D   | E   | F   | G   | H   |
-| ----- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **8** | 56  | 57  | 58  | 59  | 60  | 61  | 62  | 63  |
-| **7** | 48  | 49  | 50  | 51  | 52  | 53  | 54  | 55  |
-| **6** | 40  | 41  | 42  | 43  | 44  | 45  | 46  | 47  |
-| **5** | 32  | 33  | 34  | 35  | 36  | 37  | 38  | 39  |
-| **4** | 24  | 25  | 26  | 27  | 28  | 29  | 30  | 31  |
-| **3** | 16  | 17  | 18  | 19  | 20  | 21  | 22  | 23  |
-| **2** | 08  | 09  | 10  | 11  | 12  | 13  | 14  | 15  |
-| **1** | 00  | 01  | 02  | 03  | 04  | 05  | 06  | 07  |
+## Description
 
-H8 - Most significant bit
-A1 - Least significant bit
+| Feature                | Implementation                                                                                                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Board representation   | [Bitboard](https://www.chessprogramming.org/Bitboards)                                                                                                                        |
+| Square mapping         | [Little-endian Rank-file Mapping](https://www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian_Rank-File_Mapping)                                             |
+| Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                                                                  |
+| Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                                                                         |
+| Move Generation        | [Classical approach for sliders](https://www.chessprogramming.org/Classical_Approach), working on [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards) |
+| Search                 | TBD                                                                                                                                                                           |
+| Evaluation             | TBD                                                                                                                                                                           |
 
-H8 H7 ... G8 G7 ... A2 A1
+---
 
-Bitboard
-64 bit uint64. Each bit represent presence or absence of a piece.
+## History
 
-Pieces
-Represented by 12 bitboards. 1 for each piece, times 2 for each color.
+This is my third attempt at a chess engine.
 
-1.  Pawn
-2.  Rook
-3.  Knight
-4.  Bishop
-5.  Queen
-6.  King
+### The predecessors:
+
+1.  [Rhess](https://github.com/rictorlome/rhess) - a command line game written in `Ruby` using a [mailbox](https://www.chessprogramming.org/Mailbox) 8x8 board representation. Styled with 100% unicode and playable via keyboard.
+
+2.  [Gogochess](https://github.com/rictorlome/gogochess) - a chess-move generator written in `Go` with a custom `HashMap` based move-list. Passing [perft tests](https://www.chessprogramming.org/Perft_Results) up to depth 5 and capable of solving `Mate-in-Twos` in less than a minute. Configured with `HTTP` API for browser integration for easy testing.
+
+---
+
+## Todo
+
+- [ ] Revisit move encoding
+- [ ] Brainstorm and implement `Position.do_move`
+- [ ] Pseudo-legal move gen -> Legal move gen

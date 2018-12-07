@@ -4,14 +4,6 @@ import (
 // "fmt"
 )
 
-func is_slider(pt PieceType) bool {
-	return pt == BISHOP || pt == ROOK || pt == QUEEN
-}
-
-func not_k_or_p(pt PieceType) bool {
-	return pt != KING && pt != PAWN
-}
-
 func piece_on_sq(pieces []Bitboard, sq Square) Piece {
 	for piece, bb := range pieces {
 		if occupied_at_sq(bb, sq) {

@@ -122,9 +122,8 @@ func parse_square(sq string) Square {
 	if sq == "-" {
 		return make_square(0, 0)
 	}
-	files := "abcdefgh"
 	rank := int(sq[1]-'0') - 1
-	return make_square(rank, strings.Index(files, sq[0:1]))
+	return make_square(rank, strings.Index(FILES, sq[0:1]))
 }
 
 func parse_state_fields(castles string, enps string, rule50 string) StateInfo {

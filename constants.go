@@ -93,6 +93,7 @@ var FILE_BBS = []Bitboard{
 	FILE_ABB, FILE_BBB, FILE_CBB, FILE_DBB,
 	FILE_EBB, FILE_FBB, FILE_GBB, FILE_HBB,
 }
+var FILES string = "abcdefgh"
 
 // 4. RANK BITBOARDS
 var RANK_1BB Bitboard = 0xff

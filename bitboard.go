@@ -163,16 +163,14 @@ func (p Piece) String() string {
 }
 
 func (s Square) String() string {
-	files := "abcdefgh"
-	return fmt.Sprintf("%c%d", files[square_file(s)], square_rank(s)+1)
+	return fmt.Sprintf("%c%d", FILES[square_file(s)], square_rank(s)+1)
 }
 
 func to_square(s string) Square {
 	if s == "-" {
 		return NULL_SQ
 	}
-	cols := "abcdefgh"
-	return make_square(int(s[1]-'0')-1, strings.Index(cols, s[0:1]))
+	return make_square(int(s[1]-'0')-1, strings.Index(FILES, s[0:1]))
 }
 
 func trailing_zeros(b Bitboard) int {

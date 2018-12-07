@@ -9,10 +9,5 @@ func (p *Position) occupied_at(sq Square) bool {
 }
 
 func (p *Position) piece_at(sq Square) Piece {
-	for piece, piece_bb := range p.placement {
-		if occupied_at_sq(piece_bb, sq) {
-			return Piece(piece)
-		}
-	}
-	return NULL_PIECE
+  return piece_on_sq(p.placement, sq)
 }
