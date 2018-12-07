@@ -41,6 +41,11 @@ var WHITE Color = true
 var BLACK Color = false
 var COLORS = []Color{WHITE, BLACK}
 
+// 2. SIDES
+var KING_SIDE int = 0
+var QUEEN_SIDE int = 1
+var SIDES = []int{KING_SIDE, QUEEN_SIDE}
+
 // 2. DIRECTIONS
 var NORTH int = 8
 var EAST int = 1
@@ -141,6 +146,9 @@ var RELEVANT_BISHOP_OCCUPANCY_BITS = [64]int{
 	5, 5, 5, 5, 5, 5, 5, 5,
 	6, 5, 5, 5, 5, 5, 5, 6,
 }
+
+var CASTLE_MOVE_SQS [4]Bitboard
+var CASTLE_CHECK_SQS [4]Bitboard
 
 // 6. SQUARES
 const (
@@ -296,6 +304,9 @@ var BQ_CASTLE StateInfo = 0x1
 var BK_CASTLE StateInfo = BQ_CASTLE << 1
 var WQ_CASTLE StateInfo = BQ_CASTLE << 2
 var WK_CASTLE StateInfo = BQ_CASTLE << 3
+var CASTLING_RIGHTS = [4]StateInfo{
+	WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE,
+}
 
 var BLACK_CASTLES StateInfo = BQ_CASTLE | BK_CASTLE
 var WHITE_CASLTES StateInfo = WQ_CASTLE | BK_CASTLE
@@ -339,6 +350,15 @@ const (
 
 var MOVE_TYPES = []MoveType{
 	NORMAL, PROMOTION, EN_PASSANT, CASTLING,
+}
+
+var BLACK_KINGSIDE Move = to_move(SQ_E8, SQ_G8, CASTLING, NO_PROMOTION)
+var BLACK_QUEENSIDE Move = to_move(SQ_E8, SQ_C8, CASTLING, NO_PROMOTION)
+var WHITE_KINGSIDE Move = to_move(SQ_E1, SQ_G1, CASTLING, NO_PROMOTION)
+var WHITE_QUEENSIDE Move = to_move(SQ_E1, SQ_C1, CASTLING, NO_PROMOTION)
+
+var CASTLE_MOVES = []Move{
+	WHITE_KINGSIDE, WHITE_QUEENSIDE, BLACK_KINGSIDE, BLACK_QUEENSIDE,
 }
 
 // 14. AttackFuncs

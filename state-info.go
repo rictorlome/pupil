@@ -5,6 +5,14 @@ import (
 )
 
 // From msb -> lsb: rule-50 (6)/enpassant (6)/castling rights (4)
+
+// NOTE: tmp function does not include attacking.
+func can_castle(side int, color Color, occ Bitboard, st StateInfo) bool {
+	empty := occ&CASTLE_MOVE_SQS[color_to_int(color)*2+side] == 0
+	has_right := st&CASTLING_RIGHTS[color_to_int(color)*2+side] != 0
+	return empty && has_right
+}
+
 func get_enp_sq(s StateInfo) Square {
 	return Square((s >> 4) & 0x3F)
 }

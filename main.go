@@ -20,6 +20,7 @@ func init() {
 			PAWN_ATTACK_BBS[s][i] = pawn_attacks(SQUARE_BB, color)
 		}
 	}
+	init_castle_sqs()
 }
 
 func main() {

@@ -26,8 +26,33 @@ func get_attack_func(pt PieceType) AttackFunc {
 	return AttackFuncs[pt]
 }
 
+// NOTE: CASTLE_MOVE_SQS is for testing non-occupancy of squares for castling.
+// CASTLE_CHECK_SQS is used for checking if king is passing through attacked sqs.
+// Include E1/E8 and exclude B1/B8 when validating if squares are attacked
+func init_castle_sqs() {
+	CASTLE_MOVE_SQS[0] = SQUARE_BBS[SQ_F1] | SQUARE_BBS[SQ_G1]
+	CASTLE_MOVE_SQS[1] = SQUARE_BBS[SQ_D1] | SQUARE_BBS[SQ_C1] | SQUARE_BBS[SQ_B1]
+	CASTLE_MOVE_SQS[2] = SQUARE_BBS[SQ_F8] | SQUARE_BBS[SQ_G8]
+	CASTLE_MOVE_SQS[3] = SQUARE_BBS[SQ_D8] | SQUARE_BBS[SQ_C8] | SQUARE_BBS[SQ_B8]
+
+	CASTLE_CHECK_SQS[0] = SQUARE_BBS[SQ_E1] | SQUARE_BBS[SQ_F1] | SQUARE_BBS[SQ_G1]
+	CASTLE_CHECK_SQS[1] = SQUARE_BBS[SQ_E1] | SQUARE_BBS[SQ_D1] | SQUARE_BBS[SQ_C1]
+	CASTLE_CHECK_SQS[2] = SQUARE_BBS[SQ_E8] | SQUARE_BBS[SQ_F8] | SQUARE_BBS[SQ_G8]
+	CASTLE_CHECK_SQS[3] = SQUARE_BBS[SQ_E8] | SQUARE_BBS[SQ_D8] | SQUARE_BBS[SQ_C8]
+}
+
 func king_attacks(occ Bitboard, square Square) Bitboard {
 	return KING_ATTACK_BBS[square]
+}
+
+func king_castles(occ Bitboard, color Color, st StateInfo) []Move {
+	var move_list []Move
+	for _, side := range SIDES {
+		if can_castle(side, color, occ, st) {
+			move_list = append(move_list, CASTLE_MOVES[color_to_int(color)*2+side])
+		}
+	}
+	return move_list
 }
 
 func knight_attacks(occ Bitboard, square Square) Bitboard {
@@ -92,8 +117,10 @@ func pseudolegals_by_color(pieces []Bitboard, color Color, st StateInfo) []Move 
 		switch t {
 		case PAWN:
 			move_list = append(move_list, serialize_for_pseudos_pawns(pieces[piece], occ, self_occ, color, st)...)
+		case KING:
+			move_list = append(move_list, serialize_for_pseudos_king(pieces[piece], occ, self_occ, color, st)...)
 		default:
-			move_list = append(move_list, serialize_for_pseudos(pieces[piece], occ, self_occ, get_attack_func(t))...)
+			move_list = append(move_list, serialize_for_pseudos_other(pieces[piece], occ, self_occ, get_attack_func(t))...)
 		}
 	}
 	return move_list
@@ -116,19 +143,22 @@ func serialize_for_attacks(piece_bb Bitboard, occ Bitboard, fn AttackFunc) Bitbo
 	return attacks
 }
 
-func serialize_for_pseudos(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) []Move {
+// NOTE: This function assumes only one king in piece_bb.
+func serialize_for_pseudos_king(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, st StateInfo) []Move {
+	src := Square(lsb(piece_bb))
+	return append(serialize_normal_moves(src, king_attacks(occ, src)), king_castles(occ, color, st)...)
+}
+
+func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) []Move {
 	var move_list []Move
 	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
-		pseudos := fn(occ, src) &^ self_occ
-		for dst_cursor := pseudos; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
-			dst := Square(lsb(dst_cursor))
-			move_list = append(move_list, to_move(dst, src, NORMAL, NO_PROMOTION))
-		}
+		move_list = append(serialize_normal_moves(src, fn(occ, src)&^self_occ))
 	}
 	return move_list
 }
 
+// NOTE: if promoting, 2 moves are added (queen and knight promotions)
 func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard, color Color, st StateInfo) []Move {
 	var move_list []Move
 	f_dir, l_rank, idx := forward(color), last_rank(color), color_to_int(color)
@@ -148,6 +178,14 @@ func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard
 				move_list = append(move_list, to_move(dst, src, NORMAL, NO_PROMOTION))
 			}
 		}
+	}
+	return move_list
+}
+
+func serialize_normal_moves(src Square, moves Bitboard) []Move {
+	var move_list []Move
+	for dst_cursor := moves; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
+		move_list = append(move_list, to_move(Square(lsb(dst_cursor)), src, NORMAL, NO_PROMOTION))
 	}
 	return move_list
 }
