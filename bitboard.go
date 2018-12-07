@@ -167,6 +167,24 @@ func (s Square) String() string {
 	return fmt.Sprintf("%c%d", files[square_file(s)], square_rank(s)+1)
 }
 
+func to_square(s string) Square {
+	if s == "-" {
+		return NULL_SQ
+	}
+	cols := "abcdefgh"
+	return make_square(int(s[1]-'0')-1, strings.Index(cols, s[0:1]))
+}
+
 func trailing_zeros(b Bitboard) int {
 	return bits.TrailingZeros64(uint64(b))
+}
+
+func uci_to_move(uci string) Move {
+	mt := NORMAL
+	src, dst := to_square(uci[0:2]), to_square(uci[2:4])
+	promotion := PROMOTION_TYPES[strings.Index(strings.Join(PROMOTION_STRINGS, ""), string(uci[4:]))]
+	if promotion != NO_PROMOTION {
+		mt = PROMOTION
+	}
+	return to_move(dst, src, mt, promotion)
 }

@@ -325,6 +325,7 @@ var CHAR_TO_CASTLE = map[string]StateInfo{
 // bit 14 - 15 move type (0 - normal, 1 - promotion, 2 - en passant, 3 - castling)
 var DST_MASK Move = 0xFFC0
 var SRC_MASK Move = 0xF03F
+var MOVE_TYPE_MASK Move = 0x3FFF
 var PROMOTION_MASK Move = 0xCFFF
 
 const (

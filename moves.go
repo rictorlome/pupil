@@ -16,6 +16,10 @@ func move_src(m Move) Square {
 	return Square((m &^ SRC_MASK) >> 6)
 }
 
+func move_type(m Move) MoveType {
+	return MOVE_TYPES[int((m&^MOVE_TYPE_MASK)>>14)]
+}
+
 func (m Move) String() string {
 	return move_src(m).String() + move_dst(m).String() + move_prom(m).String()
 }
