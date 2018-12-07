@@ -49,7 +49,7 @@ func king_castles(occ Bitboard, color Color, st StateInfo) []Move {
 	var move_list []Move
 	for _, side := range SIDES {
 		if can_castle(side, color, occ, st) {
-			move_list = append(move_list, CASTLE_MOVES[color_to_int(color)*2+side])
+			move_list = append(move_list, CASTLE_MOVES[int(color)*2+side])
 		}
 	}
 	return move_list
@@ -161,11 +161,11 @@ func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitbo
 // NOTE: if promoting, 2 moves are added (queen and knight promotions)
 func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard, color Color, st StateInfo) []Move {
 	var move_list []Move
-	f_dir, l_rank, idx := forward(color), last_rank(color), color_to_int(color)
+	f_dir, l_rank := forward(color), last_rank(color)
 	enp_sq := get_enp_sq(st)
 	for cursor := pawns; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
-		attacks := (PAWN_ATTACK_BBS[src][idx] & (occ | SQUARE_BBS[enp_sq])) &^ self_occ
+		attacks := (PAWN_ATTACK_BBS[src][color] & (occ | SQUARE_BBS[enp_sq])) &^ self_occ
 		pseudos := attacks | pawn_pushes(src, f_dir, occ)
 		for dst_cursor := pseudos; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
 			dst := Square(lsb(dst_cursor))

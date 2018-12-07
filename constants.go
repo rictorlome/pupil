@@ -3,7 +3,7 @@ package main
 /*
 Table of Contents:
 
-1. Colors (bool)
+1. Colors (int)
 2. Directions (int)
 3. File Bitboards (uint64)
 4. Rank Bitboards (uint64)
@@ -21,7 +21,7 @@ Table of Contents:
 */
 type AttackFunc func(Bitboard, Square) Bitboard
 type Bitboard uint64
-type Color bool
+type Color int
 type Move uint16
 type MoveType uint16
 type Piece uint
@@ -37,8 +37,8 @@ type Square uint
 type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
 
 // 1. COLORS
-var WHITE Color = true
-var BLACK Color = false
+var WHITE Color = 0
+var BLACK Color = 1
 var COLORS = []Color{WHITE, BLACK}
 
 // 2. SIDES

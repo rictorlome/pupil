@@ -8,8 +8,8 @@ import (
 
 // NOTE: tmp function does not include attacking.
 func can_castle(side int, color Color, occ Bitboard, st StateInfo) bool {
-	empty := occ&CASTLE_MOVE_SQS[color_to_int(color)*2+side] == 0
-	has_right := st&CASTLING_RIGHTS[color_to_int(color)*2+side] != 0
+	empty := occ&CASTLE_MOVE_SQS[int(color)*2+side] == 0
+	has_right := st&CASTLING_RIGHTS[int(color)*2+side] != 0
 	return empty && has_right
 }
 

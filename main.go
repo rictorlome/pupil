@@ -16,8 +16,8 @@ func init() {
 		BISHOP_OCCUPANCY_MASKS[s] = occupancy_mask(s, BISHOP_DIRECTIONS)
 		RELEVANT_ROOK_OCCUPANCY[s] = ROOK_ATTACK_MASKS[s] &^ ROOK_OCCUPANCY_MASKS[s]
 		RELEVANT_BISHOP_OCCUPANCY[s] = BISHOP_ATTACK_MASKS[s] &^ BISHOP_OCCUPANCY_MASKS[s]
-		for i, color := range COLORS {
-			PAWN_ATTACK_BBS[s][i] = pawn_attacks(SQUARE_BB, color)
+		for _, color := range COLORS {
+			PAWN_ATTACK_BBS[s][color] = pawn_attacks(SQUARE_BB, color)
 		}
 	}
 	init_castle_sqs()

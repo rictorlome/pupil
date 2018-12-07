@@ -33,7 +33,7 @@ func generate_castle_string(s StateInfo) string {
 }
 
 func generate_color_string(pos Position) string {
-	if pos.to_move {
+	if pos.to_move == WHITE {
 		return "w"
 	}
 	return "b"
@@ -95,7 +95,7 @@ func parse_fen(fen string) Position {
 		move_count,
 		parse_positions(fields[0]),
 		parse_state_fields(fields[2], fields[3], fields[4]),
-		Color(fields[1] == "w"),
+		Color(bool_to_int(fields[1] == "w")),
 	}
 }
 

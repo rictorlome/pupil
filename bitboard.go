@@ -11,8 +11,8 @@ func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
 
-func color_to_int(c Color) int {
-	if c == WHITE {
+func bool_to_int(b bool) int {
+	if b {
 		return 0
 	}
 	return 1
