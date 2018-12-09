@@ -22,7 +22,7 @@ func generate_castle_string(s StateInfo) string {
 	var castle_string string
 	// Reversed because bit indices are right to left
 	for idx, char := range "qkQK" {
-		if has_bit(s, uint(idx)) {
+		if has_bit(s.castling_rights, uint(idx)) {
 			castle_string = string(char) + castle_string
 		}
 	}
@@ -39,17 +39,8 @@ func generate_color_string(pos Position) string {
 	return "b"
 }
 
-func generate_enpassant_string(s StateInfo) string {
-	just_sq := get_enp_sq(s)
-	if !possible_enpassant_sq(just_sq) {
-		return "-"
-	}
-	return just_sq.String()
-}
-
-func generate_rule50_string(s StateInfo) string {
-	just_rule50 := int((s >> 10) & 0x3F)
-	return strconv.Itoa(just_rule50)
+func generate_rule_50_string(s StateInfo) string {
+	return strconv.Itoa(s.rule_50)
 }
 
 func generate_fen(pos Position) string {
@@ -57,8 +48,8 @@ func generate_fen(pos Position) string {
 	fenArr = append(fenArr, grid_to_fen(bitboards_to_grid(pos.placement)))
 	fenArr = append(fenArr, generate_color_string(pos))
 	fenArr = append(fenArr, generate_castle_string(pos.state))
-	fenArr = append(fenArr, generate_enpassant_string(pos.state))
-	fenArr = append(fenArr, generate_rule50_string(pos.state))
+	fenArr = append(fenArr, pos.state.ep_sq.String())
+	fenArr = append(fenArr, generate_rule_50_string(pos.state))
 	fenArr = append(fenArr, strconv.Itoa(pos.move_count))
 	return strings.Join(fenArr, " ")
 }
@@ -118,17 +109,19 @@ func parse_positions(positions string) []Bitboard {
 }
 
 func parse_square(sq string) Square {
-	// Since a1 cannot be an en-passant square, it's being used for null.
 	if sq == "-" {
-		return make_square(0, 0)
+		return NULL_SQ
 	}
 	rank := int(sq[1]-'0') - 1
 	return make_square(rank, strings.Index(FILES, sq[0:1]))
 }
 
-func parse_state_fields(castles string, enps string, rule50 string) StateInfo {
-	rule50_int, _ := strconv.Atoi(rule50)
-	return make_castle_state_info(castles) |
-		make_enpassant_square_info(parse_square(enps)) |
-		make_rule_50(rule50_int)
+func parse_state_fields(castles string, enps string, rule_50 string) StateInfo {
+	rule_50_int, _ := strconv.Atoi(rule_50)
+	return StateInfo{
+		make_castle_state_info(castles),
+		parse_square(enps),
+		nil,
+		rule_50_int,
+	}
 }

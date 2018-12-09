@@ -163,6 +163,9 @@ func (p Piece) String() string {
 }
 
 func (s Square) String() string {
+	if s == NULL_SQ {
+		return "-"
+	}
 	return fmt.Sprintf("%c%d", FILES[square_file(s)], square_rank(s)+1)
 }
 

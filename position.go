@@ -1,7 +1,7 @@
 package main
 
-func is_capture(m Move) bool {
-	return m&Move(CAPTURE) != 0
+func (p *Position) king_square(color Color) Square {
+	return Square(lsb(p.placement[color * 6]))
 }
 
 func (p *Position) occupied_at(sq Square) bool {

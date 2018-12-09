@@ -4,9 +4,8 @@ import "fmt"
 
 func init() {
 	// Initialize Square Bitboards
-	var x Bitboard = 0x1
 	for _, s := range SQUARES {
-		var SQUARE_BB Bitboard = x << s
+		var SQUARE_BB Bitboard = 0x1 << s
 		SQUARE_BBS[s] = SQUARE_BB
 		KING_ATTACK_BBS[s] = precompute_king_attacks(SQUARE_BB)
 		KNIGHT_ATTACK_BBS[s] = precompute_knight_attacks(SQUARE_BB)
@@ -26,5 +25,5 @@ func init() {
 func main() {
 	fmt.Println("OK")
 	pos := parse_fen(INITIAL_FEN)
-	fmt.Println(pseudolegals_by_color(pos.placement, BLACK, pos.state))
+	fmt.Println(pos.king_square(BLACK))
 }

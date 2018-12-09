@@ -14,7 +14,7 @@ Table of Contents:
 9. Pieces (int)
 10. PieceType (int)
 11. FEN (string)
-12. CastlingRights StateInfo (uint16)
+12. CastlingRights (int)
 13. Move
 14. AttackFuncs
 
@@ -33,7 +33,12 @@ type Position struct {
 	to_move    Color
 }
 type Square uint
-type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
+type StateInfo struct {
+	castling_rights int
+	ep_sq           Square
+	prev            *StateInfo
+	rule_50         int
+}
 
 // 1. COLORS
 var WHITE Color = 0
@@ -300,19 +305,19 @@ var INITIAL_FEN string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0
 var INITIAL_FEN_JUST_PIECES string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
 // 12. CASTLING RIGHTS - KQkq
-var BQ_CASTLE StateInfo = 0x1
-var BK_CASTLE StateInfo = BQ_CASTLE << 1
-var WQ_CASTLE StateInfo = BQ_CASTLE << 2
-var WK_CASTLE StateInfo = BQ_CASTLE << 3
-var CASTLING_RIGHTS = [4]StateInfo{
+var BQ_CASTLE int = 0x1
+var BK_CASTLE int = BQ_CASTLE << 1
+var WQ_CASTLE int = BQ_CASTLE << 2
+var WK_CASTLE int = BQ_CASTLE << 3
+var CASTLING_RIGHTS = [4]int{
 	WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE,
 }
 
-var BLACK_CASTLES StateInfo = BQ_CASTLE | BK_CASTLE
-var WHITE_CASLTES StateInfo = WQ_CASTLE | BK_CASTLE
-var NO_CASTLE StateInfo = 0
+var BLACK_CASTLES int = BQ_CASTLE | BK_CASTLE
+var WHITE_CASLTES int = WQ_CASTLE | BK_CASTLE
+var NO_CASTLE int = 0
 
-var CHAR_TO_CASTLE = map[string]StateInfo{
+var CHAR_TO_CASTLE = map[string]int{
 	"q": BQ_CASTLE, "k": BK_CASTLE,
 	"Q": WQ_CASTLE, "K": WK_CASTLE,
 	"-": NO_CASTLE,

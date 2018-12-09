@@ -9,6 +9,10 @@ func cap_or_quiet(occ Bitboard, dst Square) MoveType {
 	return MoveType(((occ >> dst) & 1) << 2)
 }
 
+func is_capture(m Move) bool {
+	return m&Move(CAPTURE) != 0
+}
+
 func move_dst(m Move) Square {
 	return Square(m &^ DST_MASK)
 }
