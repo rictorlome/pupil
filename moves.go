@@ -13,6 +13,14 @@ func is_capture(m Move) bool {
 	return m&Move(CAPTURE) != 0
 }
 
+func is_castle(m Move) bool {
+	return m&(Move(KING_CASTLE)|Move(QUEEN_CASTLE)) != 0
+}
+
+func is_enpassant(m Move) bool {
+	return m&(Move(EP_CAPTURE)) != 0
+}
+
 func move_dst(m Move) Square {
 	return Square(m &^ DST_MASK)
 }

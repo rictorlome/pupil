@@ -5,6 +5,33 @@ import (
   "fmt"
 )
 
+type AlignedTest struct {
+  a, b, c Square
+  is bool
+}
+
+var AlignedTests = []AlignedTest {
+  AlignedTest{SQ_A1, SQ_A2, SQ_A3, true},
+  AlignedTest{SQ_A1, SQ_A2, SQ_A8, true},
+  AlignedTest{SQ_A1, SQ_A3, SQ_A1, true},
+  AlignedTest{SQ_B1, SQ_A2, SQ_A3, false},
+  AlignedTest{SQ_A1, SQ_E5, SQ_H8, true},
+  AlignedTest{SQ_A1, SQ_E5, SQ_H1, false},
+  AlignedTest{SQ_H1, SQ_H8, SQ_H1, true},
+  AlignedTest{SQ_B2, SQ_C3, SQ_D4, true},
+  AlignedTest{SQ_B2, SQ_C3, SQ_E5, true},
+  AlignedTest{SQ_B2, SQ_C3, SQ_E6, false},
+  AlignedTest{SQ_A1, SQ_E4, SQ_A4, false},
+}
+
+func TestAligned(t *testing.T) {
+  for _, test := range AlignedTests {
+    if aligned(test.a, test.b, test.c) != test.is {
+      t.Error(fmt.Sprintf("Test %v, %v, %v: Expected %v, got %v", test.a, test.b, test.c, test.is, aligned(test.a, test.b, test.c)))
+    }
+  }
+}
+
 type ShiftByTest struct {
   start Bitboard
   d int

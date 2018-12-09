@@ -19,6 +19,17 @@ func init() {
 			PAWN_ATTACK_BBS[s][color] = pawn_attacks(SQUARE_BB, color)
 		}
 	}
+	// Initialize dependent BBs
+	for _, atk_mask := range [2][64]Bitboard{ROOK_ATTACK_MASKS, BISHOP_ATTACK_MASKS} {
+		for _, s1 := range SQUARES {
+			for _, s2 := range SQUARES {
+				if occupied_at_sq(atk_mask[s1], s2) {
+					LINE_BBS[s1][s2] = atk_mask[s1]&atk_mask[s2] | SQUARE_BBS[s1] | SQUARE_BBS[s2]
+				}
+			}
+		}
+	}
+
 	init_castle_sqs()
 }
 

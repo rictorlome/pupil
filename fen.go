@@ -123,5 +123,6 @@ func parse_state_fields(castles string, enps string, rule_50 string) StateInfo {
 		parse_square(enps),
 		nil,
 		rule_50_int,
+		Bitboard(0), /* THIS IS TEMP . Have to set blockers) */
 	}
 }

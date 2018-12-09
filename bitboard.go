@@ -7,6 +7,10 @@ import (
 	// "strconv"
 )
 
+func aligned(sq1 Square, sq2 Square, sq3 Square) bool {
+	return LINE_BBS[sq1][sq2]&SQUARE_BBS[sq3] != 0
+}
+
 func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
@@ -85,6 +89,10 @@ func occupied_squares_by_color(pieces []Bitboard, color Color) Bitboard {
 
 func on_board(sq Square) bool {
 	return SQ_A1 <= sq && sq <= SQ_H8
+}
+
+func opposite(c Color) Color {
+	return c ^ 1
 }
 
 func piece_range_by_color(color Color) []Piece {

@@ -38,6 +38,8 @@ type StateInfo struct {
 	ep_sq           Square
 	prev            *StateInfo
 	rule_50         int
+
+	blockers_for_king Bitboard
 }
 
 // 1. COLORS
@@ -130,6 +132,8 @@ var BISHOP_OCCUPANCY_MASKS [64]Bitboard
 
 var RELEVANT_ROOK_OCCUPANCY [64]Bitboard
 var RELEVANT_BISHOP_OCCUPANCY [64]Bitboard
+
+var LINE_BBS [64][64]Bitboard
 
 var RELEVANT_ROOK_OCCUPANCY_BITS = [64]int{
 	12, 11, 11, 11, 11, 11, 11, 12,
