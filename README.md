@@ -26,12 +26,13 @@ This is my third attempt at a chess engine.
 
 1.  [Rhess](https://github.com/rictorlome/rhess) - a command line game written in `Ruby` using a [mailbox](https://www.chessprogramming.org/Mailbox) 8x8 board representation. Styled with 100% unicode and playable via keyboard.
 
-2.  [Gogochess](https://github.com/rictorlome/gogochess) - a chess-move generator written in `Go` with a custom `HashMap` based move-list. Passing [perft tests](https://www.chessprogramming.org/Perft_Results) up to depth 5 and capable of solving `Mate-in-Twos` in less than a minute. Configured with `HTTP` API for browser integration for easy testing.
+2.  [Gogochess](https://github.com/rictorlome/gogochess) - a chess-move generator written in `Go` with a custom `HashMap` based move-list. Passing [perft tests](https://www.chessprogramming.org/Perft_Results) up to depth 5 and capable of solving `Mate-in-Twos` in less than a minute. Configured with `HTTP` API for browser integration and easy testing.
 
 ---
 
 ## Todo
 
-- [ ] Revisit move encoding
+- [x] Revisit move encoding
+- [ ] Precompute relevant bitboards for pawn pushes
 - [ ] Brainstorm and implement `Position.do_move`
 - [ ] Pseudo-legal move gen -> Legal move gen

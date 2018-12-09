@@ -4,12 +4,13 @@ import (
 // "fmt"
 )
 
-func move_dst(m Move) Square {
-	return Square(m &^ DST_MASK)
+func cap_or_quiet(occ Bitboard, dst Square) MoveType {
+	// (occ>>dst)&1 returns 1 if occupied, else 0.
+	return MoveType(((occ >> dst) & 1) << 2)
 }
 
-func move_prom(m Move) PromotionType {
-	return PROMOTION_TYPES[int((m&^PROMOTION_MASK)>>12)]
+func move_dst(m Move) Square {
+	return Square(m &^ DST_MASK)
 }
 
 func move_src(m Move) Square {
@@ -17,17 +18,13 @@ func move_src(m Move) Square {
 }
 
 func move_type(m Move) MoveType {
-	return MOVE_TYPES[int((m&^MOVE_TYPE_MASK)>>14)]
+	return MOVE_TYPES[int((m&^MOVE_TYPE_MASK)>>12)]
 }
 
 func (m Move) String() string {
-	return move_src(m).String() + move_dst(m).String() + move_prom(m).String()
+	return move_src(m).String() + move_dst(m).String() + PROMOTION_STRINGS[move_type(m)]
 }
 
-func (p PromotionType) String() string {
-	return PROMOTION_STRINGS[int(p>>12)]
-}
-
-func to_move(dest Square, src Square, mt MoveType, pt PromotionType) Move {
-	return Move(uint16(dest) | (uint16(src) << 6) | uint16(mt) | uint16(pt))
+func to_move(dest Square, src Square, mt MoveType) Move {
+	return Move(uint16(dest) | (uint16(src) << 6) | uint16(mt))
 }

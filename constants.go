@@ -32,7 +32,6 @@ type Position struct {
 	state      StateInfo
 	to_move    Color
 }
-type PromotionType uint16
 type Square uint
 type StateInfo uint16 // Enpassant Sq, Castling Rights, and Rule 50
 
@@ -322,42 +321,46 @@ var CHAR_TO_CASTLE = map[string]StateInfo{
 // 13. MOVE (uin16)
 // bit 0 - 5 (dest sq)
 // bit 6 - 11 (source sq)
-// bit 12 - 13 (promotion piece type knight or q)
-// bit 14 - 15 move type (0 - normal, 1 - promotion, 2 - en passant, 3 - castling)
+// bit 12 - 15 (move type)
 var DST_MASK Move = 0xFFC0
 var SRC_MASK Move = 0xF03F
-var MOVE_TYPE_MASK Move = 0x3FFF
-var PROMOTION_MASK Move = 0xCFFF
+var MOVE_TYPE_MASK Move = 0xFFF
 
 const (
-	NO_PROMOTION PromotionType = iota << 12
-	KNIGHT_PROMOTION
-	QUEEN_PROMOTION
+	QUIET MoveType = iota << 12
+	DOUBLE_PAWN_PUSH
+	KING_CASTLE
+	QUEEN_CASTLE
+	CAPTURE
+	EP_CAPTURE
 )
-
-var PROMOTION_TYPES = []PromotionType{
-	NO_PROMOTION, KNIGHT_PROMOTION, QUEEN_PROMOTION,
-}
-
-var PROMOTION_STRINGS = []string{
-	"", "n", "q",
-}
-
 const (
-	NORMAL MoveType = iota << 14
-	PROMOTION
-	EN_PASSANT
-	CASTLING
+	KNIGHT_PROMOTION MoveType = (iota + 8) << 12
+	BISHOP_PROMOTION
+	ROOK_PROMOTION
+	QUEEN_PROMOTION
+	KNIGHT_PROMOTION_CAPTURE
+	BISHOP_PROMOTION_CAPTURE
+	ROOK_PROMOTION_CAPTURE
+	QUEEN_PROMOTION_CAPTURE
 )
 
 var MOVE_TYPES = []MoveType{
-	NORMAL, PROMOTION, EN_PASSANT, CASTLING,
+	QUIET, DOUBLE_PAWN_PUSH, KING_CASTLE, QUEEN_CASTLE,
+	CAPTURE, EP_CAPTURE /* 6-7 unused */, QUIET, QUIET,
+	KNIGHT_PROMOTION, BISHOP_PROMOTION, ROOK_PROMOTION, QUEEN_PROMOTION,
+	KNIGHT_PROMOTION_CAPTURE, BISHOP_PROMOTION_CAPTURE, ROOK_PROMOTION_CAPTURE, QUEEN_PROMOTION_CAPTURE,
 }
 
-var BLACK_KINGSIDE Move = to_move(SQ_E8, SQ_G8, CASTLING, NO_PROMOTION)
-var BLACK_QUEENSIDE Move = to_move(SQ_E8, SQ_C8, CASTLING, NO_PROMOTION)
-var WHITE_KINGSIDE Move = to_move(SQ_E1, SQ_G1, CASTLING, NO_PROMOTION)
-var WHITE_QUEENSIDE Move = to_move(SQ_E1, SQ_C1, CASTLING, NO_PROMOTION)
+var PROMOTION_STRINGS = []string{
+	"", "", "", "", "", "", "", "",
+	"n", "b", "r", "q", "n", "b", "r", "q",
+}
+
+var BLACK_KINGSIDE Move = to_move(SQ_E8, SQ_G8, KING_CASTLE)
+var BLACK_QUEENSIDE Move = to_move(SQ_E8, SQ_C8, QUEEN_CASTLE)
+var WHITE_KINGSIDE Move = to_move(SQ_E1, SQ_G1, KING_CASTLE)
+var WHITE_QUEENSIDE Move = to_move(SQ_E1, SQ_C1, QUEEN_CASTLE)
 
 var CASTLE_MOVES = []Move{
 	WHITE_KINGSIDE, WHITE_QUEENSIDE, BLACK_KINGSIDE, BLACK_QUEENSIDE,

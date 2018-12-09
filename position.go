@@ -1,7 +1,7 @@
 package main
 
-func (p *Position) is_capture(m Move) bool {
-	return p.occupied_at(move_dst(m)) || move_type(m) == EN_PASSANT
+func is_capture(m Move) bool {
+	return m&Move(CAPTURE) != 0
 }
 
 func (p *Position) occupied_at(sq Square) bool {
@@ -9,5 +9,5 @@ func (p *Position) occupied_at(sq Square) bool {
 }
 
 func (p *Position) piece_at(sq Square) Piece {
-  return piece_on_sq(p.placement, sq)
+	return piece_on_sq(p.placement, sq)
 }

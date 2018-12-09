@@ -176,13 +176,3 @@ func to_square(s string) Square {
 func trailing_zeros(b Bitboard) int {
 	return bits.TrailingZeros64(uint64(b))
 }
-
-func uci_to_move(uci string) Move {
-	mt := NORMAL
-	src, dst := to_square(uci[0:2]), to_square(uci[2:4])
-	promotion := PROMOTION_TYPES[strings.Index(strings.Join(PROMOTION_STRINGS, ""), string(uci[4:]))]
-	if promotion != NO_PROMOTION {
-		mt = PROMOTION
-	}
-	return to_move(dst, src, mt, promotion)
-}
