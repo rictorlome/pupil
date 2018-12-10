@@ -19,13 +19,6 @@ func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
 
-func bool_to_int(b bool) int {
-	if b {
-		return 0
-	}
-	return 1
-}
-
 func empty(b Bitboard) bool {
 	return b == 0
 }

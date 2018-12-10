@@ -20,3 +20,7 @@ func piece_to_color(p Piece) Color {
 func piece_to_type(p Piece) PieceType {
 	return PieceType(p % 6)
 }
+
+func pt_to_p(pt PieceType, color Color) Piece {
+	return Piece(pt + PieceType(6*color))
+}

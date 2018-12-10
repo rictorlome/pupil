@@ -79,15 +79,26 @@ func grid_to_fen(grid [8][8]string) string {
 	return strings.Join(fenArr, "/")
 }
 
+func parse_color(s string) Color {
+	if s == "w" {
+		return WHITE
+	}
+	return BLACK
+}
+
 func parse_fen(fen string) Position {
 	fields := strings.Split(fen, " ")
 	move_count, _ := strconv.Atoi(fields[5])
-	return Position{
-		move_count,
-		parse_positions(fields[0]),
-		parse_state_fields(fields[2], fields[3], fields[4]),
-		Color(bool_to_int(fields[1] == "w")),
-	}
+
+	p := Position{}
+	p.state = StateInfo{}
+	p.move_count = move_count
+	p.placement = parse_positions(fields[0])
+	p.to_move = parse_color(fields[1])
+
+	p.state.initialize_from_fen(fields[2], fields[3], fields[4])
+
+	return p
 }
 
 func parse_positions(positions string) []Bitboard {
@@ -114,15 +125,4 @@ func parse_square(sq string) Square {
 	}
 	rank := int(sq[1]-'0') - 1
 	return make_square(rank, strings.Index(FILES, sq[0:1]))
-}
-
-func parse_state_fields(castles string, enps string, rule_50 string) StateInfo {
-	rule_50_int, _ := strconv.Atoi(rule_50)
-	return StateInfo{
-		make_castle_state_info(castles),
-		parse_square(enps),
-		nil,
-		rule_50_int,
-		Bitboard(0), /* THIS IS TEMP . Have to set blockers) */
-	}
 }

@@ -41,5 +41,4 @@ func main() {
 	fmt.Println("OK")
 	pos := parse_fen(INITIAL_FEN)
 	fmt.Println(pos.king_square(BLACK))
-	fmt.Println(BETWEEN_BBS[SQ_A1][SQ_B4])
 }
