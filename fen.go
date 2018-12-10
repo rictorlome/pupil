@@ -22,7 +22,7 @@ func generate_castle_string(s StateInfo) string {
 	var castle_string string
 	// Reversed because bit indices are right to left
 	for idx, char := range "qkQK" {
-		if has_bit(s.castling_rights, uint(idx)) {
+		if has_right(s.castling_rights, uint(idx)) {
 			castle_string = string(char) + castle_string
 		}
 	}

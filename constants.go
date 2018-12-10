@@ -120,6 +120,7 @@ var ALL_SQS Bitboard = 0xffffffffffffffff
 
 // Initialized in main.init
 var SQUARE_BBS [64]Bitboard
+var NEIGHBOR_BBS [64]Bitboard
 var KNIGHT_ATTACK_BBS [64]Bitboard
 var KING_ATTACK_BBS [64]Bitboard
 var PAWN_ATTACK_BBS [64][2]Bitboard
@@ -326,6 +327,8 @@ var CHAR_TO_CASTLE = map[string]int{
 	"Q": WQ_CASTLE, "K": WK_CASTLE,
 	"-": NO_CASTLE,
 }
+
+var CASTLING_MASK_BY_SQ [64]int
 
 // 13. MOVE (uin16)
 // bit 0 - 5 (dest sq)

@@ -62,6 +62,10 @@ func msb(b Bitboard) int {
 	return 63 - leading_zeros(b)
 }
 
+func neighbors(b Bitboard) Bitboard {
+	return shift_direction(b, WEST) | shift_direction(b, EAST)
+}
+
 func occupied_at_bb(b Bitboard, sq Bitboard) bool {
 	return b&sq != 0
 }
