@@ -11,6 +11,10 @@ func aligned(sq1 Square, sq2 Square, sq3 Square) bool {
 	return LINE_BBS[sq1][sq2]&SQUARE_BBS[sq3] != 0
 }
 
+func between(sq1 Square, sq2 Square, sq3 Square) bool {
+	return BETWEEN_BBS[sq1][sq2]&SQUARE_BBS[sq3] != 0
+}
+
 func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
