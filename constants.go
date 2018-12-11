@@ -34,12 +34,13 @@ type Position struct {
 }
 type Square uint
 type StateInfo struct {
+	// Core fen info
 	castling_rights int
 	ep_sq           Square
-	prev            *StateInfo
 	rule_50         int
-
+	// Additional info
 	blockers_for_king Bitboard
+	prev              *StateInfo
 }
 
 // 1. COLORS

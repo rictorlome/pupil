@@ -50,6 +50,13 @@ func (p *Position) occupied_at(sq Square) bool {
 	return p.piece_at(sq) != NULL_PIECE
 }
 
+func (p *Position) parse_move(s string) Move {
+	src := parse_square(s[:2])
+	dst := parse_square(s[2:4])
+	mover_type, captured := piece_to_type(p.piece_at(src)), p.piece_at(dst)
+	return to_move(dst, src, parse_move_type(s[4:], p.occupancy(), src, dst, mover_type, captured))
+}
+
 func (p *Position) piece_at(sq Square) Piece {
 	return piece_on_sq(p.placement, sq)
 }

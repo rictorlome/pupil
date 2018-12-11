@@ -89,16 +89,40 @@ func parse_color(s string) Color {
 func parse_fen(fen string) Position {
 	fields := strings.Split(fen, " ")
 	move_count, _ := strconv.Atoi(fields[5])
-
+	// Core fen info
 	p := Position{}
 	p.state = StateInfo{}
-	p.move_count = move_count
-	p.placement = parse_positions(fields[0])
-	p.to_move = parse_color(fields[1])
-
-	p.state.initialize_from_fen(fields[2], fields[3], fields[4])
+	p.set_fen_info(fields[0], fields[1], fields[2], fields[3], fields[4], move_count)
+	// Additional state info
+	p.state.blockers_for_king = p.slider_blockers(opposite(p.to_move), p.king_square(p.to_move))
+	p.state.prev = nil
 
 	return p
+}
+
+func parse_move_type(promstring string, occ Bitboard, src Square, dst Square, mover_type PieceType, captured Piece) MoveType {
+	file_diff := square_file(dst) - square_file(src)
+	rank_diff := square_rank(dst) - square_rank(src)
+	// Promotion
+	mt := MoveType(strings.Index(strings.Join(PROMOTION_STRINGS, ""), promstring))
+	// Capture
+	mt |= cap_or_quiet(occ, dst)
+	// En passant
+	if mover_type == PAWN && square_file(dst) != square_file(src) && captured == NULL_PIECE {
+		mt |= EP_CAPTURE
+	}
+	// Double Pawn Push
+	if mover_type == PAWN && (rank_diff == 2 || rank_diff == -2) {
+		mt |= DOUBLE_PAWN_PUSH
+	}
+	// Castles
+	if mover_type == KING && file_diff == 2 {
+		mt |= KING_CASTLE
+	}
+	if mover_type == KING && file_diff == -2 {
+		mt |= QUEEN_CASTLE
+	}
+	return mt
 }
 
 func parse_positions(positions string) []Bitboard {
