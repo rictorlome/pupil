@@ -19,6 +19,10 @@ func binary(b Bitboard) string {
 	return fmt.Sprintf("%064b", uint64(b))
 }
 
+func binary_16(u uint16) string {
+	return fmt.Sprintf("%016b", u)
+}
+
 func empty(b Bitboard) bool {
 	return b == 0
 }

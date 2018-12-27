@@ -12,12 +12,19 @@ func can_castle(side int, color Color, occ Bitboard, cr int) bool {
 	return empty && has_right
 }
 
-// NOTE: This should only be called on dst squares of DOUBLE_PAWN_PUSH moves
-func dst_to_ep_sq(dst Square) Square {
-	if dst < SQ_A5 {
-		return Square(dst - 8)
+func cleanup_sq_for_ep_capture(capture_dst Square) Square {
+	if capture_dst < SQ_A5 {
+		return Square(capture_dst + 8)
 	}
-	return Square(dst + 8)
+	return Square(capture_dst - 8)
+}
+
+// NOTE: This should only be called on dst squares of DOUBLE_PAWN_PUSH moves
+func dst_to_ep_sq(push_dst Square) Square {
+	if push_dst < SQ_A5 {
+		return Square(push_dst - 8)
+	}
+	return Square(push_dst + 8)
 }
 
 func has_right(rights int, right uint) bool {
@@ -30,7 +37,7 @@ func init_castling_masks() {
 		case SQ_A1:
 			CASTLING_MASK_BY_SQ[sq] = WQ_CASTLE
 		case SQ_E1:
-			CASTLING_MASK_BY_SQ[sq] = WHITE_CASLTES
+			CASTLING_MASK_BY_SQ[sq] = WHITE_CASTLES
 		case SQ_H1:
 			CASTLING_MASK_BY_SQ[sq] = WK_CASTLE
 		case SQ_A8:
@@ -42,6 +49,21 @@ func init_castling_masks() {
 		default:
 			CASTLING_MASK_BY_SQ[sq] = NO_CASTLE
 		}
+	}
+}
+
+func init_rook_squares_for_castling() {
+	m := [12]Square {
+		SQ_C1, SQ_A1, SQ_D1,
+		SQ_G1, SQ_H1, SQ_F1,
+		SQ_C8, SQ_A8, SQ_D8,
+		SQ_G8, SQ_H8, SQ_F8,
+	}
+	for king_dst, rook_src, rook_dst := 0, 1, 2; rook_dst < 12; {
+		ROOK_SRC_DST[m[king_dst]] = [2]Square{m[rook_src], m[rook_dst],}
+		king_dst += 3
+		rook_src += 3
+		rook_dst += 3
 	}
 }
 

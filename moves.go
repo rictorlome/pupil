@@ -1,12 +1,12 @@
 package main
 
 import (
-// "fmt"
+	// "fmt"
 )
 
 func cap_or_quiet(occ Bitboard, dst Square) MoveType {
 	// (occ>>dst)&1 returns 1 if occupied, else 0.
-	return MoveType(((occ >> dst) & 1) << 2)
+	return MoveType(((occ >> dst) & 1) << (2 + 12))
 }
 
 func is_capture(m Move) bool {
@@ -14,11 +14,15 @@ func is_capture(m Move) bool {
 }
 
 func is_castle(m Move) bool {
-	return m&(Move(KING_CASTLE)|Move(QUEEN_CASTLE)) != 0
+	return is_move_type(m, KING_CASTLE) || is_move_type(m, QUEEN_CASTLE)
 }
 
 func is_enpassant(m Move) bool {
-	return m&(Move(EP_CAPTURE)) != 0
+	return is_move_type(m, EP_CAPTURE)
+}
+
+func is_move_type(m Move, mt MoveType) bool {
+	return m&Move(mt) == Move(mt)
 }
 
 func move_dst(m Move) Square {
@@ -30,11 +34,20 @@ func move_src(m Move) Square {
 }
 
 func move_type(m Move) MoveType {
+	//TODO: remove this lookup, just and with the mask
 	return MOVE_TYPES[int((m&^MOVE_TYPE_MASK)>>12)]
 }
 
+func move_type_to_idx(mt MoveType) int {
+	return int(mt) >> 12
+}
+
 func (m Move) String() string {
-	return move_src(m).String() + move_dst(m).String() + PROMOTION_STRINGS[move_type(m)]
+	return move_src(m).String() + move_dst(m).String() + PROMOTION_STRINGS[move_type_to_idx(move_type(m))]
+}
+
+func (mt MoveType) String() string {
+	return MOVE_TYPE_STRINGS[move_type_to_idx(mt)]
 }
 
 func to_move(dest Square, src Square, mt MoveType) Move {

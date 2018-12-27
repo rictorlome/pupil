@@ -1,5 +1,9 @@
 package main
 
+import (
+	// "fmt"
+)
+
 func (p *Position) king_square(color Color) Square {
 	return Square(lsb(p.placement[color*6]))
 }

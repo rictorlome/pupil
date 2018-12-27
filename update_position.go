@@ -5,14 +5,26 @@ import (
 	"strconv"
 )
 
+func (p *Position) do_enpassant(pawn_dst Square) {
+	ep_sq := cleanup_sq_for_ep_capture(pawn_dst)
+	p.remove_piece(p.piece_at(ep_sq), ep_sq)
+}
+
 func (p *Position) clear_sq(sq Square) {
 	for _, pc := range PIECES {
 		p.remove_piece(pc, sq)
 	}
 }
 
+func (p *Position) do_castle(king_dst Square) {
+	rook_src_dst := ROOK_SRC_DST[king_dst]
+	r := p.piece_at(rook_src_dst[0])
+	p.remove_piece(r, rook_src_dst[0])
+	p.place_piece(r, rook_src_dst[1])
+}
+
 func (p *Position) do_move(m Move, new_state StateInfo) {
-	src, dst, move_type := move_src(m), move_dst(m), move_type(m)
+	src, dst := move_src(m), move_dst(m)
 	mover := p.piece_at(src)
 	// Update new state
 	new_state.castling_rights = update_castling_right(p.state.castling_rights, src)
@@ -20,7 +32,11 @@ func (p *Position) do_move(m Move, new_state StateInfo) {
 	new_state.rule_50 = update_rule_50(p.state.rule_50, m, p.piece_type_at(src))
 
 	// Update placement
-	if move_type == CAPTURE {
+	if is_castle(m) {
+		p.do_castle(dst)
+	} else if is_enpassant(m) {
+		p.do_enpassant(dst)
+	} else if is_capture(m) {
 		p.remove_piece(p.piece_at(dst), dst)
 	}
 	p.remove_piece(mover, src)

@@ -35,6 +35,7 @@ func init() {
 
 	init_castle_sqs()
 	init_castling_masks()
+	init_rook_squares_for_castling()
 }
 
 func main() {
