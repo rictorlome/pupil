@@ -24,3 +24,7 @@ func piece_to_type(p Piece) PieceType {
 func pt_to_p(pt PieceType, color Color) Piece {
 	return Piece(pt + PieceType(6*color))
 }
+
+func (pt PieceType) String() string {
+	return PIECE_TYPE_STRINGS[pt]
+}

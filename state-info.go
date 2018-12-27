@@ -53,14 +53,14 @@ func init_castling_masks() {
 }
 
 func init_rook_squares_for_castling() {
-	m := [12]Square {
+	m := [12]Square{
 		SQ_C1, SQ_A1, SQ_D1,
 		SQ_G1, SQ_H1, SQ_F1,
 		SQ_C8, SQ_A8, SQ_D8,
 		SQ_G8, SQ_H8, SQ_F8,
 	}
 	for king_dst, rook_src, rook_dst := 0, 1, 2; rook_dst < 12; {
-		ROOK_SRC_DST[m[king_dst]] = [2]Square{m[rook_src], m[rook_dst],}
+		ROOK_SRC_DST[m[king_dst]] = [2]Square{m[rook_src], m[rook_dst]}
 		king_dst += 3
 		rook_src += 3
 		rook_dst += 3

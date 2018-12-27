@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "fmt"
+// "fmt"
 )
 
 func (p *Position) king_square(color Color) Square {

@@ -42,4 +42,10 @@ func main() {
 	fmt.Println("OK")
 	pos := parse_fen(INITIAL_FEN)
 	fmt.Println(pos.king_square(BLACK))
+
+	fmt.Println(binary_16(uint16(MOVE_TYPE_MASK)))
+	fmt.Println(binary_16(uint16(^MOVE_TYPE_MASK)))
+	for _, mt := range MOVE_TYPES {
+		fmt.Println(binary_16(uint16(mt)), mt)
+	}
 }

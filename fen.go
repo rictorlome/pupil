@@ -104,7 +104,11 @@ func parse_move_type(promstring string, occ Bitboard, src Square, dst Square, mo
 	file_diff := square_file(dst) - square_file(src)
 	rank_diff := square_rank(dst) - square_rank(src)
 	// Promotion
-	mt := MoveType(strings.Index(strings.Join(PROMOTION_STRINGS, ""), promstring))
+	var mt MoveType
+	if promstring != "" {
+		idx := strings.Index(strings.Join(PROMOTION_STRINGS, ""), promstring)
+		mt = MoveType(idx<<12) | MoveType(PROMOTION_MASK)
+	}
 	// Capture
 	mt |= cap_or_quiet(occ, dst)
 	// En passant

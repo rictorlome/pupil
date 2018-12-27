@@ -10,6 +10,11 @@ func (p *Position) do_enpassant(pawn_dst Square) {
 	p.remove_piece(p.piece_at(ep_sq), ep_sq)
 }
 
+func (p *Position) do_promotion(c Color, mt MoveType, dst Square) {
+	pt := move_type_to_promotion_type(mt)
+	p.place_piece(pt_to_p(pt, c), dst)
+}
+
 func (p *Position) clear_sq(sq Square) {
 	for _, pc := range PIECES {
 		p.remove_piece(pc, sq)
@@ -39,8 +44,13 @@ func (p *Position) do_move(m Move, new_state StateInfo) {
 	} else if is_capture(m) {
 		p.remove_piece(p.piece_at(dst), dst)
 	}
+
 	p.remove_piece(mover, src)
-	p.place_piece(mover, dst)
+	if is_promotion(m) {
+		p.do_promotion(p.to_move, move_type(m), dst)
+	} else {
+		p.place_piece(mover, dst)
+	}
 
 	// Reassign state
 	new_state.prev = &p.state

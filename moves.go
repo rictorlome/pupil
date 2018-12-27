@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "fmt"
+// "fmt"
 )
 
 func cap_or_quiet(occ Bitboard, dst Square) MoveType {
@@ -22,7 +22,11 @@ func is_enpassant(m Move) bool {
 }
 
 func is_move_type(m Move, mt MoveType) bool {
-	return m&Move(mt) == Move(mt)
+	return MoveType(m&^MOVE_TYPE_MASK) == mt
+}
+
+func is_promotion(m Move) bool {
+	return m&Move(PROMOTION_MASK) != 0
 }
 
 func move_dst(m Move) Square {
@@ -40,6 +44,10 @@ func move_type(m Move) MoveType {
 
 func move_type_to_idx(mt MoveType) int {
 	return int(mt) >> 12
+}
+
+func move_type_to_promotion_type(mt MoveType) PieceType {
+	return PROMOTION_PIECE_TYPES[(mt &^ MoveType(PROMOTION_MASK) &^ CAPTURE >> 12)]
 }
 
 func (m Move) String() string {

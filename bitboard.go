@@ -171,6 +171,13 @@ func (b Bitboard) String() string {
 	return s
 }
 
+func (c Color) String() string {
+	if c == WHITE {
+		return "w"
+	}
+	return "b"
+}
+
 func (p Piece) String() string {
 	return string([]rune(PIECE_STRING)[p])
 }
