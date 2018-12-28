@@ -4,6 +4,24 @@ import (
 // "fmt"
 )
 
+func (p *Position) dup() Position {
+	new_placement := make([]Bitboard, len(p.placement))
+	copy(new_placement, p.placement)
+	return Position{
+		p.move_count,
+		new_placement,
+		p.state.dup(),
+		p.to_move,
+	}
+}
+
+func (s *StateInfo) dup() StateInfo {
+	return StateInfo{
+		s.castling_rights, s.ep_sq, s.rule_50,
+		s.blockers_for_king, s.prev,
+	}
+}
+
 func (p *Position) generate_moves() []Move {
 	pseudo_legals := pseudolegals_by_color(p.placement, p.to_move, p.state.ep_sq, p.state.castling_rights)
 	legals := make([]Move, 0)
@@ -100,4 +118,8 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	}
 
 	return blockers
+}
+
+func (p Position) String() string {
+	return generate_fen(p)
 }

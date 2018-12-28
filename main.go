@@ -42,6 +42,6 @@ func main() {
 	fmt.Println("OK")
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
 	pos := parse_fen(INITIAL_FEN)
-	fmt.Println(len(pos.generate_moves()))
-	fmt.Println(pos.generate_moves())
+	// fmt.Println(len(pos.generate_moves()))
+	fmt.Println(countLeaves(pos, 0))
 }
