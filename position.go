@@ -8,22 +8,21 @@ func (p *Position) dup() Position {
 	new_placement := make([]Bitboard, len(p.placement))
 	copy(new_placement, p.placement)
 	return Position{
-		p.move_count,
+		p.ply,
 		new_placement,
 		p.state.dup(),
-		p.to_move,
 	}
 }
 
-func (s *StateInfo) dup() StateInfo {
-	return StateInfo{
+func (s *StateInfo) dup() *StateInfo {
+	return &StateInfo{
 		s.castling_rights, s.ep_sq, s.rule_50,
-		s.blockers_for_king, s.prev,
+		s.blockers_for_king, s.prev, s.captured,
 	}
 }
 
 func (p *Position) generate_moves() []Move {
-	pseudo_legals := pseudolegals_by_color(p.placement, p.to_move, p.state.ep_sq, p.state.castling_rights)
+	pseudo_legals := pseudolegals_by_color(p.placement, p.to_move(), p.state.ep_sq, p.state.castling_rights)
 	legals := make([]Move, 0)
 	for _, pseudo_legal := range pseudo_legals {
 		if p.is_legal(pseudo_legal) {
@@ -46,9 +45,13 @@ func (p *Position) is_legal(m Move) bool {
 	}
 	if p.piece_type_at(src) == KING {
 		// Remember to add not-through-attack check for castles
-		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.placement, opposite(p.to_move)), dst)
+		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.placement, opposite(p.to_move())), dst)
 	}
-	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.to_move))
+	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.to_move()))
+}
+
+func (p *Position) move_count() int {
+	return p.ply / 2
 }
 
 func (p *Position) occupancy() Bitboard {
@@ -118,6 +121,10 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	}
 
 	return blockers
+}
+
+func (p *Position) to_move() Color {
+	return Color(p.ply % 2)
 }
 
 func (p Position) String() string {

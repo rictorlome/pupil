@@ -33,7 +33,7 @@ func generate_castle_string(s StateInfo) string {
 }
 
 func generate_color_string(pos Position) string {
-	if pos.to_move == WHITE {
+	if pos.to_move() == WHITE {
 		return "w"
 	}
 	return "b"
@@ -47,10 +47,10 @@ func generate_fen(pos Position) string {
 	var fenArr []string
 	fenArr = append(fenArr, grid_to_fen(bitboards_to_grid(pos.placement)))
 	fenArr = append(fenArr, generate_color_string(pos))
-	fenArr = append(fenArr, generate_castle_string(pos.state))
+	fenArr = append(fenArr, generate_castle_string(*pos.state))
 	fenArr = append(fenArr, pos.state.ep_sq.String())
-	fenArr = append(fenArr, generate_rule_50_string(pos.state))
-	fenArr = append(fenArr, strconv.Itoa(pos.move_count))
+	fenArr = append(fenArr, generate_rule_50_string(*pos.state))
+	fenArr = append(fenArr, strconv.Itoa(pos.move_count()))
 	return strings.Join(fenArr, " ")
 }
 
@@ -91,10 +91,10 @@ func parse_fen(fen string) Position {
 	move_count, _ := strconv.Atoi(fields[5])
 	// Core fen info
 	p := Position{}
-	p.state = StateInfo{}
+	p.state = &StateInfo{}
 	p.set_fen_info(fields[0], fields[1], fields[2], fields[3], fields[4], move_count)
 	// Additional state info
-	p.state.blockers_for_king = p.slider_blockers(opposite(p.to_move), p.king_square(p.to_move))
+	p.state.blockers_for_king = p.slider_blockers(opposite(p.to_move()), p.king_square(p.to_move()))
 	p.state.prev = nil
 
 	return p

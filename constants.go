@@ -27,10 +27,9 @@ type MoveType uint16
 type Piece uint
 type PieceType uint
 type Position struct {
-	move_count int
+	ply int
 	placement  []Bitboard
-	state      StateInfo
-	to_move    Color
+	state      *StateInfo
 }
 type Square uint
 type StateInfo struct {
@@ -41,6 +40,7 @@ type StateInfo struct {
 	// Additional info
 	blockers_for_king Bitboard
 	prev              *StateInfo
+	captured          Piece
 }
 
 // 1. COLORS

@@ -1,7 +1,7 @@
 package main
 
 import (
-// "fmt"
+"fmt"
 )
 
 // NOTE: tmp function does not include attacking.
@@ -92,4 +92,12 @@ func update_rule_50(rule_50 int, m Move, pt PieceType) int {
 		return 0
 	}
 	return rule_50 + 1
+}
+
+func (s StateInfo) String() string {
+	recursive_string := "nil"
+	if s.prev != nil {
+		recursive_string = (*s.prev).String()
+	}
+	return fmt.Sprintf("[r50 = %v, prev = %v]", s.rule_50, recursive_string)
 }
