@@ -37,20 +37,24 @@ func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
 	return pushes
 }
 
+// NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
 func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castling_rights int) []Move {
 	occ, self_occ := occupied_squares(pieces), occupied_squares_by_color(pieces, color)
 	var move_list []Move
 
 	for _, piece := range piece_range_by_color(color) {
 		t := piece_to_type(piece)
+		var piece_move_list []Move
+		piece_board := pieces[piece]
 		switch t {
 		case PAWN:
-			move_list = append(move_list, serialize_for_pseudos_pawns(pieces[piece], occ, self_occ, color, ep_sq)...)
+			piece_move_list = serialize_for_pseudos_pawns(piece_board, occ, self_occ, color, ep_sq)
 		case KING:
-			move_list = append(move_list, serialize_for_pseudos_king(pieces[piece], occ, self_occ, color, castling_rights)...)
+			piece_move_list = serialize_for_pseudos_king(piece_board, occ, self_occ, color, castling_rights)
 		default:
-			move_list = append(move_list, serialize_for_pseudos_other(pieces[piece], occ, self_occ, get_attack_func(t))...)
+			piece_move_list = serialize_for_pseudos_other(piece_board, occ, self_occ, get_attack_func(t))
 		}
+		move_list = append(move_list, piece_move_list...)
 	}
 	return move_list
 }
@@ -58,14 +62,14 @@ func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castlin
 // NOTE: This function assumes only one king in piece_bb.
 func serialize_for_pseudos_king(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int) []Move {
 	src := Square(lsb(piece_bb))
-	return append(serialize_normal_moves(src, king_attacks(occ, src), occ), king_castles(occ, color, cr)...)
+	return append(serialize_normal_moves(src, king_attacks(occ, src)&^self_occ, occ), king_castles(occ, color, cr)...)
 }
 
 func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) []Move {
 	var move_list []Move
 	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
-		move_list = append(serialize_normal_moves(src, fn(occ, src)&^self_occ, occ))
+		move_list = append(move_list, serialize_normal_moves(src, fn(occ, src)&^self_occ, occ)...)
 	}
 	return move_list
 }

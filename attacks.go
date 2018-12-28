@@ -1,5 +1,9 @@
 package main
 
+import (
+// "fmt"
+)
+
 func attacks_by_color(pieces []Bitboard, color Color) Bitboard {
 	occ := occupied_squares(pieces)
 	var attacks Bitboard

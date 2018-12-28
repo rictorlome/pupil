@@ -40,12 +40,8 @@ func init() {
 
 func main() {
 	fmt.Println("OK")
+	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
 	pos := parse_fen(INITIAL_FEN)
-	fmt.Println(pos.king_square(BLACK))
-
-	fmt.Println(binary_16(uint16(MOVE_TYPE_MASK)))
-	fmt.Println(binary_16(uint16(^MOVE_TYPE_MASK)))
-	for _, mt := range MOVE_TYPES {
-		fmt.Println(binary_16(uint16(mt)), mt)
-	}
+	fmt.Println(len(pos.generate_moves()))
+	fmt.Println(pos.generate_moves())
 }

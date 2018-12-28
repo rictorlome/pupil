@@ -4,6 +4,17 @@ import (
 // "fmt"
 )
 
+func (p *Position) generate_moves() []Move {
+	pseudo_legals := pseudolegals_by_color(p.placement, p.to_move, p.state.ep_sq, p.state.castling_rights)
+	legals := make([]Move, 0)
+	for _, pseudo_legal := range pseudo_legals {
+		if p.is_legal(pseudo_legal) {
+			legals = append(legals, pseudo_legal)
+		}
+	}
+	return legals
+}
+
 func (p *Position) king_square(color Color) Square {
 	return Square(lsb(p.placement[color*6]))
 }
