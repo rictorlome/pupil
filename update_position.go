@@ -31,9 +31,10 @@ func (p *Position) do_castle(king_dst Square) {
 func (p *Position) do_move(m Move, new_state StateInfo) {
 	src, dst := move_src(m), move_dst(m)
 	mover := p.piece_at(src)
+	us, them := p.to_move, opposite(p.to_move)
 	// Update new state
 	new_state.castling_rights = update_castling_right(p.state.castling_rights, src)
-	new_state.ep_sq = update_ep_sq(m, p.placement[pt_to_p(PAWN, opposite(p.to_move))])
+	new_state.ep_sq = update_ep_sq(m, p.placement[pt_to_p(PAWN, them)])
 	new_state.rule_50 = update_rule_50(p.state.rule_50, m, p.piece_type_at(src))
 
 	// Update placement
@@ -47,10 +48,14 @@ func (p *Position) do_move(m Move, new_state StateInfo) {
 
 	p.remove_piece(mover, src)
 	if is_promotion(m) {
-		p.do_promotion(p.to_move, move_type(m), dst)
+		p.do_promotion(us, move_type(m), dst)
 	} else {
 		p.place_piece(mover, dst)
 	}
+
+	// Update king blockers (for next turn)
+	// our sliders, their king
+	new_state.blockers_for_king = p.slider_blockers(us, p.king_square(them))
 
 	// Reassign state
 	new_state.prev = &p.state
