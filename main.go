@@ -41,7 +41,8 @@ func init() {
 func main() {
 	fmt.Println("OK")
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
-	pos := parse_fen(INITIAL_FEN)
+	// pos := parse_fen(INITIAL_FEN)
 	// fmt.Println(len(pos.generate_moves()))
-	fmt.Println(countLeaves(pos, 0))
+	// fmt.Println(countLeaves(pos, 0))
+	fmt.Println(two_up(SQ_E2, WHITE))
 }

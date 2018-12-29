@@ -96,8 +96,9 @@ func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard
 				move_list = append(move_list, to_move(dst, src, KNIGHT_PROMOTION|cap_or_quiet(occ, dst)), to_move(dst, src, QUEEN_PROMOTION|cap_or_quiet(occ, dst)))
 			case dst == ep_sq:
 				move_list = append(move_list, to_move(dst, src, EP_CAPTURE))
+			case dst == two_up(src, color):
+				move_list = append(move_list, to_move(dst, src, DOUBLE_PAWN_PUSH))
 			default:
-				// NOTE: this current encoding does not include double pushes.
 				move_list = append(move_list, to_move(dst, src, cap_or_quiet(occ, dst)))
 			}
 		}

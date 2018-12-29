@@ -29,11 +29,11 @@ func attackers_to_sq_by_color(pieces []Bitboard, sq Square, color Color) Bitboar
 		case KING:
 			continue
 		case PAWN:
-			attackers |= pawn_attacks(sq_bb, opposite(color))&pieces[piece]
+			attackers |= pawn_attacks(sq_bb, opposite(color)) & pieces[piece]
 		case KNIGHT:
-			attackers |= knight_attacks(occ,sq)&pieces[piece]
+			attackers |= knight_attacks(occ, sq) & pieces[piece]
 		default:
-			attackers |= serialize_for_attacks(sq_bb, occ, get_attack_func(t))&pieces[piece]
+			attackers |= serialize_for_attacks(sq_bb, occ, get_attack_func(t)) & pieces[piece]
 		}
 	}
 	return attackers

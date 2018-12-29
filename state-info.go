@@ -87,8 +87,9 @@ func update_castling_right(cr int, src Square) int {
 
 // NOTE: ep_sq is only set if enemy pawn can actually take it.
 func update_ep_sq(m Move, enemy_pawns Bitboard) Square {
-	if move_type(m) == DOUBLE_PAWN_PUSH && (enemy_pawns&NEIGHBOR_BBS[move_dst(m)] != 0) {
-		return dst_to_ep_sq(move_dst(m))
+	dst := move_dst(m)
+	if move_type(m) == DOUBLE_PAWN_PUSH && (enemy_pawns&NEIGHBOR_BBS[dst] != 0) {
+		return dst_to_ep_sq(dst)
 	}
 	return NULL_SQ
 }

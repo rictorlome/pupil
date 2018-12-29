@@ -199,3 +199,10 @@ func to_square(s string) Square {
 func trailing_zeros(b Bitboard) int {
 	return bits.TrailingZeros64(uint64(b))
 }
+
+func two_up(src Square, color Color) Square {
+	if color == WHITE {
+		return Square(int(src) + 16)
+	}
+	return Square(int(src) - 16)
+}

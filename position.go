@@ -22,13 +22,14 @@ func (p *Position) generate_evasions() []Move {
 	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
 	atks := attacks_by_color(p.placement, them)
 
+	king_evasions := serialize_normal_moves(king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
 	// safe squares for king
 	if popcount(checkers) > 1 {
-		return serialize_normal_moves(king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
+		return king_evasions
 	}
 	checker_sq := Square(lsb(checkers))
 	non_evasions := p.generate_non_evasions()
-	var blocks_or_captures []Move
+	blocks_or_captures := king_evasions
 	for _, move := range non_evasions {
 		dst := move_dst(move)
 		if dst == checker_sq || occupied_at_sq(BETWEEN_BBS[king_sq][checker_sq], dst) {
