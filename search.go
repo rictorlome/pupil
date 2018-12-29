@@ -1,43 +1,58 @@
 package main
 
 import (
-// "fmt"
+	"fmt"
 )
 
-func countLeaves(p Position, depth int) int {
-	if depth == 0 {
+type Node struct {
+	origin   Move
+	children []Node
+}
+
+func build_tree(p *Position, move Move, depth_left int) Node {
+	var children []Node
+	if 0 < depth_left {
+		moves := (*p).generate_moves()
+		for _, move := range moves {
+			(*p).do_move(move, StateInfo{})
+			children = append(children, build_tree(p, move, depth_left-1))
+			(*p).undo_move(move)
+		}
+	}
+	return Node{move, children}
+}
+
+func (n *Node) count_leaves() int {
+	if len(n.children) == 0 {
 		return 1
 	}
 	child_leaves := 0
-	for _, move := range p.generate_moves() {
-		duped := p.dup()
-		duped.do_move(move, StateInfo{})
-		child_leaves += countLeaves(duped, depth-1)
+	for _, child := range n.children {
+		child_leaves += child.count_leaves()
 	}
 	return child_leaves
 }
 
-func get_perft(p Position, depth int, move Move) perft {
-	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
-	if depth == 0 {
-		new_perft.update_with_move(move)
-		new_perft.checks += indicator(p.in_check())
-		new_perft.checkmates += indicator(p.in_checkmate())
-		return new_perft
+func divide(fen string, max_depth int, dividor int) {
+	pos := parse_fen(fen)
+	for i := 1; i <= max_depth; i++ {
+		n := build_tree(&pos, Move(0), i)
+		if 2 < i {
+			divide_tree("", n, 1, dividor, i)
+		}
+		fmt.Println(fmt.Sprintf("perft( %v)=          %--v", i, n.count_leaves()))
 	}
-	new_perft.nodes = 0
-	for _, move := range p.generate_moves() {
-		p.do_move(move, StateInfo{})
-		new_perft = new_perft.add(get_perft(p, depth-1, move))
-		p.undo_move(move)
-	}
-	new_perft.depth = depth
-	return new_perft
 }
 
-func indicator(b bool) int {
-	if b {
-		return 1
+func divide_tree(prefix string, n Node, cur_depth int, max_depth int, i int) {
+	if max_depth < cur_depth {
+		return
 	}
-	return 0
+	for i, child := range n.children {
+		new_prefix := fmt.Sprintf("%v %v", prefix, child.origin)
+		divide_tree(new_prefix, child, cur_depth+1, max_depth, i)
+	}
+	if 1 < cur_depth && cur_depth < i {
+		fmt.Println(fmt.Sprintf("%v. %v moves =        %v", cur_depth, prefix, n.count_leaves()))
+	}
 }

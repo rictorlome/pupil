@@ -17,6 +17,31 @@ func (p *perft) add(s perft) perft {
 	}
 }
 
+func get_perft(p Position, depth int, move Move) perft {
+	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
+	if depth == 0 {
+		new_perft.update_with_move(move)
+		new_perft.checks += indicator(p.in_check())
+		new_perft.checkmates += indicator(p.in_checkmate())
+		return new_perft
+	}
+	new_perft.nodes = 0
+	for _, move := range p.generate_moves() {
+		p.do_move(move, StateInfo{})
+		new_perft = new_perft.add(get_perft(p, depth-1, move))
+		p.undo_move(move)
+	}
+	new_perft.depth = depth
+	return new_perft
+}
+
+func indicator(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
 func (p *perft) update_with_move(m Move) {
 	p.captures += indicator(is_capture(m))
 	p.enpassants += indicator(is_enpassant(m))
