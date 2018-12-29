@@ -14,15 +14,46 @@ func (p *Position) dup() Position {
 	}
 }
 
-func (p *Position) generate_moves() []Move {
-	pseudo_legals := pseudolegals_by_color(p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
-	legals := make([]Move, 0)
-	for _, pseudo_legal := range pseudo_legals {
-		if p.is_legal(pseudo_legal) {
-			legals = append(legals, pseudo_legal)
+func (p *Position) generate_evasions() []Move {
+	us, them := p.side_to_move(), opposite(p.side_to_move())
+	occ, self_occ := p.occupancy(), p.occupancy_by_color(us)
+
+	king_sq := p.king_square(us)
+	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
+	atks := attacks_by_color(p.placement, them)
+
+	// safe squares for king
+	if popcount(checkers) > 1 {
+		return serialize_normal_moves(king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
+	}
+	checker_sq := Square(lsb(checkers))
+	non_evasions := p.generate_non_evasions()
+	var blocks_or_captures []Move
+	for _, move := range non_evasions {
+		dst := move_dst(move)
+		if dst == checker_sq || occupied_at_sq(BETWEEN_BBS[king_sq][checker_sq], dst) {
+			blocks_or_captures = append(blocks_or_captures, move)
 		}
 	}
-	return legals
+	return blocks_or_captures
+}
+
+func (p *Position) generate_moves() []Move {
+	if p.in_check() {
+		return p.generate_evasions()
+	}
+	return p.generate_non_evasions()
+}
+
+func (p *Position) generate_non_evasions() []Move {
+	pseudo_legals := pseudolegals_by_color(p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
+	non_evasions := make([]Move, 0)
+	for _, pseudo_legal := range pseudo_legals {
+		if p.is_legal(pseudo_legal) {
+			non_evasions = append(non_evasions, pseudo_legal)
+		}
+	}
+	return non_evasions
 }
 
 func (p *Position) king_square(color Color) Square {
@@ -58,6 +89,10 @@ func (p *Position) move_count() int {
 
 func (p *Position) occupancy() Bitboard {
 	return occupied_squares(p.placement)
+}
+
+func (p *Position) occupancy_by_color(c Color) Bitboard {
+	return occupied_squares_by_color(p.placement, c)
 }
 
 func (p *Position) occupancy_by_piece(pc Piece) Bitboard {

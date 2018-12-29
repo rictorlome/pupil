@@ -4,12 +4,11 @@ import (
 	"fmt"
 )
 
-// NOTE: tmp function does not include attacking.
-func can_castle(side int, color Color, occ Bitboard, cr int) bool {
-	// safe := atks&CASTLE_CHECK_SQS[int(color)*2+side] == 0
+func can_castle(side int, color Color, occ Bitboard, cr int, atks Bitboard) bool {
+	safe := atks&CASTLE_CHECK_SQS[int(color)*2+side] == 0
 	empty := occ&CASTLE_MOVE_SQS[int(color)*2+side] == 0
 	has_right := cr&CASTLING_RIGHTS[int(color)*2+side] != 0
-	return empty && has_right
+	return empty && has_right && safe
 }
 
 func cleanup_sq_for_ep_capture(capture_dst Square) Square {

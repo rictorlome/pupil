@@ -29,7 +29,7 @@ func TestSearch(t *testing.T) {
     for _, expected_pft := range initial_perft.perfts {
       actual_pft := get_perft(pos, expected_pft.depth)
       if actual_pft != expected_pft {
-          t.Error(fmt.Sprintf("\nExpected:\n%v\nGot:\n%v", expected_pft, actual_pft))
+          t.Error(fmt.Sprintf("\nExpected:\t %v\n Got:\t\t %v", expected_pft, actual_pft))
       }
     }
 }

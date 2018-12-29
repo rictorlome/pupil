@@ -19,10 +19,10 @@ func init_castle_sqs() {
 	CASTLE_CHECK_SQS[3] = SQUARE_BBS[SQ_E8] | SQUARE_BBS[SQ_D8] | SQUARE_BBS[SQ_C8]
 }
 
-func king_castles(occ Bitboard, color Color, cr int) []Move {
+func king_castles(occ Bitboard, color Color, cr int, enemy_attacks Bitboard) []Move {
 	var move_list []Move
 	for _, side := range SIDES {
-		if can_castle(side, color, occ, cr) {
+		if can_castle(side, color, occ, cr, enemy_attacks) {
 			move_list = append(move_list, CASTLE_MOVES[int(color)*2+side])
 		}
 	}
@@ -39,6 +39,7 @@ func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
 
 // NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
 func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castling_rights int) []Move {
+	enemy_attacks := attacks_by_color(pieces, opposite(color))
 	occ, self_occ := occupied_squares(pieces), occupied_squares_by_color(pieces, color)
 	var move_list []Move
 
@@ -50,7 +51,7 @@ func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castlin
 		case PAWN:
 			piece_move_list = serialize_for_pseudos_pawns(piece_board, occ, self_occ, color, ep_sq)
 		case KING:
-			piece_move_list = serialize_for_pseudos_king(piece_board, occ, self_occ, color, castling_rights)
+			piece_move_list = serialize_for_pseudos_king(piece_board, occ, self_occ, color, castling_rights, enemy_attacks)
 		default:
 			piece_move_list = serialize_for_pseudos_other(piece_board, occ, self_occ, get_attack_func(t))
 		}
@@ -59,10 +60,9 @@ func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castlin
 	return move_list
 }
 
-// NOTE: This function assumes only one king in piece_bb.
-func serialize_for_pseudos_king(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int) []Move {
+func serialize_for_pseudos_king(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int, enemy_attacks Bitboard) []Move {
 	src := Square(lsb(piece_bb))
-	return append(serialize_normal_moves(src, king_attacks(occ, src)&^self_occ, occ), king_castles(occ, color, cr)...)
+	return append(serialize_normal_moves(src, king_attacks(occ, src)&^self_occ, occ), king_castles(occ, color, cr, enemy_attacks)...)
 }
 
 func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) []Move {

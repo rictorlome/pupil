@@ -18,6 +18,27 @@ func attacks_by_color(pieces []Bitboard, color Color) Bitboard {
 	return attacks
 }
 
+// Returns bitboard of occupancy by color c whose pieces attack square sq
+func attackers_to_sq_by_color(pieces []Bitboard, sq Square, color Color) Bitboard {
+	occ := occupied_squares(pieces)
+	sq_bb := SQUARE_BBS[sq]
+	var attackers Bitboard
+	for _, piece := range piece_range_by_color(color) {
+		t := piece_to_type(piece)
+		switch t {
+		case KING:
+			continue
+		case PAWN:
+			attackers |= pawn_attacks(sq_bb, opposite(color))&pieces[piece]
+		case KNIGHT:
+			attackers |= knight_attacks(occ,sq)&pieces[piece]
+		default:
+			attackers |= serialize_for_attacks(sq_bb, occ, get_attack_func(t))&pieces[piece]
+		}
+	}
+	return attackers
+}
+
 func bishop_attacks(occ Bitboard, square Square) Bitboard {
 	return slider_attacks(occ, square, BISHOP_DIRECTIONS)
 }
