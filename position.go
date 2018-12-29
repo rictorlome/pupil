@@ -14,15 +14,8 @@ func (p *Position) dup() Position {
 	}
 }
 
-func (s *StateInfo) dup() *StateInfo {
-	return &StateInfo{
-		s.castling_rights, s.ep_sq, s.rule_50,
-		s.blockers_for_king, s.prev, s.captured,
-	}
-}
-
 func (p *Position) generate_moves() []Move {
-	pseudo_legals := pseudolegals_by_color(p.placement, p.to_move(), p.state.ep_sq, p.state.castling_rights)
+	pseudo_legals := pseudolegals_by_color(p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
 	legals := make([]Move, 0)
 	for _, pseudo_legal := range pseudo_legals {
 		if p.is_legal(pseudo_legal) {
@@ -36,6 +29,15 @@ func (p *Position) king_square(color Color) Square {
 	return Square(lsb(p.placement[color*6]))
 }
 
+func (p *Position) in_check() bool {
+	color := p.side_to_move()
+	return occupied_at_sq(attacks_by_color(p.placement, opposite(color)), p.king_square(color))
+}
+
+func (p *Position) in_checkmate() bool {
+	return p.in_check() && len(p.generate_moves()) == 0
+}
+
 func (p *Position) is_legal(m Move) bool {
 	src, dst := move_src(m), move_dst(m)
 
@@ -45,9 +47,9 @@ func (p *Position) is_legal(m Move) bool {
 	}
 	if p.piece_type_at(src) == KING {
 		// Remember to add not-through-attack check for castles
-		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.placement, opposite(p.to_move())), dst)
+		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.placement, opposite(p.side_to_move())), dst)
 	}
-	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.to_move()))
+	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.side_to_move()))
 }
 
 func (p *Position) move_count() int {
@@ -101,6 +103,10 @@ func (p *Position) piece_type_at(sq Square) PieceType {
 	return piece_to_type(p.piece_at(sq))
 }
 
+func (p *Position) side_to_move() Color {
+	return Color(p.ply % 2)
+}
+
 // Returns bitboard of all pieces blocking attacks to sq from sliders of color c.
 func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	var blockers Bitboard
@@ -121,10 +127,6 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	}
 
 	return blockers
-}
-
-func (p *Position) to_move() Color {
-	return Color(p.ply % 2)
 }
 
 func (p Position) String() string {

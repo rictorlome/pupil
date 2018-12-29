@@ -1,7 +1,7 @@
 package main
 
 import (
-"fmt"
+	"fmt"
 )
 
 // NOTE: tmp function does not include attacking.
@@ -25,6 +25,13 @@ func dst_to_ep_sq(push_dst Square) Square {
 		return Square(push_dst - 8)
 	}
 	return Square(push_dst + 8)
+}
+
+func (s *StateInfo) dup() *StateInfo {
+	return &StateInfo{
+		s.castling_rights, s.ep_sq, s.rule_50,
+		s.blockers_for_king, s.prev, s.captured,
+	}
 }
 
 func has_right(rights int, right uint) bool {

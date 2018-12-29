@@ -27,9 +27,9 @@ type MoveType uint16
 type Piece uint
 type PieceType uint
 type Position struct {
-	ply int
-	placement  []Bitboard
-	state      *StateInfo
+	ply       int
+	placement []Bitboard
+	state     *StateInfo
 }
 type Square uint
 type StateInfo struct {

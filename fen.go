@@ -33,7 +33,7 @@ func generate_castle_string(s StateInfo) string {
 }
 
 func generate_color_string(pos Position) string {
-	if pos.to_move() == WHITE {
+	if pos.side_to_move() == WHITE {
 		return "w"
 	}
 	return "b"
@@ -94,7 +94,7 @@ func parse_fen(fen string) Position {
 	p.state = &StateInfo{}
 	p.set_fen_info(fields[0], fields[1], fields[2], fields[3], fields[4], move_count)
 	// Additional state info
-	p.state.blockers_for_king = p.slider_blockers(opposite(p.to_move()), p.king_square(p.to_move()))
+	p.state.blockers_for_king = p.slider_blockers(opposite(p.side_to_move()), p.king_square(p.side_to_move()))
 	p.state.prev = nil
 
 	return p
