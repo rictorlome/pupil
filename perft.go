@@ -17,7 +17,30 @@ func (p *perft) add(s perft) perft {
 	}
 }
 
-func get_perft(p Position, depth int, move Move) perft {
+func get_perft(p *Position, depth int, move Move, c chan perft) {
+	c <- get_perft_recursive(p, depth, move)
+}
+
+func get_perft_parallel(p *Position, depth int) perft {
+	if depth < 1 {
+		return perft{0, 1, 0, 0, 0, 0, 0, 0}
+	}
+	new_perft := perft{0, 0, 0, 0, 0, 0, 0, 0}
+	c := make(chan perft)
+	moves := p.generate_moves()
+	for i := 0; i < len(moves); i++ {
+		duped := p.dup()
+		duped.do_move(moves[i], StateInfo{})
+		go get_perft(&duped, depth - 1, moves[i], c)
+	}
+	for i := 0; i < len(moves); i++ {
+		new_perft = new_perft.add(<-c)
+	}
+	new_perft.depth = depth
+	return new_perft
+}
+
+func get_perft_recursive(p *Position, depth int, move Move) perft {
 	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
 	if depth == 0 {
 		new_perft.update_with_move(move)
@@ -28,7 +51,7 @@ func get_perft(p Position, depth int, move Move) perft {
 	new_perft.nodes = 0
 	for _, move := range p.generate_moves() {
 		p.do_move(move, StateInfo{})
-		new_perft = new_perft.add(get_perft(p, depth-1, move))
+		new_perft = new_perft.add(get_perft_recursive(p, depth-1, move))
 		p.undo_move(move)
 	}
 	new_perft.depth = depth
