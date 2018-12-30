@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+// import "fmt"
 
 func init() {
 	// Initialize Square Bitboards
@@ -42,7 +42,7 @@ func main() {
 	// fmt.Println("OK")
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
 	// pos := parse_fen(INITIAL_FEN)
-	fen := "r1bq1bnr/pppkpppp/8/1B1p4/1n2P3/N7/PPPP1PPP/R1BQK1NR b KQ - 2 5"
-	pos := parse_fen(fen)
-	fmt.Println(pos.generate_moves())
+	// // fen := "r1bq1bnr/pppkpppp/8/1B1p4/1n2P3/N7/PPPP1PPP/R1BQK1NR b KQ - 2 5"
+	// // pos := parse_fen(fen)
+	// build_tree(&pos, nil, Move(0), 5)
 }

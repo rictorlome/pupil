@@ -31,20 +31,19 @@ func (n Node) String() string {
 }
 
 func build_tree(p *Position, parent *Node, move Move, depth_left int) Node {
-	var children []Node
-	self := Node{parent, move, children}
 	if 0 < depth_left {
 		moves := (*p).generate_moves()
-		for _, move := range moves {
-			fmt.Println(self)
-			(*p).do_move(move, StateInfo{})
-			children = append(children, build_tree(p, &self, move, depth_left-1))
+		children := make([]Node, len(moves))
+		self := Node{parent, move, children}
+		for i := 0; i < len(moves); i++ {
+			(*p).do_move(moves[i], StateInfo{})
+			children[i] = build_tree(p, &self, moves[i], depth_left-1)
 			// sort.Sort(Nodes(children))
-			(*p).undo_move(move)
+			(*p).undo_move(moves[i])
 		}
+		return self
 	}
-	self.children = children
-	return self
+	return Node{parent, move, make([]Node, 0)}
 }
 
 func (n *Node) count_leaves() int {
