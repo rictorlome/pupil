@@ -2,24 +2,49 @@ package main
 
 import (
 	"fmt"
+	// "sort"
 )
 
 type Node struct {
+	parent   *Node
 	origin   Move
 	children []Node
 }
 
-func build_tree(p *Position, move Move, depth_left int) Node {
+type Nodes []Node
+
+func (n Nodes) Len() int {
+	return len(n)
+}
+func (n Nodes) Swap(i, j int) {
+	n[i], n[j] = n[j], n[i]
+}
+func (n Nodes) Less(i, j int) bool {
+	return int(move_src(n[i].origin)) < int(move_src(n[j].origin))
+}
+
+func (n Node) String() string {
+	if n.parent == nil {
+		return fmt.Sprintf("%v", n.origin)
+	}
+	return fmt.Sprintf("%v -> %v", n.parent, n.origin)
+}
+
+func build_tree(p *Position, parent *Node, move Move, depth_left int) Node {
 	var children []Node
+	self := Node{parent, move, children}
 	if 0 < depth_left {
 		moves := (*p).generate_moves()
 		for _, move := range moves {
+			fmt.Println(self)
 			(*p).do_move(move, StateInfo{})
-			children = append(children, build_tree(p, move, depth_left-1))
+			children = append(children, build_tree(p, &self, move, depth_left-1))
+			// sort.Sort(Nodes(children))
 			(*p).undo_move(move)
 		}
 	}
-	return Node{move, children}
+	self.children = children
+	return self
 }
 
 func (n *Node) count_leaves() int {
@@ -36,7 +61,7 @@ func (n *Node) count_leaves() int {
 func divide(fen string, max_depth int, dividor int) {
 	pos := parse_fen(fen)
 	for i := 1; i <= max_depth; i++ {
-		n := build_tree(&pos, Move(0), i)
+		n := build_tree(&pos, nil, Move(0), i)
 		if 2 < i {
 			divide_tree("", n, 1, dividor, i)
 		}

@@ -39,8 +39,8 @@ func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
 
 // NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
 func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castling_rights int) []Move {
-	enemy_attacks := attacks_by_color(pieces, opposite(color))
 	occ, self_occ := occupied_squares(pieces), occupied_squares_by_color(pieces, color)
+	enemy_attacks := attacks_by_color(occ, pieces, opposite(color))
 	var move_list []Move
 
 	for _, piece := range piece_range_by_color(color) {

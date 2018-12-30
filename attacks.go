@@ -4,8 +4,7 @@ import (
 // "fmt"
 )
 
-func attacks_by_color(pieces []Bitboard, color Color) Bitboard {
-	occ := occupied_squares(pieces)
+func attacks_by_color(occ Bitboard, pieces []Bitboard, color Color) Bitboard {
 	var attacks Bitboard
 	for _, piece := range piece_range_by_color(color) {
 		t := piece_to_type(piece)

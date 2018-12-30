@@ -16,11 +16,13 @@ func (p *Position) dup() Position {
 
 func (p *Position) generate_evasions() []Move {
 	us, them := p.side_to_move(), opposite(p.side_to_move())
-	occ, self_occ := p.occupancy(), p.occupancy_by_color(us)
-
 	king_sq := p.king_square(us)
+
+	occ, self_occ := p.occupancy(), p.occupancy_by_color(us)
+	occ_without_king := occ &^ SQUARE_BBS[king_sq]
+
 	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
-	atks := attacks_by_color(p.placement, them)
+	atks := attacks_by_color(occ_without_king, p.placement, them)
 
 	king_evasions := serialize_normal_moves(king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
 	// safe squares for king
@@ -63,7 +65,7 @@ func (p *Position) king_square(color Color) Square {
 
 func (p *Position) in_check() bool {
 	color := p.side_to_move()
-	return occupied_at_sq(attacks_by_color(p.placement, opposite(color)), p.king_square(color))
+	return occupied_at_sq(attacks_by_color(p.occupancy(), p.placement, opposite(color)), p.king_square(color))
 }
 
 func (p *Position) in_checkmate() bool {
@@ -79,7 +81,7 @@ func (p *Position) is_legal(m Move) bool {
 	}
 	if p.piece_type_at(src) == KING {
 		// Remember to add not-through-attack check for castles
-		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.placement, opposite(p.side_to_move())), dst)
+		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.occupancy(), p.placement, opposite(p.side_to_move())), dst)
 	}
 	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.side_to_move()))
 }
