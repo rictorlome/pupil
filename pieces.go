@@ -21,6 +21,14 @@ func piece_to_type(p Piece) PieceType {
 	return PieceType(p % 6)
 }
 
+func placement_to_placement_by_square(placement []Bitboard) []Piece {
+	placement_by_square := make([]Piece, 64)
+	for _, SQ := range SQUARES {
+		placement_by_square[SQ] = piece_on_sq(placement, SQ)
+	}
+	return placement_by_square
+}
+
 func pt_to_p(pt PieceType, color Color) Piece {
 	return Piece(pt + PieceType(6*color))
 }

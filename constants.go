@@ -29,6 +29,7 @@ type PieceType uint
 type Position struct {
 	ply       int
 	placement []Bitboard
+	placement_by_square []Piece
 	state     *StateInfo
 }
 type Square uint

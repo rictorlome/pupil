@@ -6,10 +6,13 @@ import (
 
 func (p *Position) dup() Position {
 	new_placement := make([]Bitboard, len(p.placement))
+	new_placement_by_square := make([]Piece, len(p.placement_by_square))
 	copy(new_placement, p.placement)
+	copy(new_placement_by_square, p.placement_by_square)
 	return Position{
 		p.ply,
 		new_placement,
+		new_placement_by_square,
 		p.state.dup(),
 	}
 }
@@ -134,7 +137,7 @@ func (p *Position) parse_move(s string) Move {
 }
 
 func (p *Position) piece_at(sq Square) Piece {
-	return piece_on_sq(p.placement, sq)
+	return p.placement_by_square[sq]
 }
 
 func (p *Position) piece_type_at(sq Square) PieceType {

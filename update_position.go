@@ -73,10 +73,12 @@ func (p *Position) do_promotion(c Color, mt MoveType, dst Square) {
 }
 
 func (p *Position) place_piece(pc Piece, sq Square) {
+	p.placement_by_square[sq] = pc
 	p.placement[pc] |= SQUARE_BBS[sq]
 }
 
 func (p *Position) remove_piece(pc Piece, sq Square) {
+	p.placement_by_square[sq] = NULL_PIECE
 	p.placement[pc] &^= SQUARE_BBS[sq]
 }
 
@@ -84,6 +86,7 @@ func (p *Position) set_fen_info(positions string, color string, castles string, 
 	rule_50_int, _ := strconv.Atoi(rule_50)
 	// On Position
 	p.placement = parse_positions(positions)
+	p.placement_by_square = placement_to_placement_by_square(p.placement)
 	p.ply = move_count*2 + int(parse_color(color))
 	// On StateInfo
 	p.state.castling_rights = make_castle_state_info(castles)
