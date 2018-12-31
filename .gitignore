@@ -1,4 +1,3 @@
 util
-magic.go
 *.prof
 pupil.test

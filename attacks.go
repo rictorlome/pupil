@@ -100,6 +100,7 @@ func queen_attacks(occ Bitboard, square Square) Bitboard {
 }
 
 func rook_attacks(occ Bitboard, square Square) Bitboard {
+	// return magic_rook_attack(occ, square)
 	return slider_attacks(occ, square, ROOK_DIRECTIONS)
 }
 
