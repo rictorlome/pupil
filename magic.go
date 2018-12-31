@@ -6,13 +6,13 @@ import (
 )
 
 type Magic struct {
-	mask    Bitboard
-	magic   Bitboard
+	mask  Bitboard
+	magic Bitboard
 	// offset in the attack array
-	offset  uint
+	offset uint
 	// the number of indices in the attack table for this square
-	size 		uint
-	shift   uint
+	size  uint
+	shift uint
 }
 
 func attack_index(m Magic, occ Bitboard) uint {
@@ -21,7 +21,12 @@ func attack_index(m Magic, occ Bitboard) uint {
 
 func magic_rook_attack(occ Bitboard, sq Square) Bitboard {
 	m := RookMagics[sq]
-	return RookAttackTable[attack_index(m, occ)]
+	return RookAttackTable[m.offset+attack_index(m, occ)]
+}
+
+func magic_bishop_attack(occ Bitboard, sq Square) Bitboard {
+	m := BishopMagics[sq]
+	return BishopAttackTable[m.offset+attack_index(m, occ)]
 }
 
 var RookAttackTable = make([]Bitboard, 0x19000)
@@ -32,57 +37,51 @@ var BishopMagics [64]Magic
 
 func find_magic(sq Square, bishop bool) Magic {
 	m := Magic{}
-	var occupancy, reference, used [4096]Bitboard
-
-	// Rook
-	attack_table := RookAttackTable
+	var occupancy, reference [4096]Bitboard
+	// Rook by default
 	magics := RookMagics
-	attack_func := rook_attacks
-	// attack_mask := ROOK_ATTACK_MASKS[sq]
+	attack_table := RookAttackTable
+	attack_func := slider_rook_attacks
 	m.mask = RELEVANT_ROOK_OCCUPANCY[sq]
+	m.magic = Bitboard(RookMagicNums[sq])
 	if bishop {
 		magics = BishopMagics
 		attack_table = BishopAttackTable
-		attack_func = bishop_attacks
-		// attack_mask = BISHOP_ATTACK_MASKS[sq]
+		attack_func = slider_bishop_attacks
 		m.mask = RELEVANT_BISHOP_OCCUPANCY[sq]
+		m.magic = Bitboard(BishopMagicNums[sq])
 	}
-
 
 	m.shift = uint(64 - popcount(m.mask))
 	if sq == SQ_A1 {
 		m.offset = 0
 	} else {
-		m.offset = magics[sq - 1].offset + magics[sq - 1].size
+		m.offset = magics[sq-1].offset + magics[sq-1].size
 	}
 
-	b, size := Bitboard(0), uint(0)
-	for first := true; first || b != 0; b = (b - m.mask) & m.mask {
+	occ, size := Bitboard(0), uint(0)
+	for first := true; first || occ != 0; occ = (occ - m.mask) & m.mask {
 		first = false
-		occupancy[size] = b
-		reference[size] = attack_func(b, sq)
-		// fmt.Println("size", size, "offset", m.offset)
-		// attack_table[m.offset + size] = reference[size]
+		occupancy[size] = occ
+		reference[size] = attack_func(occ, sq)
 		size++
 	}
 	m.size = size
 
-	OUTER:
+OUTER:
 	for i := 0; i < 100000000; i++ {
-		m.magic = rand_few_bits()
-		// fmt.Println(uint64(m.magic))
-		if popcount((m.magic * m.mask) >> 56) < 6 {
+		var used [4096]Bitboard
+		if popcount((m.magic*m.mask)>>56) < 6 {
+			m.magic = rand_few_bits()
 			continue
 		}
-		for i := uint(0); i < size; i++ {
-			// find your index
-			idx := attack_index(m, occupancy[i])
-			// fmt.Println(idx < 4096)
-			// if you haven't used, use it
+		for j := uint(0); j < size; j++ {
+			idx := attack_index(m, occupancy[j])
 			if used[idx] == 0 {
-				attack_table[m.offset + idx] = reference[i]
-				used[idx] = attack_table[m.offset + idx]
-			} else if used[idx] != attack_table[m.offset + idx] {
+				used[idx] = reference[j]
+				attack_table[m.offset+idx] = used[idx]
+			} else if used[idx] != reference[j] {
+				m.magic = rand_few_bits()
 				continue OUTER
 			}
 		}

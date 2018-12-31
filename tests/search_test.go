@@ -20,7 +20,7 @@ var initial_perft = perft_seq {
     perft{3,8902,34,0,0,0,12,0},
     perft{4,197281,1576,0,0,0,469,8},
     perft{5,4865609,82719,258,0,0,27351,347},
-    // perft{6,119060324,2812008,5248,0,0,809099,10823},
+    perft{6,119060324,2812008,5248,0,0,809099,10823},
   },
 }
 
@@ -28,6 +28,7 @@ func TestSearch(t *testing.T) {
     pos := parse_fen(initial_perft.start_fen)
     for _, expected_pft := range initial_perft.perfts {
       actual_pft := get_perft_parallel(&pos, expected_pft.depth)
+      // actual_pft := get_perft_recursive(&pos, expected_pft.depth, Move(0))
       if actual_pft != expected_pft {
           t.Error(fmt.Sprintf("\nExpected:\t %v\n Got:\t\t %v", expected_pft, actual_pft))
       }

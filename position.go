@@ -68,7 +68,8 @@ func (p *Position) king_square(color Color) Square {
 
 func (p *Position) in_check() bool {
 	color := p.side_to_move()
-	return occupied_at_sq(attacks_by_color(p.occupancy(), p.placement, opposite(color)), p.king_square(color))
+	atks := attacks_by_color(p.occupancy(), p.placement, opposite(color))
+	return occupied_at_sq(atks, p.king_square(color))
 }
 
 func (p *Position) in_checkmate() bool {

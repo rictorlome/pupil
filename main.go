@@ -11,8 +11,8 @@ func init() {
 		NEIGHBOR_BBS[s] = neighbors(SQUARE_BB)
 		KING_ATTACK_BBS[s] = precompute_king_attacks(SQUARE_BB)
 		KNIGHT_ATTACK_BBS[s] = precompute_knight_attacks(SQUARE_BB)
-		ROOK_ATTACK_MASKS[s] = rook_attacks(e, s)
-		BISHOP_ATTACK_MASKS[s] = bishop_attacks(e, s)
+		ROOK_ATTACK_MASKS[s] = slider_rook_attacks(Bitboard(0), s)
+		BISHOP_ATTACK_MASKS[s] = slider_bishop_attacks(Bitboard(0), s)
 		ROOK_OCCUPANCY_MASKS[s] = occupancy_mask(s, ROOK_DIRECTIONS)
 		BISHOP_OCCUPANCY_MASKS[s] = occupancy_mask(s, BISHOP_DIRECTIONS)
 		RELEVANT_ROOK_OCCUPANCY[s] = ROOK_ATTACK_MASKS[s] &^ ROOK_OCCUPANCY_MASKS[s]
@@ -22,7 +22,7 @@ func init() {
 		}
 	}
 	// Initialize dependent BBs
-	for _, fn := range [2]AttackFunc{rook_attacks, bishop_attacks} {
+	for _, fn := range [2]AttackFunc{slider_rook_attacks, slider_bishop_attacks} {
 		for _, s1 := range SQUARES {
 			for _, s2 := range SQUARES {
 				if occupied_at_sq(fn(e, s1), s2) {
@@ -36,20 +36,23 @@ func init() {
 	init_castle_sqs()
 	init_castling_masks()
 	init_rook_squares_for_castling()
+	for _, sq := range SQUARES {
+		BishopMagics[sq] = find_magic(sq, true)
+		RookMagics[sq] = find_magic(sq, false)
+	}
 }
 
 func main() {
-	// fmt.Println("OK")
+	fmt.Println("OK")
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
 	// pos := parse_fen(INITIAL_FEN)
 	// // fen := "r1bq1bnr/pppkpppp/8/1B1p4/1n2P3/N7/PPPP1PPP/R1BQK1NR b KQ - 2 5"
 	// // pos := parse_fen(fen)
 	// build_tree_parallel(&pos, 4)
-	for _, sq := range SQUARES {
-			find_magic(sq, true)
-			find_magic(sq, false)
-	}
 
-	fmt.Println(magic_rook_attack(Bitboard(0), SQ_E4))
+	// fmt.Println(magic_rook_attack(Bitboard(0), SQ_E4))
+	for _, sq := range SQUARES {
+		fmt.Println(fmt.Sprintf("%v,", uint64(BishopMagics[sq].magic)))
+	}
 
 }

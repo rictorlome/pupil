@@ -31,7 +31,7 @@ func get_perft_parallel(p *Position, depth int) perft {
 	for i := 0; i < len(moves); i++ {
 		duped := p.dup()
 		duped.do_move(moves[i], StateInfo{})
-		go get_perft(&duped, depth - 1, moves[i], c)
+		go get_perft(&duped, depth-1, moves[i], c)
 	}
 	for i := 0; i < len(moves); i++ {
 		new_perft = new_perft.add(<-c)
