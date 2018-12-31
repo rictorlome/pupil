@@ -39,9 +39,10 @@ type StateInfo struct {
 	ep_sq           Square
 	rule_50         int
 	// Additional info
-	blockers_for_king Bitboard
-	prev              *StateInfo
-	captured          Piece
+	opposite_color_attacks Bitboard
+	blockers_for_king      Bitboard
+	prev                   *StateInfo
+	captured               Piece
 }
 
 // 1. COLORS

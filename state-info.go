@@ -28,7 +28,7 @@ func dst_to_ep_sq(push_dst Square) Square {
 
 func (s *StateInfo) dup() *StateInfo {
 	return &StateInfo{
-		s.castling_rights, s.ep_sq, s.rule_50,
+		s.castling_rights, s.ep_sq, s.rule_50, s.opposite_color_attacks,
 		s.blockers_for_king, s.prev, s.captured,
 	}
 }

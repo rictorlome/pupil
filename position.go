@@ -4,6 +4,14 @@ import (
 // "fmt"
 )
 
+func (p *Position) get_color_attacks(color Color) Bitboard {
+	return attacks_by_color(p.occupancy(), p.placement, color)
+}
+
+func (p *Position) opposite_color_attacks() Bitboard {
+	return p.state.opposite_color_attacks
+}
+
 func (p *Position) dup() Position {
 	new_placement := make([]Bitboard, len(p.placement))
 	new_placement_by_square := make([]Piece, len(p.placement_by_square))
@@ -68,7 +76,7 @@ func (p *Position) king_square(color Color) Square {
 
 func (p *Position) in_check() bool {
 	color := p.side_to_move()
-	atks := attacks_by_color(p.occupancy(), p.placement, opposite(color))
+	atks := p.opposite_color_attacks()
 	return occupied_at_sq(atks, p.king_square(color))
 }
 
@@ -85,7 +93,7 @@ func (p *Position) is_legal(m Move) bool {
 	}
 	if p.piece_type_at(src) == KING {
 		// Remember to add not-through-attack check for castles
-		return is_castle(m) || !occupied_at_sq(attacks_by_color(p.occupancy(), p.placement, opposite(p.side_to_move())), dst)
+		return is_castle(m) || !occupied_at_sq(p.opposite_color_attacks(), dst)
 	}
 	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.side_to_move()))
 }

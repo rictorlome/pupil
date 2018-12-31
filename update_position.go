@@ -57,6 +57,7 @@ func (p *Position) do_move(m Move, new_state StateInfo) {
 
 	// Update king blockers (for next turn)
 	// our sliders, their king
+	new_state.opposite_color_attacks = p.get_color_attacks(us)
 	new_state.blockers_for_king = p.slider_blockers(us, p.king_square(them))
 
 	// Reassign state
