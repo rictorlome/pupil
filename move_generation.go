@@ -76,7 +76,7 @@ func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitbo
 
 // NOTE: if promoting, 2 moves are added (queen and knight promotions)
 func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard, color Color, ep_sq Square) []Move {
-	var move_list []Move
+	move_list := make([]Move, 48)
 	f_dir, l_rank := forward(color), last_rank(color)
 	ep_sq_bb := Bitboard(0)
 
@@ -85,6 +85,7 @@ func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard
 		ep_sq_bb = SQUARE_BBS[ep_sq]
 	}
 
+	i := 0
 	for cursor := pawns; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
 		attacks := (PAWN_ATTACK_BBS[src][color] & (occ | ep_sq_bb)) &^ self_occ
@@ -93,17 +94,21 @@ func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard
 			dst := Square(lsb(dst_cursor))
 			switch {
 			case square_rank(dst) == l_rank:
-				move_list = append(move_list, to_move(dst, src, KNIGHT_PROMOTION|cap_or_quiet(occ, dst)), to_move(dst, src, QUEEN_PROMOTION|cap_or_quiet(occ, dst)))
+				move_list[i] = to_move(dst, src, KNIGHT_PROMOTION|cap_or_quiet(occ, dst))
+				move_list[i+1] = to_move(dst, src, QUEEN_PROMOTION|cap_or_quiet(occ, dst))
+				// Increment an extra time here because we add two moves
+				i++
 			case dst == ep_sq:
-				move_list = append(move_list, to_move(dst, src, EP_CAPTURE))
+				move_list[i] = to_move(dst, src, EP_CAPTURE)
 			case dst == two_up(src, color):
-				move_list = append(move_list, to_move(dst, src, DOUBLE_PAWN_PUSH))
+				move_list[i] = to_move(dst, src, DOUBLE_PAWN_PUSH)
 			default:
-				move_list = append(move_list, to_move(dst, src, cap_or_quiet(occ, dst)))
+				move_list[i] = to_move(dst, src, cap_or_quiet(occ, dst))
 			}
+			i++
 		}
 	}
-	return move_list
+	return move_list[0:i]
 }
 
 func serialize_normal_moves(src Square, moves Bitboard, occ Bitboard) []Move {
