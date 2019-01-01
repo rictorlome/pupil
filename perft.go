@@ -2,7 +2,18 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
+
+var pool *sync.Pool
+
+func initPool() {
+	pool = &sync.Pool{
+		New: func() interface{} {
+			return new(StateInfo)
+		},
+	}
+}
 
 type perft struct {
 	depth, nodes, captures, enpassants, castles, promotions, checks, checkmates int
@@ -25,12 +36,13 @@ func get_perft_parallel(p *Position, depth int) perft {
 	if depth < 1 {
 		return perft{0, 1, 0, 0, 0, 0, 0, 0}
 	}
+	initPool()
 	new_perft := perft{0, 0, 0, 0, 0, 0, 0, 0}
 	c := make(chan perft)
 	moves := p.generate_moves()
 	for i := 0; i < len(moves); i++ {
 		duped := p.dup()
-		duped.do_move(moves[i], StateInfo{})
+		duped.do_move(moves[i], &StateInfo{})
 		go get_perft(&duped, depth-1, moves[i], c)
 	}
 	for i := 0; i < len(moves); i++ {
@@ -50,9 +62,11 @@ func get_perft_recursive(p *Position, depth int, move Move) perft {
 	}
 	new_perft.nodes = 0
 	for _, move := range p.generate_moves() {
-		p.do_move(move, StateInfo{})
+		s := pool.Get().(*StateInfo)
+		p.do_move(move, s)
 		new_perft = new_perft.add(get_perft_recursive(p, depth-1, move))
 		p.undo_move(move)
+		pool.Put(s)
 	}
 	new_perft.depth = depth
 	return new_perft

@@ -40,7 +40,7 @@ func build_tree_recursive(p *Position, parent *Node, move Move, depth_left int) 
 		moves := (*p).generate_moves()
 		children := make([]Node, len(moves))
 		for i := 0; i < len(moves); i++ {
-			(*p).do_move(moves[i], StateInfo{})
+			(*p).do_move(moves[i], &StateInfo{})
 			children[i] = build_tree_recursive(p, &self, moves[i], depth_left-1)
 			(*p).undo_move(moves[i])
 		}
@@ -57,7 +57,7 @@ func build_tree_parallel(p *Position, depth_left int) Node {
 	self := Node{nil, Move(0), make([]Node, moves_len)}
 	for i := 0; i < moves_len; i++ {
 		duped := (*p).dup()
-		duped.do_move(moves[i], StateInfo{})
+		duped.do_move(moves[i], &StateInfo{})
 		go build_tree(&duped, &self, moves[i], depth_left-1, c)
 	}
 	for i := 0; i < moves_len; i++ {

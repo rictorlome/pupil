@@ -15,18 +15,20 @@ type Magic struct {
 	shift uint
 }
 
-func attack_index(m Magic, occ Bitboard) uint {
+func attack_index(m *Magic, occ Bitboard) uint {
 	return uint(((occ & m.mask) * m.magic) >> m.shift)
 }
 
+func attack_index_with_offset(m *Magic, occ Bitboard) uint {
+	return m.offset + uint(((occ&m.mask)*m.magic)>>m.shift)
+}
+
 func magic_rook_attack(occ Bitboard, sq Square) Bitboard {
-	m := RookMagics[sq]
-	return RookAttackTable[m.offset+attack_index(m, occ)]
+	return RookAttackTable[attack_index_with_offset(&RookMagics[sq], occ)]
 }
 
 func magic_bishop_attack(occ Bitboard, sq Square) Bitboard {
-	m := BishopMagics[sq]
-	return BishopAttackTable[m.offset+attack_index(m, occ)]
+	return BishopAttackTable[attack_index_with_offset(&BishopMagics[sq], occ)]
 }
 
 var RookAttackTable = make([]Bitboard, 0x19000)
@@ -76,7 +78,7 @@ OUTER:
 			continue
 		}
 		for j := uint(0); j < size; j++ {
-			idx := attack_index(m, occupancy[j])
+			idx := attack_index(&m, occupancy[j])
 			if used[idx] == 0 {
 				used[idx] = reference[j]
 				attack_table[m.offset+idx] = used[idx]

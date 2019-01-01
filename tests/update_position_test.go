@@ -44,7 +44,7 @@ var UpdatePositionTests = []TestStatelessUpdate{
 func StatelessMove(t *testing.T, test TestStatelessUpdate) {
 	p := parse_fen(test.initial)
 	move := p.parse_move(test.uci)
-	p.do_move(move, StateInfo{})
+	p.do_move(move, &StateInfo{})
 	if generate_fen(p) != test.end {
 		t.Error(fmt.Sprintf("Move: %v, Expected not equal to actual:\n%v %v\n", test.uci, test.end, generate_fen(p)))
 	}

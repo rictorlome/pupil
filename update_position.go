@@ -25,7 +25,7 @@ func (p *Position) do_castle(do bool, king_dst Square) {
 	}
 }
 
-func (p *Position) do_move(m Move, new_state StateInfo) {
+func (p *Position) do_move(m Move, new_state *StateInfo) {
 	src, dst := move_src(m), move_dst(m)
 	mover := p.piece_at(src)
 	us, them := p.side_to_move(), opposite(p.side_to_move())
@@ -62,7 +62,7 @@ func (p *Position) do_move(m Move, new_state StateInfo) {
 
 	// Reassign state
 	new_state.prev = p.state
-	p.state = &new_state
+	p.state = new_state
 
 	// Update position
 	p.ply += 1
