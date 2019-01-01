@@ -19,14 +19,14 @@ func init_castle_sqs() {
 	CASTLE_CHECK_SQS[3] = SQUARE_BBS[SQ_E8] | SQUARE_BBS[SQ_D8] | SQUARE_BBS[SQ_C8]
 }
 
-func king_castles(occ Bitboard, color Color, cr int, enemy_attacks Bitboard) []Move {
-	var move_list []Move
+func king_castles(move_list []Move, idx int, occ Bitboard, color Color, cr int, enemy_attacks Bitboard) int {
 	for _, side := range SIDES {
 		if can_castle(side, color, occ, cr, enemy_attacks) {
-			move_list = append(move_list, CASTLE_MOVES[int(color)*2+side])
+			move_list[idx] = CASTLE_MOVES[int(color)*2+side]
+			idx++
 		}
 	}
-	return move_list
+	return idx
 }
 
 func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
@@ -61,17 +61,23 @@ func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castlin
 }
 
 func serialize_for_pseudos_king(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int, enemy_attacks Bitboard) []Move {
+	move_list := make([]Move, 10)
+	idx := 0
 	src := Square(lsb(piece_bb))
-	return append(serialize_normal_moves(src, king_attacks(occ, src)&^self_occ, occ), king_castles(occ, color, cr, enemy_attacks)...)
+	idx = serialize_normal_moves(move_list, idx, src, king_attacks(occ, src)&^self_occ, occ)
+	idx = king_castles(move_list, idx, occ, color, cr, enemy_attacks)
+	return move_list[0:idx]
 }
 
 func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) []Move {
-	var move_list []Move
+	// https://chess.stackexchange.com/questions/4490/maximum-possible-movement-in-a-turn
+	move_list := make([]Move, 218)
+	idx := 0
 	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
-		move_list = append(move_list, serialize_normal_moves(src, fn(occ, src)&^self_occ, occ)...)
+		idx = serialize_normal_moves(move_list, idx, src, fn(occ, src)&^self_occ, occ)
 	}
-	return move_list
+	return move_list[0:idx]
 }
 
 // NOTE: if promoting, 2 moves are added (queen and knight promotions)
@@ -111,11 +117,11 @@ func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard
 	return move_list[0:i]
 }
 
-func serialize_normal_moves(src Square, moves Bitboard, occ Bitboard) []Move {
-	var move_list []Move
+func serialize_normal_moves(move_list []Move, idx int, src Square, moves Bitboard, occ Bitboard) int {
 	for dst_cursor := moves; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
 		dst := Square(lsb(dst_cursor))
-		move_list = append(move_list, to_move(dst, src, cap_or_quiet(occ, dst)))
+		move_list[idx] = to_move(dst, src, cap_or_quiet(occ, dst))
+		idx++
 	}
-	return move_list
+	return idx
 }

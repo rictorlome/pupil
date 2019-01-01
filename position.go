@@ -26,6 +26,8 @@ func (p *Position) dup() Position {
 }
 
 func (p *Position) generate_evasions() []Move {
+	move_list := make([]Move, 218)
+	idx := 0
 	us, them := p.side_to_move(), opposite(p.side_to_move())
 	king_sq := p.king_square(us)
 
@@ -35,21 +37,23 @@ func (p *Position) generate_evasions() []Move {
 	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
 	atks := attacks_by_color(occ_without_king, p.placement, them)
 
-	king_evasions := serialize_normal_moves(king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
+	idx = serialize_normal_moves(move_list, idx, king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
 	// safe squares for king
 	if popcount(checkers) > 1 {
-		return king_evasions
+		return move_list[0:idx]
 	}
 	checker_sq := Square(lsb(checkers))
 	non_evasions := p.generate_non_evasions()
-	blocks_or_captures := king_evasions
+	// blocks_or_captures := make([]Move, len(non_evasions) + len(king_evasions))
+	// idx := copy(blocks_or_captures, king_evasions)
 	for _, move := range non_evasions {
 		dst := move_dst(move)
 		if dst == checker_sq || occupied_at_sq(BETWEEN_BBS[king_sq][checker_sq], dst) {
-			blocks_or_captures = append(blocks_or_captures, move)
+			move_list[idx] = move
+			idx++
 		}
 	}
-	return blocks_or_captures
+	return move_list[0:idx]
 }
 
 func (p *Position) generate_moves() []Move {
