@@ -25,7 +25,7 @@ func (p *Position) dup() Position {
 	}
 }
 
-func (p *Position) generate_evasions(ml *[]Move) {
+func (p *Position) generate_evasions(pl *[]Move, ml *[]Move) {
 	us, them := p.side_to_move(), opposite(p.side_to_move())
 	king_sq := p.king_square(us)
 
@@ -41,23 +41,23 @@ func (p *Position) generate_evasions(ml *[]Move) {
 		return
 	}
 	checker_sq := Square(lsb(checkers))
-	p.generate_non_evasions(ml, BETWEEN_BBS[king_sq][checker_sq]|checkers)
+	p.generate_non_evasions(pl, ml, BETWEEN_BBS[king_sq][checker_sq]|checkers)
 }
 
 func (p *Position) generate_moves() []Move {
+	pseudo_legal_move_list := make([]Move, 0, MAX_BRANCHING)
 	move_list := make([]Move, 0, MAX_BRANCHING)
 	if p.in_check() {
-		p.generate_evasions(&move_list)
+		p.generate_evasions(&pseudo_legal_move_list, &move_list)
 	} else {
-		p.generate_non_evasions(&move_list, Bitboard(0))
+		p.generate_non_evasions(&pseudo_legal_move_list, &move_list, Bitboard(0))
 	}
 	return move_list
 }
 
-func (p *Position) generate_non_evasions(ml *[]Move, evasions Bitboard) {
-	pseudo_legals := make([]Move, 0, MAX_BRANCHING)
-	pseudolegals_by_color(&pseudo_legals, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
-	for _, pseudo_legal := range pseudo_legals {
+func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, evasions Bitboard) {
+	pseudolegals_by_color(pl, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
+	for _, pseudo_legal := range *pl {
 		if p.is_legal(pseudo_legal) && (empty(evasions) || (occupied_at_sq(evasions, move_dst(pseudo_legal)))) {
 			*ml = append(*ml, pseudo_legal)
 		}
