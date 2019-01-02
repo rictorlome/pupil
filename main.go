@@ -46,13 +46,19 @@ func main() {
 	fmt.Println("OK")
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
 	// pos := parse_fen(INITIAL_FEN)
-	// // fen := "r1bq1bnr/pppkpppp/8/1B1p4/1n2P3/N7/PPPP1PPP/R1BQK1NR b KQ - 2 5"
-	// // pos := parse_fen(fen)
-	// build_tree_parallel(&pos, 4)
 
-	// fmt.Println(magic_rook_attack(Bitboard(0), SQ_E4))
-	for _, sq := range SQUARES {
-		fmt.Println(fmt.Sprintf("%v,", uint64(BishopMagics[sq].magic)))
-	}
+	fen := "2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w - - 0 1"
+	// fen := "2bq1bn1/2pppk2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 w - - 0 2"
+	pos := parse_fen(fen)
+	best := pos.minimax(4)
+	fmt.Println(best)
+	pos.do_move(best.move, &StateInfo{})
+	solution := "2bqkbn1/2pppQ2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 b - - 0 1"
+	fmt.Println(best.move)
+	fmt.Println(pos.String())
+	fmt.Println(solution)
 
+	// fen := "2bq1bn1/2pppk2/np2N3/r3P1pB/p2N4/8/PPPPKPP1/RNB2r2 b - - 1 2"
+	// pos := parse_fen(fen)
+	// fmt.Println(pos.evaluate(pos.in_checkmate()))
 }
