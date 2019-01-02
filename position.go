@@ -25,9 +25,7 @@ func (p *Position) dup() Position {
 	}
 }
 
-func (p *Position) generate_evasions() []Move {
-	move_list := make([]Move, 218)
-	idx := 0
+func (p *Position) generate_evasions(ml *[]Move) {
 	us, them := p.side_to_move(), opposite(p.side_to_move())
 	king_sq := p.king_square(us)
 
@@ -37,41 +35,33 @@ func (p *Position) generate_evasions() []Move {
 	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
 	atks := attacks_by_color(occ_without_king, p.placement, them)
 
-	idx = serialize_normal_moves(move_list, idx, king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
+	serialize_normal_moves(ml, king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
 	// safe squares for king
 	if popcount(checkers) > 1 {
-		return move_list[0:idx]
+		return
 	}
 	checker_sq := Square(lsb(checkers))
-	non_evasions := p.generate_non_evasions()
-	// blocks_or_captures := make([]Move, len(non_evasions) + len(king_evasions))
-	// idx := copy(blocks_or_captures, king_evasions)
-	for _, move := range non_evasions {
-		dst := move_dst(move)
-		if dst == checker_sq || occupied_at_sq(BETWEEN_BBS[king_sq][checker_sq], dst) {
-			move_list[idx] = move
-			idx++
-		}
-	}
-	return move_list[0:idx]
+	p.generate_non_evasions(ml, BETWEEN_BBS[king_sq][checker_sq]|checkers)
 }
 
 func (p *Position) generate_moves() []Move {
+	move_list := make([]Move, 0, MAX_BRANCHING)
 	if p.in_check() {
-		return p.generate_evasions()
+		p.generate_evasions(&move_list)
+	} else {
+		p.generate_non_evasions(&move_list, Bitboard(0))
 	}
-	return p.generate_non_evasions()
+	return move_list
 }
 
-func (p *Position) generate_non_evasions() []Move {
-	pseudo_legals := pseudolegals_by_color(p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
-	non_evasions := make([]Move, 0)
+func (p *Position) generate_non_evasions(ml *[]Move, evasions Bitboard) {
+	pseudo_legals := make([]Move, 0, MAX_BRANCHING)
+	pseudolegals_by_color(&pseudo_legals, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
 	for _, pseudo_legal := range pseudo_legals {
-		if p.is_legal(pseudo_legal) {
-			non_evasions = append(non_evasions, pseudo_legal)
+		if p.is_legal(pseudo_legal) && (empty(evasions) || (occupied_at_sq(evasions, move_dst(pseudo_legal)))) {
+			*ml = append(*ml, pseudo_legal)
 		}
 	}
-	return non_evasions
 }
 
 func (p *Position) king_square(color Color) Square {

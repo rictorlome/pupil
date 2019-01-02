@@ -19,14 +19,12 @@ func init_castle_sqs() {
 	CASTLE_CHECK_SQS[3] = SQUARE_BBS[SQ_E8] | SQUARE_BBS[SQ_D8] | SQUARE_BBS[SQ_C8]
 }
 
-func king_castles(move_list []Move, idx int, occ Bitboard, color Color, cr int, enemy_attacks Bitboard) int {
+func king_castles(move_list *[]Move, occ Bitboard, color Color, cr int, enemy_attacks Bitboard) {
 	for _, side := range SIDES {
 		if can_castle(side, color, occ, cr, enemy_attacks) {
-			move_list[idx] = CASTLE_MOVES[int(color)*2+side]
-			idx++
+			*move_list = append(*move_list, CASTLE_MOVES[int(color)*2+side])
 		}
 	}
-	return idx
 }
 
 func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
@@ -38,60 +36,44 @@ func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
 }
 
 // NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
-func pseudolegals_by_color(pieces []Bitboard, color Color, ep_sq Square, castling_rights int) []Move {
+func pseudolegals_by_color(pl *[]Move, pieces []Bitboard, color Color, ep_sq Square, castling_rights int) {
 	occ, self_occ := occupied_squares(pieces), occupied_squares_by_color(pieces, color)
 	enemy_attacks := attacks_by_color(occ, pieces, opposite(color))
-	var move_list []Move
-
 	for _, piece := range piece_range_by_color(color) {
 		t := piece_to_type(piece)
-		var piece_move_list []Move
 		piece_board := pieces[piece]
 		switch t {
 		case PAWN:
-			piece_move_list = serialize_for_pseudos_pawns(piece_board, occ, self_occ, color, ep_sq)
+			serialize_for_pseudos_pawns(pl, piece_board, occ, self_occ, color, ep_sq)
 		case KING:
-			piece_move_list = serialize_for_pseudos_king(piece_board, occ, self_occ, color, castling_rights, enemy_attacks)
+			serialize_for_pseudos_king(pl, piece_board, occ, self_occ, color, castling_rights, enemy_attacks)
 		default:
-			piece_move_list = serialize_for_pseudos_other(piece_board, occ, self_occ, get_attack_func(t))
+			serialize_for_pseudos_other(pl, piece_board, occ, self_occ, get_attack_func(t))
 		}
-		move_list = append(move_list, piece_move_list...)
 	}
-	return move_list
 }
 
-func serialize_for_pseudos_king(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int, enemy_attacks Bitboard) []Move {
-	move_list := make([]Move, 10)
-	idx := 0
+func serialize_for_pseudos_king(pl *[]Move, piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int, enemy_attacks Bitboard) {
 	src := Square(lsb(piece_bb))
-	idx = serialize_normal_moves(move_list, idx, src, king_attacks(occ, src)&^self_occ, occ)
-	idx = king_castles(move_list, idx, occ, color, cr, enemy_attacks)
-	return move_list[0:idx]
+	serialize_normal_moves(pl, src, king_attacks(occ, src)&^self_occ, occ)
+	king_castles(pl, occ, color, cr, enemy_attacks)
 }
 
-func serialize_for_pseudos_other(piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) []Move {
-	// https://chess.stackexchange.com/questions/4490/maximum-possible-movement-in-a-turn
-	move_list := make([]Move, 218)
-	idx := 0
+func serialize_for_pseudos_other(pl *[]Move, piece_bb Bitboard, occ Bitboard, self_occ Bitboard, fn AttackFunc) {
 	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
-		idx = serialize_normal_moves(move_list, idx, src, fn(occ, src)&^self_occ, occ)
+		serialize_normal_moves(pl, src, fn(occ, src)&^self_occ, occ)
 	}
-	return move_list[0:idx]
 }
 
 // NOTE: if promoting, 2 moves are added (queen and knight promotions)
-func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard, color Color, ep_sq Square) []Move {
-	move_list := make([]Move, 48)
+func serialize_for_pseudos_pawns(pl *[]Move, pawns Bitboard, occ Bitboard, self_occ Bitboard, color Color, ep_sq Square) {
 	f_dir, l_rank := forward(color), last_rank(color)
 	ep_sq_bb := Bitboard(0)
-
 	// To avoid indexing problems
 	if ep_sq != NULL_SQ {
 		ep_sq_bb = SQUARE_BBS[ep_sq]
 	}
-
-	i := 0
 	for cursor := pawns; cursor != 0; cursor &= cursor - 1 {
 		src := Square(lsb(cursor))
 		attacks := (PAWN_ATTACK_BBS[src][color] & (occ | ep_sq_bb)) &^ self_occ
@@ -100,28 +82,22 @@ func serialize_for_pseudos_pawns(pawns Bitboard, occ Bitboard, self_occ Bitboard
 			dst := Square(lsb(dst_cursor))
 			switch {
 			case square_rank(dst) == l_rank:
-				move_list[i] = to_move(dst, src, KNIGHT_PROMOTION|cap_or_quiet(occ, dst))
-				move_list[i+1] = to_move(dst, src, QUEEN_PROMOTION|cap_or_quiet(occ, dst))
-				// Increment an extra time here because we add two moves
-				i++
+				c_o_q := cap_or_quiet(occ, dst)
+				*pl = append(*pl, to_move(dst, src, KNIGHT_PROMOTION|c_o_q), to_move(dst, src, QUEEN_PROMOTION|c_o_q))
 			case dst == ep_sq:
-				move_list[i] = to_move(dst, src, EP_CAPTURE)
+				*pl = append(*pl, to_move(dst, src, EP_CAPTURE))
 			case dst == two_up(src, color):
-				move_list[i] = to_move(dst, src, DOUBLE_PAWN_PUSH)
+				*pl = append(*pl, to_move(dst, src, DOUBLE_PAWN_PUSH))
 			default:
-				move_list[i] = to_move(dst, src, cap_or_quiet(occ, dst))
+				*pl = append(*pl, to_move(dst, src, cap_or_quiet(occ, dst)))
 			}
-			i++
 		}
 	}
-	return move_list[0:i]
 }
 
-func serialize_normal_moves(move_list []Move, idx int, src Square, moves Bitboard, occ Bitboard) int {
+func serialize_normal_moves(ml *[]Move, src Square, moves Bitboard, occ Bitboard) {
 	for dst_cursor := moves; dst_cursor != 0; dst_cursor &= dst_cursor - 1 {
 		dst := Square(lsb(dst_cursor))
-		move_list[idx] = to_move(dst, src, cap_or_quiet(occ, dst))
-		idx++
+		*ml = append(*ml, to_move(dst, src, cap_or_quiet(occ, dst)))
 	}
-	return idx
 }

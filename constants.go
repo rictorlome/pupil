@@ -520,3 +520,6 @@ var BishopMagicNums = [64]uint64{
 	1153029840879027200,
 	9241424497968423040,
 }
+
+// https://chess.stackexchange.com/questions/4490/maximum-possible-movement-in-a-turn
+const MAX_BRANCHING int = 218
