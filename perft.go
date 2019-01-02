@@ -15,6 +15,21 @@ func initPool() {
 	}
 }
 
+type thread_local struct {
+	move_list, pseudo_legal_move_list *[]Move
+}
+
+func (l *thread_local) init() {
+	ml, pl := make([]Move, 0, MAX_BRANCHING), make([]Move, 0, MAX_BRANCHING)
+	l.move_list = &ml
+	l.pseudo_legal_move_list = &pl
+}
+
+func (l *thread_local) clear() {
+	*l.move_list = (*l.move_list)[:0]
+	*l.pseudo_legal_move_list = (*l.pseudo_legal_move_list)[:0]
+}
+
 type perft struct {
 	depth, nodes, captures, enpassants, castles, promotions, checks, checkmates int
 }
@@ -29,7 +44,9 @@ func (p *perft) add(s perft) perft {
 }
 
 func get_perft(p *Position, depth int, move Move, c chan perft) {
-	c <- get_perft_recursive(p, depth, move)
+	tl := thread_local{}
+	tl.init()
+	c <- get_perft_recursive(&tl, p, depth, move)
 }
 
 func get_perft_parallel(p *Position, depth int) perft {
@@ -52,19 +69,21 @@ func get_perft_parallel(p *Position, depth int) perft {
 	return new_perft
 }
 
-func get_perft_recursive(p *Position, depth int, move Move) perft {
+func get_perft_recursive(tl *thread_local, p *Position, depth int, move Move) perft {
 	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
+
 	if depth == 0 {
 		new_perft.update_with_move(move)
 		new_perft.checks += indicator(p.in_check())
-		new_perft.checkmates += indicator(p.in_checkmate())
+		new_perft.checkmates += indicator(p.in_checkmate_local(tl))
 		return new_perft
 	}
 	new_perft.nodes = 0
-	for _, move := range p.generate_moves() {
+	p.generate_moves_local(tl)
+	for _, move := range *tl.move_list {
 		s := pool.Get().(*StateInfo)
 		p.do_move(move, s)
-		new_perft = new_perft.add(get_perft_recursive(p, depth-1, move))
+		new_perft = new_perft.add(get_perft_recursive(tl, p, depth-1, move))
 		p.undo_move(move)
 		pool.Put(s)
 	}

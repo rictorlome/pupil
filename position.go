@@ -55,6 +55,15 @@ func (p *Position) generate_moves() []Move {
 	return move_list
 }
 
+func (p *Position) generate_moves_local(tl *thread_local) {
+	tl.clear()
+	if p.in_check() {
+		p.generate_evasions(tl.pseudo_legal_move_list, tl.move_list)
+	} else {
+		p.generate_non_evasions(tl.pseudo_legal_move_list, tl.move_list, Bitboard(0))
+	}
+}
+
 func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, evasions Bitboard) {
 	pseudolegals_by_color(pl, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
 	for _, pseudo_legal := range *pl {
@@ -76,6 +85,14 @@ func (p *Position) in_check() bool {
 
 func (p *Position) in_checkmate() bool {
 	return p.in_check() && len(p.generate_moves()) == 0
+}
+
+func (p *Position) in_checkmate_local(tl *thread_local) bool {
+	if !p.in_check() {
+		return false
+	}
+	p.generate_moves_local(tl)
+	return len(*tl.move_list) == 0
 }
 
 func (p *Position) is_legal(m Move) bool {
