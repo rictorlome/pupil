@@ -38,8 +38,8 @@ func attackers_to_sq_by_color(pieces []Bitboard, sq Square, color Color) Bitboar
 	return attackers
 }
 
-func bishop_attacks(occ Bitboard, square Square) Bitboard {
-	return magic_bishop_attack(occ, square)
+func bishop_attacks(occ Bitboard, sq Square) Bitboard {
+	return BishopAttackTable[attack_index_with_offset(&BishopMagics[sq], occ)]
 }
 
 func get_attack_func(pt PieceType) AttackFunc {
@@ -99,8 +99,8 @@ func queen_attacks(occ Bitboard, square Square) Bitboard {
 	return rook_attacks(occ, square) | bishop_attacks(occ, square)
 }
 
-func rook_attacks(occ Bitboard, square Square) Bitboard {
-	return magic_rook_attack(occ, square)
+func rook_attacks(occ Bitboard, sq Square) Bitboard {
+	return RookAttackTable[attack_index_with_offset(&RookMagics[sq], occ)]
 }
 
 func serialize_for_attacks(piece_bb Bitboard, occ Bitboard, fn AttackFunc) Bitboard {

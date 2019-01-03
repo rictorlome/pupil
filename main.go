@@ -36,10 +36,7 @@ func init() {
 	init_castle_sqs()
 	init_castling_masks()
 	init_rook_squares_for_castling()
-	for _, sq := range SQUARES {
-		BishopMagics[sq] = find_magic(sq, true)
-		RookMagics[sq] = find_magic(sq, false)
-	}
+	init_magics()
 }
 
 func main() {

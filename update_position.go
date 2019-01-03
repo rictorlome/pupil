@@ -5,12 +5,6 @@ import (
 	"strconv"
 )
 
-func (p *Position) clear_sq(sq Square) {
-	for _, pc := range PIECES {
-		p.remove_piece(pc, sq)
-	}
-}
-
 func (p *Position) do_castle(do bool, king_dst Square) {
 	rook_src_dst := ROOK_SRC_DST[king_dst]
 	src, dst := rook_src_dst[0], rook_src_dst[1]

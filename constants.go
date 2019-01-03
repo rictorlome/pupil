@@ -387,6 +387,13 @@ var AttackFuncs = []AttackFunc{
 	king_attacks, queen_attacks, bishop_attacks, knight_attacks, rook_attacks, null_attacks,
 }
 
+// 15. Magics
+var RookAttackTable = make([]Bitboard, 0x19000)
+var BishopAttackTable = make([]Bitboard, 0x1480)
+
+var RookMagics [64]Magic
+var BishopMagics [64]Magic
+
 var RookMagicNums = [64]uint64{
 	108104671511543808,
 	18014535952633857,

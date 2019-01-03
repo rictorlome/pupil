@@ -6,8 +6,8 @@ import (
 )
 
 type Magic struct {
-	mask  Bitboard
 	magic Bitboard
+	mask  Bitboard
 	// offset in the attack array
 	offset uint
 	// the number of indices in the attack table for this square
@@ -23,20 +23,6 @@ func attack_index_with_offset(m *Magic, occ Bitboard) uint {
 	return m.offset + uint(((occ&m.mask)*m.magic)>>m.shift)
 }
 
-func magic_rook_attack(occ Bitboard, sq Square) Bitboard {
-	return RookAttackTable[attack_index_with_offset(&RookMagics[sq], occ)]
-}
-
-func magic_bishop_attack(occ Bitboard, sq Square) Bitboard {
-	return BishopAttackTable[attack_index_with_offset(&BishopMagics[sq], occ)]
-}
-
-var RookAttackTable = make([]Bitboard, 0x19000)
-var BishopAttackTable = make([]Bitboard, 0x1480)
-
-var RookMagics [64]Magic
-var BishopMagics [64]Magic
-
 func find_magic(sq Square, bishop bool) Magic {
 	m := Magic{}
 	var occupancy, reference [4096]Bitboard
@@ -45,12 +31,14 @@ func find_magic(sq Square, bishop bool) Magic {
 	attack_table := RookAttackTable
 	attack_func := slider_rook_attacks
 	m.mask = RELEVANT_ROOK_OCCUPANCY[sq]
+	// Use precomputed values for speedup
 	m.magic = Bitboard(RookMagicNums[sq])
 	if bishop {
 		magics = BishopMagics
 		attack_table = BishopAttackTable
 		attack_func = slider_bishop_attacks
 		m.mask = RELEVANT_BISHOP_OCCUPANCY[sq]
+		// Use precomputed value for speedup
 		m.magic = Bitboard(BishopMagicNums[sq])
 	}
 
@@ -91,6 +79,13 @@ OUTER:
 	}
 	fmt.Println("FAILED!")
 	return m
+}
+
+func init_magics() {
+	for _, sq := range SQUARES {
+		BishopMagics[sq] = find_magic(sq, true)
+		RookMagics[sq] = find_magic(sq, false)
+	}
 }
 
 // https://www.chessprogramming.org/Looking_for_Magics#Feeding_in_Randoms

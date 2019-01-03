@@ -6,15 +6,15 @@ A WIP `Go`-based chess engine destined to beat me in a 10 minute game.
 
 ## Description
 
-| Feature                | Implementation                                                                                                                                                                |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Board representation   | [Bitboard](https://www.chessprogramming.org/Bitboards)                                                                                                                        |
-| Square mapping         | [Little-endian Rank-file Mapping](https://www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian_Rank-File_Mapping)                                             |
-| Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                                                                  |
-| Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                                                                         |
-| Move Generation        | [Classical approach for sliders](https://www.chessprogramming.org/Classical_Approach), working on [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards) |
-| Search                 | TBD                                                                                                                                                                           |
-| Evaluation             | TBD                                                                                                                                                                           |
+| Feature                | Implementation                                                                                                                    |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Board representation   | [Bitboard](https://www.chessprogramming.org/Bitboards)                                                                            |
+| Square mapping         | [Little-endian Rank-file Mapping](https://www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian_Rank-File_Mapping) |
+| Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                      |
+| Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                             |
+| Move Generation        | [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards)                                                       |
+| Search                 | TBD                                                                                                                               |
+| Evaluation             | TBD                                                                                                                               |
 
 ---
 
@@ -32,7 +32,11 @@ This is my third attempt at a chess engine.
 
 ## Todo
 
-- [x] Revisit move encoding
-- [ ] Precompute relevant bitboards for pawn pushes
-- [ ] Brainstorm and implement `Position.do_move`
-- [ ] Pseudo-legal move gen -> Legal move gen
+- [ ] Clean up code
+- [ ] Determine if passing slices works as efficiently as passing pointers to slices
+- [ ] Precompute, cache and incrementally update occupancy
+- [ ] Add more perft positions, debug move gen
+- [ ] See attacks_by_color can be cached
+- [ ] Minimax -> Negamax
+- [ ] Add basic evaluation heuristics
+- [ ] Alpha-beta

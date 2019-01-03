@@ -4,14 +4,6 @@ import (
 // "fmt"
 )
 
-func (p *Position) get_color_attacks(color Color) Bitboard {
-	return attacks_by_color(p.occupancy(), p.placement, color)
-}
-
-func (p *Position) opposite_color_attacks() Bitboard {
-	return p.state.opposite_color_attacks
-}
-
 func (p *Position) dup() Position {
 	new_placement := make([]Bitboard, len(p.placement))
 	new_placement_by_square := make([]Piece, len(p.placement_by_square))
@@ -62,6 +54,10 @@ func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, evasions Bitboa
 			*ml = append(*ml, pseudo_legal)
 		}
 	}
+}
+
+func (p *Position) get_color_attacks(color Color) Bitboard {
+	return attacks_by_color(p.occupancy(), p.placement, color)
 }
 
 func (p *Position) king_square(color Color) Square {
@@ -130,6 +126,10 @@ func (p *Position) occupancy_by_piece_types(pts ...PieceType) Bitboard {
 
 func (p *Position) occupied_at(sq Square) bool {
 	return p.piece_at(sq) != NULL_PIECE
+}
+
+func (p *Position) opposite_color_attacks() Bitboard {
+	return p.state.opposite_color_attacks
 }
 
 func (p *Position) parse_move(s string) Move {
