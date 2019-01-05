@@ -28,10 +28,11 @@ type Piece uint
 type PieceType uint
 type Position struct {
 	occ                 Bitboard
-	ply                 int
 	placement           []Bitboard
 	placement_by_square []Piece
+	ply                 int
 	state               *StateInfo
+	stm                 Color
 }
 type Square uint
 type StateInfo struct {
@@ -289,6 +290,8 @@ const (
 
 var PIECE_TYPES = []PieceType{
 	KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN,
+	KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN,
+	NULL_PIECE_TYPE,
 }
 
 var PIECE_TYPE_STRINGS = []string{

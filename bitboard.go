@@ -41,13 +41,9 @@ func last_rank(color Color) int {
 	return 0
 }
 
-func leading_zeros(b Bitboard) int {
-	return bits.LeadingZeros64(uint64(b))
-}
-
 // NOTE: returns 64 for empty bitboard
 func lsb(b Bitboard) int {
-	return trailing_zeros(b)
+	return bits.TrailingZeros64(uint64(b))
 }
 
 func make_piece(s string) Piece {
@@ -60,7 +56,7 @@ func make_square(r int, f int) Square {
 
 // NOTE: returns -1 for empty bitboard
 func msb(b Bitboard) int {
-	return 63 - leading_zeros(b)
+	return 63 - bits.LeadingZeros64(uint64(b))
 }
 
 func neighbors(b Bitboard) Bitboard {
@@ -194,10 +190,6 @@ func to_square(s string) Square {
 		return NULL_SQ
 	}
 	return make_square(int(s[1]-'0')-1, strings.Index(FILES, s[0:1]))
-}
-
-func trailing_zeros(b Bitboard) int {
-	return bits.TrailingZeros64(uint64(b))
 }
 
 func two_up(src Square, color Color) Square {

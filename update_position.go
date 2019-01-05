@@ -60,6 +60,7 @@ func (p *Position) do_move(m Move, new_state *StateInfo) {
 
 	// Update position
 	p.ply += 1
+	p.stm = opposite(p.stm)
 }
 
 func (p *Position) do_promotion(c Color, mt MoveType, dst Square) {
@@ -88,6 +89,7 @@ func (p *Position) set_fen_info(positions string, color string, castles string, 
 	p.placement_by_square = placement_to_placement_by_square(p.placement)
 	p.occ = occupied_squares(p.placement)
 	p.ply = move_count*2 + int(parse_color(color))
+	p.stm = parse_color(color)
 	// On StateInfo
 	p.state.castling_rights = make_castle_state_info(castles)
 	p.state.ep_sq = parse_square(enps)
@@ -102,6 +104,7 @@ func (p *Position) undo_move(m Move) {
 	us := opposite(p.side_to_move())
 	// Update position
 	p.ply -= 1
+	p.stm = opposite(p.stm)
 
 	// move piece back to src
 	p.remove_piece(mover, dst)

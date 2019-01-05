@@ -11,10 +11,11 @@ func (p *Position) dup() Position {
 	copy(new_placement_by_square, p.placement_by_square)
 	return Position{
 		p.occ,
-		p.ply,
 		new_placement,
 		new_placement_by_square,
+		p.ply,
 		p.state.dup(),
+		p.stm,
 	}
 }
 
@@ -149,7 +150,7 @@ func (p *Position) piece_type_at(sq Square) PieceType {
 }
 
 func (p *Position) side_to_move() Color {
-	return Color(p.ply % 2)
+	return p.stm
 }
 
 // Returns bitboard of all pieces blocking attacks to sq from sliders of color c.
@@ -159,8 +160,9 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	occ := p.occupancy()
 
 	// QUESTION: is the attack mask sufficient here, or do we need pseudolegal moves?
-	possible_snipers := (p.occupancy_by_pieces(pt_to_p(BISHOP, c), pt_to_p(QUEEN, c)) & BISHOP_ATTACK_MASKS[sq]) |
-		(p.occupancy_by_pieces(pt_to_p(ROOK, c), pt_to_p(QUEEN, c)) & ROOK_ATTACK_MASKS[sq])
+	queen_occ := p.occupancy_by_piece(pt_to_p(QUEEN, c))
+	possible_snipers := ((p.occupancy_by_piece(pt_to_p(BISHOP, c)) | queen_occ) & BISHOP_ATTACK_MASKS[sq]) |
+		((p.occupancy_by_piece(pt_to_p(ROOK, c)) | queen_occ) & ROOK_ATTACK_MASKS[sq])
 
 	for cursor := possible_snipers; cursor != 0; cursor &= cursor - 1 {
 		sniper_sq := Square(lsb(cursor))

@@ -37,8 +37,8 @@ var secondary_perft = perft_seq {
 }
 
 func TestSearch(t *testing.T) {
-    pos := parse_fen(secondary_perft.start_fen)
-    for _, expected_pft := range secondary_perft.perfts {
+    pos := parse_fen(initial_perft.start_fen)
+    for _, expected_pft := range initial_perft.perfts {
       actual_pft := get_perft_parallel(&pos, expected_pft.depth)
       // actual_pft := get_perft_recursive(&pos, expected_pft.depth, Move(0))
       if actual_pft != expected_pft {

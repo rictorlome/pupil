@@ -18,7 +18,7 @@ func piece_to_color(p Piece) Color {
 }
 
 func piece_to_type(p Piece) PieceType {
-	return PieceType(p % 6)
+	return PIECE_TYPES[p]
 }
 
 func placement_to_placement_by_square(placement []Bitboard) []Piece {
