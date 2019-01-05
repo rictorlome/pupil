@@ -10,6 +10,7 @@ func (p *Position) dup() Position {
 	copy(new_placement, p.placement)
 	copy(new_placement_by_square, p.placement_by_square)
 	return Position{
+		p.occ,
 		p.ply,
 		new_placement,
 		new_placement_by_square,
@@ -93,7 +94,7 @@ func (p *Position) move_count() int {
 }
 
 func (p *Position) occupancy() Bitboard {
-	return occupied_squares(p.placement)
+	return p.occ
 }
 
 func (p *Position) occupancy_by_color(c Color) Bitboard {

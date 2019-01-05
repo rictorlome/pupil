@@ -68,13 +68,17 @@ func (p *Position) do_promotion(c Color, mt MoveType, dst Square) {
 }
 
 func (p *Position) place_piece(pc Piece, sq Square) {
+	sq_bb := SQUARE_BBS[sq]
+	p.occ |= sq_bb
 	p.placement_by_square[sq] = pc
-	p.placement[pc] |= SQUARE_BBS[sq]
+	p.placement[pc] |= sq_bb
 }
 
 func (p *Position) remove_piece(pc Piece, sq Square) {
+	sq_bb := SQUARE_BBS[sq]
+	p.occ &^= sq_bb
 	p.placement_by_square[sq] = NULL_PIECE
-	p.placement[pc] &^= SQUARE_BBS[sq]
+	p.placement[pc] &^= sq_bb
 }
 
 func (p *Position) set_fen_info(positions string, color string, castles string, enps string, rule_50 string, move_count int) {
@@ -82,6 +86,7 @@ func (p *Position) set_fen_info(positions string, color string, castles string, 
 	// On Position
 	p.placement = parse_positions(positions)
 	p.placement_by_square = placement_to_placement_by_square(p.placement)
+	p.occ = occupied_squares(p.placement)
 	p.ply = move_count*2 + int(parse_color(color))
 	// On StateInfo
 	p.state.castling_rights = make_castle_state_info(castles)

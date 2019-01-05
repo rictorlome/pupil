@@ -27,6 +27,7 @@ type MoveType uint16
 type Piece uint
 type PieceType uint
 type Position struct {
+	occ                 Bitboard
 	ply                 int
 	placement           []Bitboard
 	placement_by_square []Piece
