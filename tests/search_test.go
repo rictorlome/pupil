@@ -24,9 +24,21 @@ var initial_perft = perft_seq {
   },
 }
 
+var secondary_perft = perft_seq {
+  "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+  []perft{
+    perft{0,1,0,0,0,0,0,0},
+    perft{1,48,8,0,2,0,0,0},
+    perft{2,2039,351,1,91,0,3,0},
+    perft{3,97862,17102,45,3162,0,993,1},
+    // perft{4,4085603,757163,1929,128013,15172,25523,43},
+    // perft{5,193690690,35043416,73365,4993637,8392,3309887,30171},
+  },
+}
+
 func TestSearch(t *testing.T) {
-    pos := parse_fen(initial_perft.start_fen)
-    for _, expected_pft := range initial_perft.perfts {
+    pos := parse_fen(secondary_perft.start_fen)
+    for _, expected_pft := range secondary_perft.perfts {
       actual_pft := get_perft_parallel(&pos, expected_pft.depth)
       // actual_pft := get_perft_recursive(&pos, expected_pft.depth, Move(0))
       if actual_pft != expected_pft {

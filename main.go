@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"strconv"
+)
 
 func init() {
 	// Initialize Square Bitboards
@@ -44,18 +48,12 @@ func main() {
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
 	// pos := parse_fen(INITIAL_FEN)
 
-	fen := "2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w - - 0 1"
+	// fen := "2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w - - 0 1"
+	// fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 	// fen := "2bq1bn1/2pppk2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 w - - 0 2"
-	pos := parse_fen(fen)
-	best := pos.minimax(4)
-	fmt.Println(best)
-	pos.do_move(best.move, &StateInfo{})
-	solution := "2bqkbn1/2pppQ2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 b - - 0 1"
-	fmt.Println(best.move)
-	fmt.Println(pos.String())
-	fmt.Println(solution)
-
-	// fen := "2bq1bn1/2pppk2/np2N3/r3P1pB/p2N4/8/PPPPKPP1/RNB2r2 b - - 1 2"
 	// pos := parse_fen(fen)
-	// fmt.Println(pos.evaluate(pos.in_checkmate()))
+	depth, _ := strconv.Atoi(os.Args[2])
+	brk, _ := strconv.Atoi(os.Args[3])
+	divide(os.Args[1], depth, brk)
+
 }
