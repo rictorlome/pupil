@@ -5,16 +5,12 @@ import (
 )
 
 func attacks_by_color(occ Bitboard, pieces []Bitboard, color Color) Bitboard {
-	var attacks Bitboard
-	for _, piece := range piece_range_by_color(color) {
-		t := piece_to_type(piece)
-		if t == PAWN {
-			attacks |= pawn_attacks(pieces[piece], color)
-		} else {
-			attacks |= serialize_for_attacks(pieces[piece], occ, get_attack_func(t))
-		}
-	}
-	return attacks
+	return pawn_attacks(pieces[pt_to_p(PAWN, color)], color) |
+		serialize_rook_attacks(pieces[pt_to_p(ROOK, color)], occ) |
+		serialize_knight_attacks(pieces[pt_to_p(KNIGHT, color)], occ) |
+		serialize_bishop_attacks(pieces[pt_to_p(BISHOP, color)], occ) |
+		serialize_queen_attacks(pieces[pt_to_p(QUEEN, color)], occ) |
+		serialize_king_attacks(pieces[pt_to_p(KING, color)], occ)
 }
 
 // Returns bitboard of occupancy by color c whose pieces attack square sq
@@ -108,6 +104,46 @@ func serialize_for_attacks(piece_bb Bitboard, occ Bitboard, fn AttackFunc) Bitbo
 	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
 		sq := Square(lsb(cursor))
 		attacks |= fn(occ, sq)
+	}
+	return attacks
+}
+
+func serialize_knight_attacks(piece_bb Bitboard, occ Bitboard) Bitboard {
+	var attacks Bitboard
+	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
+		attacks |= knight_attacks(occ, Square(lsb(cursor)))
+	}
+	return attacks
+}
+
+func serialize_rook_attacks(piece_bb Bitboard, occ Bitboard) Bitboard {
+	var attacks Bitboard
+	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
+		attacks |= rook_attacks(occ, Square(lsb(cursor)))
+	}
+	return attacks
+}
+
+func serialize_bishop_attacks(piece_bb Bitboard, occ Bitboard) Bitboard {
+	var attacks Bitboard
+	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
+		attacks |= bishop_attacks(occ, Square(lsb(cursor)))
+	}
+	return attacks
+}
+
+func serialize_queen_attacks(piece_bb Bitboard, occ Bitboard) Bitboard {
+	var attacks Bitboard
+	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
+		attacks |= queen_attacks(occ, Square(lsb(cursor)))
+	}
+	return attacks
+}
+
+func serialize_king_attacks(piece_bb Bitboard, occ Bitboard) Bitboard {
+	var attacks Bitboard
+	for cursor := piece_bb; cursor != 0; cursor &= cursor - 1 {
+		attacks |= king_attacks(occ, Square(lsb(cursor)))
 	}
 	return attacks
 }
