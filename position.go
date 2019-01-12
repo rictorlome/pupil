@@ -29,12 +29,13 @@ func (p *Position) generate_evasions(pl *[]Move, ml *[]Move) {
 	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
 	atks := attacks_by_color(occ_without_king, p.placement, them)
 
+	// King evasions
 	serialize_normal_moves(ml, king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
-	// safe squares for king
 	if popcount(checkers) > 1 {
 		return
 	}
 	checker_sq := Square(lsb(checkers))
+	// Regular moves (duplicate king evasions are excluded in pseudo_legals_by_color)
 	p.generate_non_evasions(pl, ml, BETWEEN_BBS[king_sq][checker_sq]|checkers)
 }
 
@@ -52,10 +53,15 @@ func (p *Position) generate_moves() []Move {
 func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, forced_dsts Bitboard) {
 	pseudolegals_by_color(pl, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights, forced_dsts)
 	for _, pseudo_legal := range *pl {
-		if p.is_legal(pseudo_legal) && (empty(forced_dsts) || (occupied_at_sq(forced_dsts, move_dst(pseudo_legal)))) {
+		if p.is_legal(pseudo_legal) && (empty(forced_dsts) || is_good_evasion(forced_dsts, pseudo_legal)) {
 			*ml = append(*ml, pseudo_legal)
 		}
 	}
+}
+
+func is_good_evasion(forced_dsts Bitboard, m Move) bool {
+	return occupied_at_sq(forced_dsts, move_dst(m)) ||
+		(is_enpassant(m) && occupied_at_sq(forced_dsts, cleanup_sq_for_ep_capture(move_dst(m))))
 }
 
 func (p *Position) get_color_attacks(color Color) Bitboard {
@@ -78,16 +84,19 @@ func (p *Position) in_checkmate() bool {
 
 func (p *Position) is_legal(m Move) bool {
 	src, dst := move_src(m), move_dst(m)
+	us, them := p.side_to_move(), opposite(p.side_to_move())
+	ksq := p.king_square(us)
 
 	if is_enpassant(m) {
-		// This enpassant check is temporary. Apparently, this is a tricky case.
-		return true
+		their_queens := p.placement[pt_to_p(QUEEN, them)]
+		// No discovered slider attacks on the king.
+		return empty(rook_attacks(p.occupancy()&^(SQUARE_BBS[src]|SQUARE_BBS[cleanup_sq_for_ep_capture(dst)]), ksq)&(p.placement[pt_to_p(ROOK, them)]|their_queens)) &&
+			empty(bishop_attacks(p.occupancy()&^SQUARE_BBS[src], ksq)&(p.placement[pt_to_p(BISHOP, them)]|their_queens))
 	}
 	if p.piece_type_at(src) == KING {
-		// Remember to add not-through-attack check for castles
 		return is_castle(m) || !occupied_at_sq(p.opposite_color_attacks(), dst)
 	}
-	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, p.king_square(p.side_to_move()))
+	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, ksq)
 }
 
 func (p *Position) move_count() int {

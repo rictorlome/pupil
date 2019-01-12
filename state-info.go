@@ -38,24 +38,12 @@ func has_right(rights int, right uint) bool {
 }
 
 func init_castling_masks() {
-	for _, sq := range SQUARES {
-		switch sq {
-		case SQ_A1:
-			CASTLING_MASK_BY_SQ[sq] = WQ_CASTLE
-		case SQ_E1:
-			CASTLING_MASK_BY_SQ[sq] = WHITE_CASTLES
-		case SQ_H1:
-			CASTLING_MASK_BY_SQ[sq] = WK_CASTLE
-		case SQ_A8:
-			CASTLING_MASK_BY_SQ[sq] = BQ_CASTLE
-		case SQ_E8:
-			CASTLING_MASK_BY_SQ[sq] = BLACK_CASTLES
-		case SQ_H8:
-			CASTLING_MASK_BY_SQ[sq] = BK_CASTLE
-		default:
-			CASTLING_MASK_BY_SQ[sq] = NO_CASTLE
-		}
-	}
+	CASTLING_MASK_BY_SQ[SQ_A1] = WQ_CASTLE
+	CASTLING_MASK_BY_SQ[SQ_E1] = WHITE_CASTLES
+	CASTLING_MASK_BY_SQ[SQ_H1] = WK_CASTLE
+	CASTLING_MASK_BY_SQ[SQ_A8] = BQ_CASTLE
+	CASTLING_MASK_BY_SQ[SQ_E8] = BLACK_CASTLES
+	CASTLING_MASK_BY_SQ[SQ_H8] = BK_CASTLE
 }
 
 func init_rook_squares_for_castling() {
