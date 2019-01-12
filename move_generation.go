@@ -36,7 +36,7 @@ func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
 }
 
 // NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
-func pseudolegals_by_color(pl *[]Move, pieces []Bitboard, color Color, ep_sq Square, castling_rights int) {
+func pseudolegals_by_color(pl *[]Move, pieces []Bitboard, color Color, ep_sq Square, castling_rights int, forced_dsts Bitboard) {
 	occ, self_occ := occupied_squares(pieces), occupied_squares_by_color(pieces, color)
 	enemy_attacks := attacks_by_color(occ, pieces, opposite(color))
 	for _, piece := range piece_range_by_color(color) {
@@ -46,7 +46,11 @@ func pseudolegals_by_color(pl *[]Move, pieces []Bitboard, color Color, ep_sq Squ
 		case PAWN:
 			serialize_for_pseudos_pawns(pl, piece_board, occ, self_occ, color, ep_sq)
 		case KING:
-			serialize_for_pseudos_king(pl, piece_board, occ, self_occ, color, castling_rights, enemy_attacks)
+			// Forced_dsts means we are in check
+			// The kings moves have already been added to the movelist by generate_evasions
+			if empty(forced_dsts) {
+				serialize_for_pseudos_king(pl, piece_board, occ, self_occ, color, castling_rights, enemy_attacks)
+			}
 		default:
 			serialize_for_pseudos_other(pl, piece_board, occ, self_occ, get_attack_func(t))
 		}
@@ -83,7 +87,10 @@ func serialize_for_pseudos_pawns(pl *[]Move, pawns Bitboard, occ Bitboard, self_
 			switch {
 			case square_rank(dst) == l_rank:
 				c_o_q := cap_or_quiet(occ, dst)
-				*pl = append(*pl, to_move(dst, src, KNIGHT_PROMOTION|c_o_q), to_move(dst, src, QUEEN_PROMOTION|c_o_q))
+				*pl = append(*pl, to_move(dst, src, KNIGHT_PROMOTION|c_o_q))
+				*pl = append(*pl, to_move(dst, src, QUEEN_PROMOTION|c_o_q))
+				*pl = append(*pl, to_move(dst, src, ROOK_PROMOTION|c_o_q))
+				*pl = append(*pl, to_move(dst, src, BISHOP_PROMOTION|c_o_q))
 			case dst == ep_sq:
 				*pl = append(*pl, to_move(dst, src, EP_CAPTURE))
 			case dst == two_up(src, color):

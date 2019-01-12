@@ -51,7 +51,16 @@ func main() {
 	// fen := "2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w - - 0 1"
 	// fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 	// fen := "2bq1bn1/2pppk2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 w - - 0 2"
-	// pos := parse_fen(fen)
+
+	fen := "r3k2N/p1pp1pb1/bn2pn2/2qP4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQq - 0 2"
+	pos := parse_fen(fen)
+	fmt.Println(len(pos.generate_moves()))
+	fmt.Println(pos.generate_moves())
+	// for _, piece := range PIECES {
+	// 	fmt.Println(piece)
+	// 	fmt.Println(pos.placement[piece])
+	// }
+
 	// depth, _ := strconv.Atoi(os.Args[2])
 	// brk, _ := strconv.Atoi(os.Args[3])
 	// divide(os.Args[1], depth, brk)

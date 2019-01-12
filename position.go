@@ -49,10 +49,10 @@ func (p *Position) generate_moves() []Move {
 	return move_list
 }
 
-func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, evasions Bitboard) {
-	pseudolegals_by_color(pl, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights)
+func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, forced_dsts Bitboard) {
+	pseudolegals_by_color(pl, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights, forced_dsts)
 	for _, pseudo_legal := range *pl {
-		if p.is_legal(pseudo_legal) && (empty(evasions) || (occupied_at_sq(evasions, move_dst(pseudo_legal)))) {
+		if p.is_legal(pseudo_legal) && (empty(forced_dsts) || (occupied_at_sq(forced_dsts, move_dst(pseudo_legal)))) {
 			*ml = append(*ml, pseudo_legal)
 		}
 	}
