@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-var fenTests = []struct {
-	in string
-	expected Position
+var parseFenTests = []struct {
+	fen string
+	pos Position
 }{
 	{
 		"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
@@ -39,16 +39,49 @@ var fenTests = []struct {
 			occ: 18446462599001337855,
 		},
 	},
+	{
+		"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+		Position{
+			ply: 4,
+			stm: WHITE,
+			occ: 18441959068093444095,
+			state: &StateInfo{
+				castling_rights: 15,
+				ep_sq: 44,
+				rule_50: 0,
+				opposite_color_attacks: 9151313638215188480,
+				prev: nil,
+				captured: 0,
+			},
+			placement_by_square: []Piece{
+				4, 3, 2, 1, 0, 2, 3, 4, 5, 5, 5, 5, NULL_PIECE, 5, 5, 5, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, 5, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, 11, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, 11, 11, 11, 11, NULL_PIECE, 11, 11, 11, 10, 9, 8, 7, 6, 8, 9, 10,
+			},
+			placement: []Bitboard{
+				16, 8, 36, 66, 129, 268496640, 1152921504606846976, 576460752303423488,
+				2594073385365405696, 4755801206503243776, 9295429630892703744, 67272588153323520,
+			},
+		},
+	},
 }
 
-func TestParseFenMetadata(t *testing.T) {
-	for _, test := range fenTests {
-		actual := parse_fen(test.in)
-		if !reflect.DeepEqual(actual, test.expected) {
+
+func TestParseFen(t *testing.T) {
+	for _, test := range parseFenTests {
+		actual := parse_fen(test.fen)
+		if !reflect.DeepEqual(actual, test.pos) {
 			t.Errorf(
 				"Expected Postition: \n%s, got \n%s from \n%s",
-				test.expected.debug(), actual.debug(), test.in,
+				test.pos.debug(), actual.debug(), test.fen,
 			)
+		}
+	}
+}
+
+func TestGenerateFen(t *testing.T){
+	for _, test := range parseFenTests {
+		actual := generate_fen(test.pos)
+		if !reflect.DeepEqual(actual, test.fen) {
+			t.Errorf("Expected fen: \n%s, got \n%s", test.fen, actual,)
 		}
 	}
 }
