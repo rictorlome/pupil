@@ -1,7 +1,7 @@
 package main
 
 import (
-// "fmt"
+ "fmt"
 )
 
 func (p *Position) dup() Position {
@@ -178,4 +178,35 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 
 func (p Position) String() string {
 	return generate_fen(p)
+}
+
+func (p Position) debug() string {
+	state_info := fmt.Sprintf(
+		"state<casting_rights:%d,ep_sq:%d,rule_50:%d,opposite_color_attacks:%d,prev:%p,captured:%d>",
+		p.state.castling_rights, p.state.ep_sq, p.state.rule_50,
+		p.state.opposite_color_attacks, p.state.prev, p.state.captured,
+	)
+	ply := fmt.Sprintf("ply:%d", p.ply)
+	stm := fmt.Sprintf("stm:%d", p.stm)
+	occ := fmt.Sprintf("occ:%d", p.occ)
+
+	placement := "placement:["
+	for x := 0; x < len(p.placement); x++ {
+		placement += fmt.Sprintf("%d,", p.placement[x])
+	}
+	placement += "]"
+
+	squares := "placement_by_square:"
+	for x := 0; x < len(p.placement_by_square); x++ {
+		if p.placement_by_square[x] == NULL_PIECE {
+			squares += fmt.Sprint("NULL_PIECE,")
+			continue
+		}
+		squares += fmt.Sprintf("%d,", p.placement_by_square[x])
+	}
+
+	return fmt.Sprintf(
+		"Position<%s, %s, %s, %s, %s, %s>",
+		ply, stm, occ, state_info, squares, placement,
+	)
 }

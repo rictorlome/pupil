@@ -1,9 +1,57 @@
 package main
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 )
+
+var fenTests = []struct {
+	in string
+	expected Position
+}{
+	{
+		"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+		Position{
+			state: &StateInfo{
+				castling_rights: 15,
+				ep_sq: 20,
+				rule_50: 0,
+				opposite_color_attacks: 1830813695870,
+				prev: nil,
+				captured: 0,
+			},
+			ply: 3,
+			placement_by_square: []Piece{
+				4, 3, 2, 1, 0, 2, 3, 4,
+				5, 5, 5, 5, NULL_PIECE, 5, 5, 5, NULL_PIECE,
+				NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE,
+				NULL_PIECE, NULL_PIECE, NULL_PIECE, 5, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE,
+				NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE,
+				NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE, NULL_PIECE,
+				11, 11, 11, 11, 11, 11, 11, 11,
+				10, 9, 8, 7, 6, 8, 9, 10,
+			},
+			placement: []Bitboard{
+				16, 8, 36, 66, 129, 268496640, 1152921504606846976, 576460752303423488,
+				2594073385365405696, 4755801206503243776, 9295429630892703744, 71776119061217280,
+			},
+			stm: BLACK,
+			occ: 18446462599001337855,
+		},
+	},
+}
+
+func TestParseFenMetadata(t *testing.T) {
+	for _, test := range fenTests {
+		actual := parse_fen(test.in)
+		if !reflect.DeepEqual(actual, test.expected) {
+			t.Errorf(
+				"Expected Postition: \n%s, got \n%s from \n%s",
+				test.expected.debug(), actual.debug(), test.in,
+			)
+		}
+	}
+}
 
 var tests = []string{
 	"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
@@ -37,10 +85,12 @@ var tests = []string{
 	"r1b2Q1k/2p2ppp/p2p4/8/4P3/2N2N2/PP3PPP/R1nQR1K1 b - - 0 15",
 }
 
+
 func TestParseAndGenerateFen(t *testing.T) {
 	for _, test := range tests {
-		if generate_fen(parse_fen(test)) != test {
-			t.Error(fmt.Sprintf("Expected fen %v, got %v", test, generate_fen(parse_fen(test))))
+		actual := parse_fen(test)
+		if test != generate_fen(actual) {
+			t.Errorf("Expected fen: %s, got %s", actual, test)
 		}
 	}
 }
