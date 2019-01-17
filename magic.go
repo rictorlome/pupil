@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
+	"errors"
 )
 
 type Magic struct {
@@ -23,7 +23,7 @@ func attack_index_with_offset(m *Magic, occ Bitboard) uint {
 	return m.offset + uint(((occ&m.mask)*m.magic)>>m.shift)
 }
 
-func find_magic(sq Square, bishop bool) Magic {
+func find_magic(sq Square, bishop bool) (Magic, error) {
 	m := Magic{}
 	var occupancy, reference [4096]Bitboard
 	// Rook by default
@@ -75,18 +75,26 @@ OUTER:
 				continue OUTER
 			}
 		}
-		return m
+		return m, nil
 	}
-	fmt.Println("FAILED!")
-	return m
+	return m, errors.New("no magic")
 }
 
-func init_magics() {
+
+func init_magics() (err error) {
 	for _, sq := range SQUARES {
-		BishopMagics[sq] = find_magic(sq, true)
-		RookMagics[sq] = find_magic(sq, false)
+		BishopMagics[sq], err = find_magic(sq, true)
+		if err != nil {
+			return err
+		}
+		RookMagics[sq], err = find_magic(sq, false)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
+
 
 // https://www.chessprogramming.org/Looking_for_Magics#Feeding_in_Randoms
 func rand_few_bits() Bitboard {
