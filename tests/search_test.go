@@ -10,7 +10,7 @@ type perft_seq struct {
 	perfts    []perft
 }
 
-//tables taken from https://chessprogramming.wikispaces.com/Perft%20Results
+// Tables taken from https://www.chessprogramming.org/Perft_Results
 var initial_perft = perft_seq{
 	"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 	[]perft{
@@ -24,6 +24,7 @@ var initial_perft = perft_seq{
 	},
 }
 
+// Kiwipete
 var secondary_perft = perft_seq{
 	"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
 	[]perft{
@@ -31,8 +32,8 @@ var secondary_perft = perft_seq{
 		perft{1, 48, 8, 0, 2, 0, 0, 0},
 		perft{2, 2039, 351, 1, 91, 0, 3, 0},
 		perft{3, 97862, 17102, 45, 3162, 0, 993, 1},
-		// perft{4,4085603,757163,1929,128013,15172,25523,43},
-		// perft{5,193690690,35043416,73365,4993637,8392,3309887,30171},
+		// perft{4, 4085603, 757163, 1929, 128013, 15172, 25523, 43},
+		// perft{5, 193690690, 35043416, 73365, 4993637, 8392, 3309887, 30171},
 	},
 }
 
@@ -45,7 +46,7 @@ var tertiary_perft = perft_seq{
 		perft{3, 2812, 209, 2, 0, 0, 267, 0},
 		perft{4, 43238, 3348, 123, 0, 0, 1680, 17},
 		perft{5, 674624, 52051, 1165, 0, 0, 52950, 0},
-		// perft{6,11030083,940350,33325,0,7552,452473,2733},
+		// perft{6, 11030083, 940350, 33325, 0, 7552, 452473, 2733},
 	},
 }
 
@@ -61,13 +62,15 @@ var fourth_perft = perft_seq{
 	},
 }
 
-var all_tests = []perft_seq{
-	/*initial_perft, secondary_perft, tertiary_perft, */
-  fourth_perft,
+var all_perft_tests = []perft_seq{
+	initial_perft,
+	secondary_perft,
+	tertiary_perft,
+	fourth_perft,
 }
 
 func TestSearch(t *testing.T) {
-	for _, test := range all_tests {
+	for _, test := range all_perft_tests {
 		pos := parse_fen(test.start_fen)
 		for _, expected_pft := range test.perfts {
 			actual_pft := get_perft_parallel(&pos, expected_pft.depth)

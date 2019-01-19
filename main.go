@@ -52,10 +52,10 @@ func main() {
 	// fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 	// fen := "2bq1bn1/2pppk2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 w - - 0 2"
 
-	fen := "r3k2N/p1pp1pb1/bn2pn2/2qP4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQq - 0 2"
-	pos := parse_fen(fen)
-	fmt.Println(len(pos.generate_moves()))
-	fmt.Println(pos.generate_moves())
+	// fen := "8/2p4r/3p4/KP5k/5pP1/8/4P3/R7 b - g3 0 3"
+	// pos := parse_fen(fen)
+	// fmt.Println(len(pos.generate_moves()))
+	// fmt.Println(pos.generate_moves())
 	// for _, piece := range PIECES {
 	// 	fmt.Println(piece)
 	// 	fmt.Println(pos.placement[piece])
