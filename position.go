@@ -50,8 +50,24 @@ func (p *Position) generate_moves() []Move {
 	return move_list
 }
 
+// NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
+func (p *Position) generate_pseudo_legals(pl *[]Move, forced_dsts Bitboard) {
+	us := p.side_to_move()
+	occ, self_occ := p.occupancy(), p.occupancy_by_color(us)
+
+	serialize_for_pseudos_pawns(pl, p.our_pt_bb(PAWN), occ, self_occ, us, p.state.ep_sq)
+	serialize_for_pseudos_other(pl, p.our_pt_bb(KNIGHT), occ, self_occ, knight_attacks)
+	serialize_for_pseudos_other(pl, p.our_pt_bb(ROOK), occ, self_occ, rook_attacks)
+	serialize_for_pseudos_other(pl, p.our_pt_bb(BISHOP), occ, self_occ, bishop_attacks)
+	serialize_for_pseudos_other(pl, p.our_pt_bb(QUEEN), occ, self_occ, queen_attacks)
+
+	if empty(forced_dsts) {
+		serialize_for_pseudos_king(pl, p.our_pt_bb(KING), occ, self_occ, us, p.state.castling_rights, p.state.opposite_color_attacks)
+	}
+}
+
 func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, forced_dsts Bitboard) {
-	pseudolegals_by_color(pl, p.placement, p.side_to_move(), p.state.ep_sq, p.state.castling_rights, forced_dsts)
+	p.generate_pseudo_legals(pl, forced_dsts)
 	for _, pseudo_legal := range *pl {
 		if p.is_legal(pseudo_legal) && (empty(forced_dsts) || is_good_evasion(forced_dsts, pseudo_legal)) {
 			*ml = append(*ml, pseudo_legal)
@@ -183,6 +199,10 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	}
 
 	return blockers
+}
+
+func (p *Position) our_pt_bb(pt PieceType) Bitboard {
+	return p.placement[pt_to_p(pt, p.side_to_move())]
 }
 
 func (p Position) String() string {

@@ -35,28 +35,6 @@ func pawn_pushes(sq Square, dir int, occ Bitboard) Bitboard {
 	return pushes
 }
 
-// NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
-func pseudolegals_by_color(pl *[]Move, pieces []Bitboard, color Color, ep_sq Square, castling_rights int, forced_dsts Bitboard) {
-	occ, self_occ := occupied_squares(pieces), occupied_squares_by_color(pieces, color)
-	enemy_attacks := attacks_by_color(occ, pieces, opposite(color))
-	for _, piece := range piece_range_by_color(color) {
-		t := piece_to_type(piece)
-		piece_board := pieces[piece]
-		switch t {
-		case PAWN:
-			serialize_for_pseudos_pawns(pl, piece_board, occ, self_occ, color, ep_sq)
-		case KING:
-			// Forced_dsts means we are in check
-			// The kings moves have already been added to the movelist by generate_evasions
-			if empty(forced_dsts) {
-				serialize_for_pseudos_king(pl, piece_board, occ, self_occ, color, castling_rights, enemy_attacks)
-			}
-		default:
-			serialize_for_pseudos_other(pl, piece_board, occ, self_occ, get_attack_func(t))
-		}
-	}
-}
-
 func serialize_for_pseudos_king(pl *[]Move, piece_bb Bitboard, occ Bitboard, self_occ Bitboard, color Color, cr int, enemy_attacks Bitboard) {
 	src := Square(lsb(piece_bb))
 	serialize_normal_moves(pl, src, king_attacks(occ, src)&^self_occ, occ)
