@@ -64,5 +64,5 @@ func main() {
 	// depth, _ := strconv.Atoi(os.Args[2])
 	// brk, _ := strconv.Atoi(os.Args[3])
 	// divide(os.Args[1], depth, brk)
-
+	startServer()
 }

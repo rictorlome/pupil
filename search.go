@@ -10,13 +10,6 @@ type MoveScore struct {
 	score int
 }
 
-func (p *Position) evaluate(checkmate bool) int {
-	if !checkmate {
-		return 0
-	}
-	return max_score(opposite(p.side_to_move()))
-}
-
 func join(c Color, a MoveScore, b MoveScore) MoveScore {
 	if c == WHITE {
 		return a.max(b)

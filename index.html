@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Chessboard</title>
+    <link rel="stylesheet" href="css/chessboard-0.3.0.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="js/chessboard-0.3.0.min.js"></script>
+  </head>
+  <body>
+    <div id="board1" style="width: 400px"></div>
+  </body>
+  <script>
+
+    function postMoveToThink(move) {
+      console.log("posting move", move)
+      $.ajax({
+        url: 'http://localhost:8080/think',
+        data: {move},
+        method: 'post',
+        success: (response) => {
+          var fen = JSON.parse(response)
+          console.log(fen)
+          board1.position(fen, true)
+        }
+      })
+    }
+
+    function onDrop(source, target, piece, newPos, oldPos, orientation) {
+      if (target !== 'offboard') postMoveToThink(source + target);
+    };
+    var cfg = {
+      draggable: true,
+      dropOffBoard: 'snapback', // this is the default
+      position: 'start',
+      onDrop: onDrop
+    }
+    var board1 = ChessBoard('board1', cfg);
+  </script>
+</html>

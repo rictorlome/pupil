@@ -534,3 +534,106 @@ var BishopMagicNums = [64]uint64{
 
 // https://chess.stackexchange.com/questions/4490/maximum-possible-movement-in-a-turn
 const MAX_BRANCHING int = 218
+
+// Values taken from Michniewski's simple evaluation function
+// https://www.chessprogramming.org/Simplified_Evaluation_Function
+const WK_VAL int = 20000
+const WQ_VAL int = 900
+const WB_VAL int = 330
+const WN_VAL int = 320
+const WR_VAL int = 500
+const WP_VAL int = 100
+const BK_VAL int = -20000
+const BQ_VAL int = -900
+const BB_VAL int = -330
+const BN_VAL int = -320
+const BR_VAL int = -500
+const BP_VAL int = -100
+
+var MATERIAL_VALUES = []int{
+	WK_VAL, WQ_VAL, WB_VAL, WN_VAL, WR_VAL, WP_VAL,
+	BK_VAL, BQ_VAL, BB_VAL, BN_VAL, BR_VAL, BP_VAL,
+}
+
+var KING_SQUARE_VALUES_MIDGAME = []int{
+	-30, -40, -40, -50, -50, -40, -40, -30,
+	-30, -40, -40, -50, -50, -40, -40, -30,
+	-30, -40, -40, -50, -50, -40, -40, -30,
+	-30, -40, -40, -50, -50, -40, -40, -30,
+	-20, -30, -30, -40, -40, -30, -30, -20,
+	-10, -20, -20, -20, -20, -20, -20, -10,
+	20, 20, 0, 0, 0, 0, 20, 20,
+	20, 30, 10, 0, 0, 10, 30, 20,
+}
+
+var KING_SQUARE_VALUES_ENDGAME = []int{
+	-50, -40, -30, -20, -20, -30, -40, -50,
+	-30, -20, -10, 0, 0, -10, -20, -30,
+	-30, -10, 20, 30, 30, 20, -10, -30,
+	-30, -10, 30, 40, 40, 30, -10, -30,
+	-30, -10, 30, 40, 40, 30, -10, -30,
+	-30, -10, 20, 30, 30, 20, -10, -30,
+	-30, -30, 0, 0, 0, 0, -30, -30,
+	-50, -30, -30, -30, -30, -30, -30, -50,
+}
+
+var QUEEN_SQUARE_VALUES = []int{
+	-20, -10, -10, -5, -5, -10, -10, -20,
+	-10, 0, 0, 0, 0, 0, 0, -10,
+	-10, 0, 5, 5, 5, 5, 0, -10,
+	-5, 0, 5, 5, 5, 5, 0, -5,
+	0, 0, 5, 5, 5, 5, 0, -5,
+	-10, 5, 5, 5, 5, 5, 0, -10,
+	-10, 0, 5, 0, 0, 0, 0, -10,
+	-20, -10, -10, -5, -5, -10, -10, -20,
+}
+
+var BISHOP_SQUARE_VALUES = []int{
+	-20, -10, -10, -10, -10, -10, -10, -20,
+	-10, 0, 0, 0, 0, 0, 0, -10,
+	-10, 0, 5, 10, 10, 5, 0, -10,
+	-10, 5, 5, 10, 10, 5, 5, -10,
+	-10, 0, 10, 10, 10, 10, 0, -10,
+	-10, 10, 10, 10, 10, 10, 10, -10,
+	-10, 5, 0, 0, 0, 0, 5, -10,
+	-20, -10, -10, -10, -10, -10, -10, -20,
+}
+
+var KNIGHT_SQUARE_VALUES = []int{
+	-50, -40, -30, -30, -30, -30, -40, -50,
+	-40, -20, 0, 0, 0, 0, -20, -40,
+	-30, 0, 10, 15, 15, 10, 0, -30,
+	-30, 5, 15, 20, 20, 15, 5, -30,
+	-30, 0, 15, 20, 20, 15, 0, -30,
+	-30, 5, 10, 15, 15, 10, 5, -30,
+	-40, -20, 0, 5, 5, 0, -20, -40,
+	-50, -40, -30, -30, -30, -30, -40, -50,
+}
+
+var ROOK_SQUARE_VALUES = []int{
+	0, 0, 0, 0, 0, 0, 0, 0,
+	5, 10, 10, 10, 10, 10, 10, 5,
+	-5, 0, 0, 0, 0, 0, 0, -5,
+	-5, 0, 0, 0, 0, 0, 0, -5,
+	-5, 0, 0, 0, 0, 0, 0, -5,
+	-5, 0, 0, 0, 0, 0, 0, -5,
+	-5, 0, 0, 0, 0, 0, 0, -5,
+	0, 0, 0, 5, 5, 0, 0, 0,
+}
+
+var PAWN_SQUARE_VALUES = []int{
+	0, 0, 0, 0, 0, 0, 0, 0,
+	50, 50, 50, 50, 50, 50, 50, 50,
+	10, 10, 20, 30, 30, 20, 10, 10,
+	5, 5, 10, 25, 25, 10, 5, 5,
+	0, 0, 0, 20, 20, 0, 0, 0,
+	5, -5, -10, 0, 0, -10, -5, 5,
+	5, 10, 10, -20, -20, 10, 10, 5,
+	0, 0, 0, 0, 0, 0, 0, 0,
+}
+
+var POSITION_VALUES = []*[]int {
+	&KING_SQUARE_VALUES_MIDGAME, &QUEEN_SQUARE_VALUES,
+	&BISHOP_SQUARE_VALUES, &KNIGHT_SQUARE_VALUES,
+	&ROOK_SQUARE_VALUES, &PAWN_SQUARE_VALUES,
+}
