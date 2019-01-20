@@ -4,15 +4,11 @@ import (
 // "fmt"
 )
 
-func add_material_value(piece Piece) int {
-	return MATERIAL_VALUES[piece]
-}
-
 func relative_multiplier(color Color) int {
-  if color == WHITE {
-    return 1
-  }
-  return -1
+	if color == WHITE {
+		return 1
+	}
+	return -1
 }
 
 func relative_square(sq Square, color Color) Square {
@@ -26,29 +22,32 @@ func relative_square_rank(sq Square, color Color) int {
 	return 7 - square_rank(sq)
 }
 
-func add_position_value(piece Piece, color Color, sq Square) int {
-	idx := relative_square(sq, color)
-  value_arr := *POSITION_VALUES[int(piece_to_type(piece))]
-  return value_arr[idx] * relative_multiplier(color)
-}
+// func add_position_value(piece Piece, color Color, sq Square) int {
+// 	idx := relative_square(sq, color)
+// 	value_arr := *POSITION_VALUES[int(piece_to_type(piece))]
+// 	return value_arr[idx] * relative_multiplier(color)
+// }
 
-func serialize_for_evaluate(piece Piece, piece_bb Bitboard) int {
-	sum := 0
-	color := piece_to_color(piece)
+func serialize_for_evaluate(us Color, piece Piece, piece_bb Bitboard) int {
+	score := 0
+	color, pt := piece_to_color(piece), piece_to_type(piece)
 	for cursor := piece_bb; !empty(cursor); cursor &= cursor - 1 {
-		sum += add_material_value(piece)
-		sum += add_position_value(piece, color, Square(lsb(cursor)))
+		if color == us {
+			score += MATERIAL_VALUES[pt]
+		} else {
+			score -= MATERIAL_VALUES[pt]
+		}
 	}
-	return sum
+	return score
 }
 
 func (p *Position) evaluate(checkmate bool) int {
 	if !checkmate {
-		sum := 0
+		score := 0
 		for piece, piece_bb := range p.placement {
-			sum += serialize_for_evaluate(Piece(piece), piece_bb)
+			score += serialize_for_evaluate(p.side_to_move(), Piece(piece), piece_bb)
 		}
-		return sum
+		return score
 	}
-	return max_score(opposite(p.side_to_move()))
+	return -MAX_SCORE
 }

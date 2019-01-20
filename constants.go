@@ -537,22 +537,15 @@ const MAX_BRANCHING int = 218
 
 // Values taken from Michniewski's simple evaluation function
 // https://www.chessprogramming.org/Simplified_Evaluation_Function
-const WK_VAL int = 20000
-const WQ_VAL int = 900
-const WB_VAL int = 330
-const WN_VAL int = 320
-const WR_VAL int = 500
-const WP_VAL int = 100
-const BK_VAL int = -20000
-const BQ_VAL int = -900
-const BB_VAL int = -330
-const BN_VAL int = -320
-const BR_VAL int = -500
-const BP_VAL int = -100
+const K_VAL int = 20000
+const Q_VAL int = 900
+const B_VAL int = 330
+const N_VAL int = 320
+const R_VAL int = 500
+const P_VAL int = 100
 
 var MATERIAL_VALUES = []int{
-	WK_VAL, WQ_VAL, WB_VAL, WN_VAL, WR_VAL, WP_VAL,
-	BK_VAL, BQ_VAL, BB_VAL, BN_VAL, BR_VAL, BP_VAL,
+	K_VAL, Q_VAL, B_VAL, N_VAL, R_VAL, P_VAL,
 }
 
 var KING_SQUARE_VALUES_MIDGAME = []int{
@@ -632,7 +625,7 @@ var PAWN_SQUARE_VALUES = []int{
 	0, 0, 0, 0, 0, 0, 0, 0,
 }
 
-var POSITION_VALUES = []*[]int {
+var POSITION_VALUES = []*[]int{
 	&KING_SQUARE_VALUES_MIDGAME, &QUEEN_SQUARE_VALUES,
 	&BISHOP_SQUARE_VALUES, &KNIGHT_SQUARE_VALUES,
 	&ROOK_SQUARE_VALUES, &PAWN_SQUARE_VALUES,

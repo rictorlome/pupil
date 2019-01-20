@@ -5,52 +5,74 @@ import (
 // "strings"
 )
 
+var MAX_SCORE int = 32000
+
 type MoveScore struct {
 	move  Move
 	score int
 }
 
-func join(c Color, a MoveScore, b MoveScore) MoveScore {
-	if c == WHITE {
-		return a.max(b)
-	}
-	return a.min(b)
-}
-
-func (m MoveScore) max(n MoveScore) MoveScore {
-	if m.score > n.score {
-		return m
-	}
-	return n
-}
-
-func max_score(c Color) int {
-	if c == WHITE {
-		return 32000
-	}
-	return -32000
-}
-
-func (m MoveScore) min(n MoveScore) MoveScore {
-	if m.score < n.score {
-		return m
-	}
-	return n
-}
-
-func (p *Position) minimax(depth int) MoveScore {
-	us, them := p.side_to_move(), opposite(p.side_to_move())
+func (p *Position) negamax(depth int) int {
 	moves := p.generate_moves()
 	if depth == 0 {
-		return MoveScore{Move(0), p.evaluate(len(moves) == 0 && p.in_check())}
+		return p.evaluate(len(moves) == 0 && p.in_check())
 	}
-	best := MoveScore{Move(0), max_score(them)}
+	best := -MAX_SCORE
 	for _, move := range moves {
 		p.do_move(move, &StateInfo{})
-		recursive := p.minimax(depth - 1)
-		recursive.move = move
-		best = join(us, best, recursive)
+		score := -p.negamax(depth - 1)
 		p.undo_move(move)
+		if score > best {
+			best = score
+		}
 	}
 	return best
+}
+
+func (p *Position) negamaxRoot(depth int) MoveScore {
+	best := MoveScore{Move(0), -MAX_SCORE}
+	for _, move := range p.generate_moves() {
+		p.do_move(move, &StateInfo{})
+		score := -p.negamax(depth - 1)
+		p.undo_move(move)
+		if score > best.score {
+			best = MoveScore{move, score}
+		}
+	}
+	return best
+}
+
+func (p *Position) alphaBeta(alpha int, beta int, depth int) int {
+	moves := p.generate_moves()
+	if depth == 0 {
+		return p.evaluate(len(moves) == 0 && p.in_check())
+	}
+	for _, move := range moves {
+		p.do_move(move, &StateInfo{})
+		score := -p.alphaBeta(-beta, -alpha, depth-1)
+		p.undo_move(move)
+		if score >= beta {
+			return beta
+		}
+		if score > alpha {
+			alpha = score
+		}
+	}
+	return alpha
+}
+
+func (p *Position) alphaBetaRoot(depth int) MoveScore {
+	alpha, beta, best_move := -MAX_SCORE, MAX_SCORE, Move(0)
+	for _, move := range p.generate_moves() {
+		p.do_move(move, &StateInfo{})
+		score := -p.alphaBeta(-beta, -alpha, depth-1)
+		p.undo_move(move)
+		if score >= beta {
+			return MoveScore{move, beta}
+		}
+		if score > alpha {
+			best_move, alpha = move, score
+		}
+	}
+	return MoveScore{best_move, alpha}
 }
