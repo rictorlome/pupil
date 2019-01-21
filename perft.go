@@ -52,8 +52,18 @@ func get_perft_parallel(p *Position, depth int) perft {
 	return new_perft
 }
 
+var TT_TABLE = [10]*TT{
+       createTT(), createTT(), createTT(), createTT(), createTT(),
+       createTT(), createTT(), createTT(), createTT(), createTT(),
+}
+
 func get_perft_recursive(p *Position, depth int, move Move) perft {
 	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
+	tt_ptr := TT_TABLE[depth]
+	tt_entry, ok := tt_ptr.read(p.state.key)
+	if ok {
+		return tt_entry.p
+	}
 	if depth == 0 {
 		new_perft.update_with_move(move)
 		new_perft.checks += indicator(p.in_check())
@@ -69,6 +79,8 @@ func get_perft_recursive(p *Position, depth int, move Move) perft {
 		pool.Put(s)
 	}
 	new_perft.depth = depth
+	entry := TTEntry{new_perft}
+	tt_ptr.write(p.state.key, &entry)
 	return new_perft
 }
 
