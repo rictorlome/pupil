@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	// "fmt"
 )
 
 type TestStatelessUpdate struct {
@@ -42,14 +43,28 @@ var UpdatePositionTests = []TestStatelessUpdate{
 
 func StatelessMove(t *testing.T, test TestStatelessUpdate) {
 	p := parse_fen(test.initial)
+	end_pos := parse_fen(test.end)
 	move := p.parse_move(test.uci)
+	k := p.state.key
+
+	// DO MOVE
 	p.do_move(move, &StateInfo{})
 	if generate_fen(p) != test.end {
-		t.Errorf("Move: %v, Expected not equal to actual:\n%v %v\n", test.uci, test.end, generate_fen(p))
+		t.Errorf("Do move: %v, Expected not equal to actual:\n%v %v\n", test.uci, test.end, generate_fen(p))
 	}
+	if k == p.state.key {
+		t.Errorf("Do move: %v, Key did not update.", test.uci)
+	}
+	if p.state.key != end_pos.state.key {
+		t.Errorf("Do move: %v, Key did not update correctly. Expected not equal to actual:\n%v %v\n", test.uci, end_pos.state.key, p.state.key)
+	}
+	// UNDO MOVE
 	p.undo_move(move)
 	if generate_fen(p) != test.initial {
-		t.Errorf("Move: %v, Expected not equal to actual:\n%v %v\n", test.uci, test.initial, generate_fen(p))
+		t.Errorf("Undo move: %v, Expected not equal to actual:\n%v %v\n", test.uci, test.initial, generate_fen(p))
+	}
+	if k != p.state.key {
+		t.Errorf("Undo move: %v, Key did not reset on undo_move. Expected not equal to actual:\n%v %v\n", test.uci, k, p.state.key)
 	}
 }
 

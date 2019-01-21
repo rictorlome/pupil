@@ -41,12 +41,13 @@ func init() {
 	init_castling_masks()
 	init_rook_squares_for_castling()
 	init_magics()
+	init_zobrists()
 }
 
 func main() {
 	fmt.Println("OK")
 	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
-	// pos := parse_fen(INITIAL_FEN)
+	pos := parse_fen(INITIAL_FEN)
 
 	// fen := "2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w - - 0 1"
 	// fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
@@ -64,5 +65,8 @@ func main() {
 	// depth, _ := strconv.Atoi(os.Args[2])
 	// brk, _ := strconv.Atoi(os.Args[3])
 	// divide(os.Args[1], depth, brk)
-	startServer()
+	// startServer()
+	for i := 0; i < 10; i++ {
+		fmt.Println(pos.to_zobrist())
+	}
 }

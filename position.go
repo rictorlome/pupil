@@ -174,6 +174,19 @@ func (p *Position) piece_type_at(sq Square) PieceType {
 	return piece_to_type(p.piece_at(sq))
 }
 
+func (p *Position) to_zobrist() Key {
+	var ResKey Key
+	for sq, piece := range p.placement_by_square {
+		if piece != NULL_PIECE {
+			ResKey ^= ZOBRIST_PSQ[sq][piece]
+		}
+	}
+	ResKey ^= ZOBRIST_CSTL[p.state.castling_rights]
+	ResKey ^= ZOBRIST_EPSQ[p.state.ep_sq]
+	ResKey ^= ZOBRIST_SIDE * Key(p.stm)
+	return ResKey
+}
+
 func (p *Position) side_to_move() Color {
 	return p.stm
 }

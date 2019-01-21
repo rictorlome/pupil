@@ -22,6 +22,7 @@ Table of Contents:
 type AttackFunc func(Bitboard, Square) Bitboard
 type Bitboard uint64
 type Color int
+type Key uint64
 type Move uint16
 type MoveType uint16
 type Piece uint
@@ -41,6 +42,7 @@ type StateInfo struct {
 	ep_sq           Square
 	rule_50         int
 	// Additional info
+	key                    Key
 	opposite_color_attacks Bitboard
 	blockers_for_king      Bitboard
 	prev                   *StateInfo
@@ -317,6 +319,7 @@ var CASTLING_RIGHTS = [4]int{
 
 var BLACK_CASTLES int = BQ_CASTLE | BK_CASTLE
 var WHITE_CASTLES int = WQ_CASTLE | WK_CASTLE
+var ALL_CASTLES int = BLACK_CASTLES | WHITE_CASTLES
 var NO_CASTLE int = 0
 
 var CHAR_TO_CASTLE = map[string]int{

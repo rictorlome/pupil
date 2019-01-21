@@ -5,17 +5,13 @@ import (
 	"strconv"
 )
 
-func (p *Position) do_castle(do bool, king_dst Square) {
-	rook_src_dst := ROOK_SRC_DST[king_dst]
-	src, dst := rook_src_dst[0], rook_src_dst[1]
+func (p *Position) do_castle(do bool, r Piece, r_src Square, r_dst Square) {
 	if do {
-		r := p.piece_at(src)
-		p.remove_piece(r, src)
-		p.place_piece(r, dst)
+		p.remove_piece(r, r_src)
+		p.place_piece(r, r_dst)
 	} else {
-		r := p.piece_at(dst)
-		p.remove_piece(r, dst)
-		p.place_piece(r, src)
+		p.remove_piece(r, r_dst)
+		p.place_piece(r, r_src)
 	}
 }
 
@@ -23,34 +19,49 @@ func (p *Position) do_move(m Move, new_state *StateInfo) {
 	src, dst := move_src(m), move_dst(m)
 	mover := p.piece_at(src)
 	us, them := p.side_to_move(), opposite(p.side_to_move())
+	// Initialze new key (cancel current castling rights and ep sq to avoid conditional)
+	new_key := p.state.key ^ ZOBRIST_SIDE ^ ZOBRIST_CSTL[p.state.castling_rights] ^ ZOBRIST_EPSQ[p.state.ep_sq]
 	// Update new state
 	new_state.castling_rights = update_castling_right(p.state.castling_rights, src, dst)
 	new_state.ep_sq = update_ep_sq(m, p.placement[pt_to_p(PAWN, them)])
 	new_state.rule_50 = update_rule_50(p.state.rule_50, m, p.piece_type_at(src))
-
+	// Update new key
+	new_key ^= ZOBRIST_CSTL[new_state.castling_rights] ^ ZOBRIST_EPSQ[new_state.ep_sq]
 	// Update placement
 	if is_castle(m) {
-		p.do_castle(true, dst)
+		rook_src_dst := ROOK_SRC_DST[dst]
+		r_src, r_dst := rook_src_dst[0], rook_src_dst[1]
+		r := p.piece_at(r_src)
+		p.do_castle(true, r, r_src, r_dst)
+		new_key ^= ZOBRIST_PSQ[r_src][r] ^ ZOBRIST_PSQ[r_dst][r]
 	} else if is_enpassant(m) {
 		ep_sq := cleanup_sq_for_ep_capture(dst)
 		captured := p.piece_at(ep_sq)
 		new_state.captured = captured
 		p.remove_piece(captured, ep_sq)
+		new_key ^= ZOBRIST_PSQ[ep_sq][captured]
 	} else if is_capture(m) {
 		captured := p.piece_at(dst)
 		new_state.captured = captured
 		p.remove_piece(captured, dst)
+		new_key ^= ZOBRIST_PSQ[dst][captured]
 	}
 
 	p.remove_piece(mover, src)
+	new_key ^= ZOBRIST_PSQ[src][mover]
 	if is_promotion(m) {
-		p.do_promotion(us, move_type(m), dst)
+		pt := move_type_to_promotion_type(move_type(m))
+		pc := pt_to_p(pt, us)
+		p.place_piece(pc, dst)
+		new_key ^= ZOBRIST_PSQ[dst][pc]
 	} else {
 		p.place_piece(mover, dst)
+		new_key ^= ZOBRIST_PSQ[dst][mover]
 	}
 
 	// Update king blockers (for next turn)
 	// our sliders, their king
+	new_state.key = new_key
 	new_state.opposite_color_attacks = p.get_color_attacks(us)
 	new_state.blockers_for_king = p.slider_blockers(us, p.king_square(them))
 
@@ -61,11 +72,6 @@ func (p *Position) do_move(m Move, new_state *StateInfo) {
 	// Update position
 	p.ply += 1
 	p.stm = opposite(p.stm)
-}
-
-func (p *Position) do_promotion(c Color, mt MoveType, dst Square) {
-	pt := move_type_to_promotion_type(mt)
-	p.place_piece(pt_to_p(pt, c), dst)
 }
 
 func (p *Position) place_piece(pc Piece, sq Square) {
@@ -125,7 +131,10 @@ func (p *Position) undo_move(m Move) {
 
 	// if castle, undo castle
 	if is_castle(m) {
-		p.do_castle(false, dst)
+		rook_src_dst := ROOK_SRC_DST[dst]
+		r_src, r_dst := rook_src_dst[0], rook_src_dst[1]
+		r := p.piece_at(r_dst)
+		p.do_castle(false, r, r_src, r_dst)
 	}
 
 	// Reassign state
