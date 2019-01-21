@@ -22,11 +22,11 @@ func relative_square_rank(sq Square, color Color) int {
 	return 7 - square_rank(sq)
 }
 
-// func add_position_value(piece Piece, color Color, sq Square) int {
-// 	idx := relative_square(sq, color)
-// 	value_arr := *POSITION_VALUES[int(piece_to_type(piece))]
-// 	return value_arr[idx] * relative_multiplier(color)
-// }
+func add_position_value(pt PieceType, color Color, sq Square) int {
+	idx := relative_square(sq, color)
+	value_arr := *POSITION_VALUES[pt]
+	return value_arr[idx]
+}
 
 func serialize_for_evaluate(us Color, piece Piece, piece_bb Bitboard) int {
 	score := 0
@@ -34,8 +34,10 @@ func serialize_for_evaluate(us Color, piece Piece, piece_bb Bitboard) int {
 	for cursor := piece_bb; !empty(cursor); cursor &= cursor - 1 {
 		if color == us {
 			score += MATERIAL_VALUES[pt]
+			score += add_position_value(pt, color, Square(lsb(cursor)))
 		} else {
 			score -= MATERIAL_VALUES[pt]
+			score -= add_position_value(pt, color, Square(lsb(cursor)))
 		}
 	}
 	return score
