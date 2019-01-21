@@ -24,7 +24,7 @@ func (p *Position) do_move(m Move, new_state *StateInfo) {
 	mover := p.piece_at(src)
 	us, them := p.side_to_move(), opposite(p.side_to_move())
 	// Update new state
-	new_state.castling_rights = update_castling_right(p.state.castling_rights, src)
+	new_state.castling_rights = update_castling_right(p.state.castling_rights, src, dst)
 	new_state.ep_sq = update_ep_sq(m, p.placement[pt_to_p(PAWN, them)])
 	new_state.rule_50 = update_rule_50(p.state.rule_50, m, p.piece_type_at(src))
 

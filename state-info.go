@@ -69,8 +69,8 @@ func make_castle_state_info(available string) int {
 	return castles
 }
 
-func update_castling_right(cr int, src Square) int {
-	return cr &^ CASTLING_MASK_BY_SQ[src]
+func update_castling_right(cr int, src Square, dst Square) int {
+	return cr &^ (CASTLING_MASK_BY_SQ[src]|CASTLING_MASK_BY_SQ[dst])
 }
 
 // NOTE: ep_sq is only set if enemy pawn can actually take it.
