@@ -6,50 +6,28 @@ import (
 )
 
 var MAX_SCORE int = 32000
+var TT_GLOBAL *TT = createTT()
 
 type MoveScore struct {
 	move  Move
 	score int
 }
 
-func (p *Position) negamax(depth int) int {
+func (p *Position) ab(alpha int, beta int, depth int) int {
+	tt_entry, ok := TT_GLOBAL.read(p.state.key)
+	if ok && tt_entry.depth == depth && tt_entry.key == p.state.key {
+		return tt_entry.score
+	}
 	moves := p.generate_moves()
 	if depth == 0 {
-		return p.evaluate(len(moves) == 0 && p.in_check())
-	}
-	best := -MAX_SCORE
-	for _, move := range moves {
-		p.do_move(move, &StateInfo{})
-		score := -p.negamax(depth - 1)
-		p.undo_move(move)
-		if score > best {
-			best = score
-		}
-	}
-	return best
-}
-
-func (p *Position) negamaxRoot(depth int) MoveScore {
-	best := MoveScore{Move(0), -MAX_SCORE}
-	for _, move := range p.generate_moves() {
-		p.do_move(move, &StateInfo{})
-		score := -p.negamax(depth - 1)
-		p.undo_move(move)
-		if score > best.score {
-			best = MoveScore{move, score}
-		}
-	}
-	return best
-}
-
-func (p *Position) alphaBeta(alpha int, beta int, depth int) int {
-	moves := p.generate_moves()
-	if depth == 0 {
-		return p.evaluate(len(moves) == 0 && p.in_check())
+		score := p.evaluate(len(moves) == 0 && p.in_check())
+		new_entry := TTEntry{score: score, depth: depth, key: p.state.key}
+		TT_GLOBAL.write(p.state.key, &new_entry)
+		return score
 	}
 	for _, move := range moves {
 		p.do_move(move, &StateInfo{})
-		score := -p.alphaBeta(-beta, -alpha, depth-1)
+		score := -p.ab(-beta, -alpha, depth-1)
 		p.undo_move(move)
 		if score >= beta {
 			return beta
@@ -58,14 +36,20 @@ func (p *Position) alphaBeta(alpha int, beta int, depth int) int {
 			alpha = score
 		}
 	}
+	// // This causes the NegaEqualsAB test to fail
+	// new_entry := TTEntry{score: alpha, depth: depth, key: p.state.key}
+	// // This causes even more errors
+	// if ok && depth > tt_entry.depth {
+	// 		TT_GLOBAL.write(p.state.key, &new_entry)
+	// }
 	return alpha
 }
 
-func (p *Position) alphaBetaRoot(depth int) MoveScore {
+func (p *Position) ab_root(depth int) MoveScore {
 	alpha, beta, best_move := -MAX_SCORE, MAX_SCORE, Move(0)
 	for _, move := range p.generate_moves() {
 		p.do_move(move, &StateInfo{})
-		score := -p.alphaBeta(-beta, -alpha, depth-1)
+		score := -p.ab(-beta, -alpha, depth-1)
 		p.undo_move(move)
 		if score >= beta {
 			return MoveScore{move, beta}

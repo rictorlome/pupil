@@ -35,9 +35,76 @@ var MateInTwos = []BestMoveTest{
 func TestMateInTwos(t *testing.T) {
 	for i, test := range MateInTwos {
 		pos := parse_fen(test.fen)
-		best := pos.alphaBetaRoot(4)
+		best := pos.ab_root(4)
 		if best.move.String() != test.best {
 			t.Errorf("MateinTwo %v. Got %v, Expected %v", i+1, best.move, test.best)
+		}
+	}
+}
+
+func (p *Position) negamax(depth int) int {
+	moves := p.generate_moves()
+	if depth == 0 {
+		return p.evaluate(len(moves) == 0 && p.in_check())
+	}
+	best := -MAX_SCORE
+	for _, move := range moves {
+		p.do_move(move, &StateInfo{})
+		score := -p.negamax(depth - 1)
+		p.undo_move(move)
+		if score > best {
+			best = score
+		}
+	}
+	return best
+}
+
+func (p *Position) negamax_root(depth int) MoveScore {
+	best := MoveScore{Move(0), -MAX_SCORE}
+	for _, move := range p.generate_moves() {
+		p.do_move(move, &StateInfo{})
+		score := -p.negamax(depth - 1)
+		p.undo_move(move)
+		if score > best.score {
+			best = MoveScore{move, score}
+		}
+	}
+	return best
+}
+
+func (p *Position) negamax_c(depth int, move Move, c chan MoveScore) {
+	c <- MoveScore{move, -p.negamax(depth)}
+}
+
+// This doesn't seem to produce consistent results.
+func (p *Position) negamax_root_p(depth int) MoveScore {
+	best := MoveScore{Move(0), -MAX_SCORE}
+	moves := p.generate_moves()
+	c := make(chan MoveScore, len(moves))
+	for _, move := range moves {
+		dup := p.dup()
+		dup.do_move(move, &StateInfo{})
+		go dup.negamax_c(depth-1, move, c)
+	}
+	for i := 0; i < len(moves); i++ {
+		ms := <- c
+		if ms.score > best.score {
+			best = ms
+		}
+	}
+	return best
+}
+
+// This passes, but it's slow.
+func TestNegaEqualsAB(t *testing.T) {
+	for _, fen := range TestFens {
+		pos := parse_fen(fen)
+		for j := 2; j <= 4; j += 1 {
+			ab_best := pos.ab_root(j)
+			nega_best := pos.negamax_root(j)
+			if ab_best != nega_best {
+				t.Errorf("Depth %v, Pos: %v\nAb not equal nega.\nAb: %v\nNega:%v", j, fen, ab_best, nega_best)
+			}
 		}
 	}
 }

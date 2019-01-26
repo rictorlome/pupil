@@ -1,20 +1,20 @@
 # Pupil
 
-A WIP `Go`-based chess engine destined to beat me in a 10 minute game.
+Pupil is a chess engine written in `Go`. The goal of writing this program was to create an engine capable of beating me in a 10 minute game.
 
 ---
 
 ## Description
 
-| Feature                | Implementation                                                                                                                    |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Board representation   | [Bitboard](https://www.chessprogramming.org/Bitboards)                                                                            |
-| Square mapping         | [Little-endian Rank-file Mapping](https://www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian_Rank-File_Mapping) |
-| Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                      |
-| Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                             |
-| Move Generation        | [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards)                                                       |
-| Search                 | TBD                                                                                                                               |
-| Evaluation             | TBD                                                                                                                               |
+| Feature                | Implementation                                                                                                                                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Board representation   | [Bitboard](https://www.chessprogramming.org/Bitboards)                                                                                                                                                                                                                           |
+| Square mapping         | [Little-endian Rank-file Mapping](https://www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian_Rank-File_Mapping)                                                                                                                                                |
+| Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                                                                                                                                                                     |
+| Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                                                                                                                                                                            |
+| Move Generation        | [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards)                                                                                                                                                                                                      |
+| Search                 | [AlphaBeta search](https://www.chessprogramming.org/Alpha-Beta) within the [Negamax](https://www.chessprogramming.org/Negamax) framework. Currently uses [transposition tables](https://www.chessprogramming.org/Transposition_Table) to cache static evaluations of leaf nodes. |
+| Evaluation             | [Simplified Evaluation Function](https://www.chessprogramming.org/Simplified_Evaluation_Function): Material value and positional value based on precomputed arrays.                                                                                                              |
 
 ---
 
@@ -32,11 +32,9 @@ This is my third attempt at a chess engine.
 
 ## Todo
 
-- [ ] Clean up code
-- [ ] Determine if passing slices works as efficiently as passing pointers to slices
-- [ ] Precompute, cache and incrementally update occupancy
-- [ ] Add more perft positions, debug move gen
-- [ ] See attacks_by_color can be cached
-- [ ] Minimax -> Negamax
-- [ ] Add basic evaluation heuristics
-- [ ] Alpha-beta
+- [x] Test alpha-beta against negamax.
+- [x] Update transposition table for non-perft search
+- [ ] Iterative deepening
+- [ ] Cache best move
+- [ ] Update alpha-beta to search best move first
+- [ ] Flesh out frontend to allow choice of color

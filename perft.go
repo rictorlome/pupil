@@ -15,6 +15,28 @@ func initPool() {
 	}
 }
 
+type TTPerft struct {
+	lock sync.RWMutex
+	m    map[Key]perft
+}
+
+func createTTPerft() *TTPerft {
+	return &TTPerft{m: make(map[Key]perft)}
+}
+
+func (t *TTPerft) read(key Key) (perft, bool) {
+	t.lock.RLock()
+	entry, ok := t.m[key]
+	t.lock.RUnlock()
+	return entry, ok
+}
+
+func (t *TTPerft) write(key Key, entry perft) {
+	t.lock.Lock()
+	t.m[key] = entry
+	t.lock.Unlock()
+}
+
 type perft struct {
 	depth, nodes, captures, enpassants, castles, promotions, checks, checkmates int
 }
@@ -52,17 +74,17 @@ func get_perft_parallel(p *Position, depth int) perft {
 	return new_perft
 }
 
-var TT_TABLE = [10]*TT{
-       createTT(), createTT(), createTT(), createTT(), createTT(),
-       createTT(), createTT(), createTT(), createTT(), createTT(),
+var TT_TABLES = [10]*TTPerft{
+	createTTPerft(), createTTPerft(), createTTPerft(), createTTPerft(), createTTPerft(),
+	createTTPerft(), createTTPerft(), createTTPerft(), createTTPerft(), createTTPerft(),
 }
 
 func get_perft_recursive(p *Position, depth int, move Move) perft {
 	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
-	tt_ptr := TT_TABLE[depth]
-	tt_entry, ok := tt_ptr.read(p.state.key)
+	tt_table := TT_TABLES[depth]
+	perft, ok := tt_table.read(p.state.key)
 	if ok {
-		return tt_entry.p
+		return perft
 	}
 	if depth == 0 {
 		new_perft.update_with_move(move)
@@ -79,8 +101,7 @@ func get_perft_recursive(p *Position, depth int, move Move) perft {
 		pool.Put(s)
 	}
 	new_perft.depth = depth
-	entry := TTEntry{new_perft}
-	tt_ptr.write(p.state.key, &entry)
+	tt_table.write(p.state.key, new_perft)
 	return new_perft
 }
 

@@ -307,6 +307,7 @@ var PROMOTION_PIECE_TYPES = []PieceType{
 // 11. FEN
 var INITIAL_FEN string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 var INITIAL_FEN_JUST_PIECES string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+var KIWIPETE_FEN string = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 
 // 12. CASTLING RIGHTS - KQkq
 var BQ_CASTLE int = 0x1

@@ -66,7 +66,5 @@ func main() {
 	// brk, _ := strconv.Atoi(os.Args[3])
 	// divide(os.Args[1], depth, brk)
 	// startServer()
-	for i := 0; i < 10; i++ {
-		fmt.Println(pos.to_zobrist())
-	}
+	pos.ab_root(4)
 }

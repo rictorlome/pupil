@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var tests = []string{
+var TestFens = []string{
 	"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
 	"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
 	"rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
@@ -38,7 +38,7 @@ var tests = []string{
 }
 
 func TestParseAndGenerateFen(t *testing.T) {
-	for _, test := range tests {
+	for _, test := range TestFens {
 		if generate_fen(parse_fen(test)) != test {
 			t.Error(fmt.Sprintf("Expected fen %v, got %v", test, generate_fen(parse_fen(test))))
 		}

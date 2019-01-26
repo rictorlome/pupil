@@ -12,7 +12,7 @@ type perft_seq struct {
 
 // Tables taken from https://www.chessprogramming.org/Perft_Results
 var initial_perft = perft_seq{
-	"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+	INITIAL_FEN,
 	[]perft{
 		perft{0, 1, 0, 0, 0, 0, 0, 0},
 		perft{1, 20, 0, 0, 0, 0, 0, 0},
@@ -26,7 +26,7 @@ var initial_perft = perft_seq{
 
 // Kiwipete
 var secondary_perft = perft_seq{
-	"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+	KIWIPETE_FEN,
 	[]perft{
 		perft{0, 1, 0, 0, 0, 0, 0, 0},
 		perft{1, 48, 8, 0, 2, 0, 0, 0},
@@ -63,10 +63,10 @@ var fourth_perft = perft_seq{
 }
 
 var all_perft_tests = []perft_seq{
-	initial_perft,
-	secondary_perft,
-	tertiary_perft,
-	fourth_perft,
+	// initial_perft,
+	// secondary_perft,
+	// tertiary_perft,
+	// fourth_perft,
 }
 
 func TestPerft(t *testing.T) {
