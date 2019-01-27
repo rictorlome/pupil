@@ -96,15 +96,15 @@ func (p *Position) negamax_root_p(depth int) MoveScore {
 }
 
 // This passes, but it's slow.
-func TestNegaEqualsAB(t *testing.T) {
-	for _, fen := range TestFens {
-		pos := parse_fen(fen)
-		for j := 2; j <= 4; j += 1 {
-			ab_best := pos.ab_root(j)
-			nega_best := pos.negamax_root(j)
-			if ab_best != nega_best {
-				t.Errorf("Depth %v, Pos: %v\nAb not equal nega.\nAb: %v\nNega:%v", j, fen, ab_best, nega_best)
-			}
-		}
-	}
-}
+// func TestNegaEqualsAB(t *testing.T) {
+// 	for _, fen := range TestFens {
+// 		pos := parse_fen(fen)
+// 		for j := 2; j <= 4; j += 1 {
+// 			ab_best := pos.ab_root(j)
+// 			nega_best := pos.negamax_root(j)
+// 			if ab_best != nega_best {
+// 				t.Errorf("Depth %v, Pos: %v\nAb not equal nega.\nAb: %v\nNega:%v", j, fen, ab_best, nega_best)
+// 			}
+// 		}
+// 	}
+// }

@@ -63,10 +63,10 @@ var fourth_perft = perft_seq{
 }
 
 var all_perft_tests = []perft_seq{
-	// initial_perft,
-	// secondary_perft,
-	// tertiary_perft,
-	// fourth_perft,
+	initial_perft,
+	secondary_perft,
+	tertiary_perft,
+	fourth_perft,
 }
 
 func TestPerft(t *testing.T) {

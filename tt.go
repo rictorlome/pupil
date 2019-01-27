@@ -10,10 +10,29 @@ type TT struct {
 	m map[Key]*TTEntry
 }
 
+// alpha <= score <= beta
+// all moves explored
+// score is EXACT
+var PV_NODE int = 0
+
+// score >= beta, beta cutoff
+// fail-high nodes
+// returned score <= exact score
+var CUT_NODE int = 1
+
+// fail-low nodes
+// all moves explored
+// no move's score exceeds alpha
+// score <= alpha
+// exact score <= returned score
+var ALL_NODE int = 2
+
 type TTEntry struct {
-	depth int
-	key   Key
-	score int
+	best_move Move
+	depth     int
+	key       Key
+	node_type int
+	score     int
 }
 
 func createTT() *TT {

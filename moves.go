@@ -38,8 +38,7 @@ func move_src(m Move) Square {
 }
 
 func move_type(m Move) MoveType {
-	//TODO: remove this lookup, just and with the mask
-	return MOVE_TYPES[int((m&^MOVE_TYPE_MASK)>>12)]
+	return MoveType(m &^ MOVE_TYPE_MASK)
 }
 
 func move_type_to_idx(mt MoveType) int {
