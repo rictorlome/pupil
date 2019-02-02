@@ -48,9 +48,11 @@ func (p *Position) ab(alpha int, beta int, depth int) int {
 
 	// Main loop
 	for _, move := range moves {
-		p.do_move(move, &StateInfo{})
+		s := pool.Get().(*StateInfo)
+		p.do_move(move, s)
 		score = -p.ab(-beta, -alpha, depth-1)
 		p.undo_move(move)
+		pool.Put(s)
 		if score >= beta {
 			if !ok || depth >= tt_entry.depth {
 				new_entry.score = score
@@ -77,6 +79,7 @@ func (p *Position) ab(alpha int, beta int, depth int) int {
 
 func (p *Position) ab_root(depth int) MoveScore {
 	alpha, beta, best_move := -MAX_SCORE, MAX_SCORE, Move(0)
+	initPool()
 	for _, move := range p.generate_moves() {
 		p.do_move(move, &StateInfo{})
 		score := -p.ab(-beta, -alpha, depth-1)
@@ -95,10 +98,11 @@ func (p *Position) ab_root(depth int) MoveScore {
 func (p *Position) order_moves(moves_ptr *[]Move, best Move, k int) {
 	moves := *moves_ptr
 	for j := 0; j < k; j++ {
-		max_move_idx := j
+		max_move_idx, max_move_val := j, p.value(moves[j], best)
 		for i := j + 1; i < len(moves); i++ {
-			if p.value(moves[i], best) > p.value(moves[max_move_idx], best) {
-				max_move_idx = i
+			val := p.value(moves[i], best)
+			if val > max_move_val {
+				max_move_idx, max_move_val = i, val
 			}
 		}
 		if max_move_idx != j {

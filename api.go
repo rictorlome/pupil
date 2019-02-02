@@ -18,7 +18,7 @@ func (g *Game) ThinkEndpoint(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	client_move := g.pos.parse_move(r.Form["move"][0])
 	g.pos.do_move(client_move, &StateInfo{})
-	engine_move := g.pos.ab_root(5)
+	engine_move := g.pos.ab_root(6)
 	g.pos.do_move(engine_move.move, &StateInfo{})
 	json.NewEncoder(w).Encode(g.pos.String())
 
