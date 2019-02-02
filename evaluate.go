@@ -16,7 +16,7 @@ func relative_square(sq Square, color Color) Square {
 }
 
 func relative_square_rank(sq Square, color Color) int {
-	if color == WHITE {
+	if color == BLACK {
 		return square_rank(sq)
 	}
 	return 7 - square_rank(sq)
