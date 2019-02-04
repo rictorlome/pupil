@@ -34,7 +34,17 @@ This is my third attempt at a chess engine.
 
 - [x] Test alpha-beta against negamax.
 - [x] Update transposition table for non-perft search
-- [ ] Iterative deepening
-- [ ] Cache best move
-- [ ] Update alpha-beta to search best move first
-- [ ] Flesh out frontend to allow choice of color
+- [x] Cache best move
+- [x] Update alpha-beta to search best move first
+
+- [ ] Limit cache size/implement LRU/better cache clearing
+- [ ] Quiescence search
+- [ ] Iterative deepening with time limit
+- [ ] Flesh out frontend for better UX
+- [ ] Experiment compiling to WebAssembly
+- [ ] Deploy (WebAssembly or no)
+
+## Nice to haves:
+
+- [ ] Concurrent alpha-beta
+- [ ] Lint
