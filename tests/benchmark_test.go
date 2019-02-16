@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-func benchmarkAlphaBeta(fen string, depth int, b *testing.B) {
+func benchmarkAlphaBeta(fen string, depth uint8, b *testing.B) {
 	pos := parse_fen(fen)
 	for n := 0; n < b.N; n++ {
 		pos.ab_root(depth)

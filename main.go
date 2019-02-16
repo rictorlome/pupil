@@ -42,6 +42,7 @@ func init() {
 	init_rook_squares_for_castling()
 	init_magics()
 	init_zobrists()
+	init_pool()
 }
 
 func main() {
@@ -65,9 +66,6 @@ func main() {
 	// depth, _ := strconv.Atoi(os.Args[2])
 	// brk, _ := strconv.Atoi(os.Args[3])
 	// divide(os.Args[1], depth, brk)
-	// startServer()
+	startServer()
 	// pos.ab_root(4)
-	for _, mt := range MOVE_TYPES {
-		fmt.Println(int(mt))
-	}
 }

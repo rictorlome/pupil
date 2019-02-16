@@ -5,16 +5,6 @@ import (
 	"sync"
 )
 
-var pool *sync.Pool
-
-func initPool() {
-	pool = &sync.Pool{
-		New: func() interface{} {
-			return new(StateInfo)
-		},
-	}
-}
-
 type TTPerft struct {
 	lock sync.RWMutex
 	m    map[Key]perft
@@ -58,7 +48,6 @@ func get_perft_parallel(p *Position, depth int) perft {
 	if depth < 1 {
 		return perft{0, 1, 0, 0, 0, 0, 0, 0}
 	}
-	initPool()
 	new_perft := perft{0, 0, 0, 0, 0, 0, 0, 0}
 	c := make(chan perft)
 	moves := p.generate_moves()
@@ -94,11 +83,11 @@ func get_perft_recursive(p *Position, depth int, move Move) perft {
 	}
 	new_perft.nodes = 0
 	for _, move := range p.generate_moves() {
-		s := pool.Get().(*StateInfo)
+		s := si_pool.Get().(*StateInfo)
 		p.do_move(move, s)
 		new_perft = new_perft.add(get_perft_recursive(p, depth-1, move))
 		p.undo_move(move)
-		pool.Put(s)
+		si_pool.Put(s)
 	}
 	new_perft.depth = depth
 	tt_table.write(p.state.key, new_perft)

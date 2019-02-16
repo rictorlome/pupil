@@ -6,31 +6,32 @@ import (
 )
 
 var MAX_SCORE int = 32000
-var TT_GLOBAL *TT = createTT()
+var TT_GLOBAL *TT = createTT(20) // approx 120 mb space for entire program
 
 type MoveScore struct {
 	move  Move
 	score int
 }
 
-func (p *Position) ab(alpha int, beta int, depth int) int {
-	tt_entry, ok := TT_GLOBAL.read(p.state.key)
+func (p *Position) ab(alpha int, beta int, depth uint8) int {
+	tt_entry, empty := TT_GLOBAL.read(p.state.key)
+	hit := !empty && tt_entry.key == p.state.key
 	// PV_NODEs have an exact score.
 	// Would this be accurate for tt_entry.depth >= depth?
 	// It causes the minimax=ab test to fail, but the selected move must be better.
-	if ok && tt_entry.key == p.state.key && tt_entry.node_type == PV_NODE && tt_entry.depth == depth {
+	if hit && tt_entry.node_type == PV_NODE && tt_entry.depth == depth {
 		return tt_entry.score
 	}
 
 	// Default the new_entry to ALL_NODE
-	new_entry := TTEntry{depth: depth, key: p.state.key, node_type: ALL_NODE}
+	new_entry := TTEntry{depth: depth, node_type: ALL_NODE, key: p.state.key}
 	score := 0
 	moves := p.generate_moves()
 
 	// Leaf node
 	if depth == 0 {
 		score = p.evaluate(len(moves) == 0 && p.in_check())
-		if !ok || depth >= tt_entry.depth {
+		if empty || p.state.key&1 == 1 || depth >= tt_entry.depth {
 			new_entry.score = score
 			new_entry.node_type = PV_NODE
 			TT_GLOBAL.write(p.state.key, &new_entry)
@@ -40,7 +41,7 @@ func (p *Position) ab(alpha int, beta int, depth int) int {
 
 	// Check if best move was cached for this position
 	best := Move(0)
-	if ok && tt_entry.key == p.state.key && tt_entry.best_move != best {
+	if hit && tt_entry.best_move != best {
 		best = tt_entry.best_move
 	}
 	// Order first 3rd of the moves
@@ -48,13 +49,13 @@ func (p *Position) ab(alpha int, beta int, depth int) int {
 
 	// Main loop
 	for _, move := range moves {
-		s := pool.Get().(*StateInfo)
+		s := si_pool.Get().(*StateInfo)
 		p.do_move(move, s)
 		score = -p.ab(-beta, -alpha, depth-1)
 		p.undo_move(move)
-		pool.Put(s)
+		si_pool.Put(s)
 		if score >= beta {
-			if !ok || depth >= tt_entry.depth {
+			if empty || p.state.key&1 == 1 || depth >= tt_entry.depth {
 				new_entry.score = score
 				new_entry.node_type = CUT_NODE
 				new_entry.best_move = move
@@ -70,16 +71,15 @@ func (p *Position) ab(alpha int, beta int, depth int) int {
 	}
 
 	// Cache node
-	if !ok || depth > tt_entry.depth {
+	if empty || p.state.key&1 == 1 || depth > tt_entry.depth {
 		new_entry.score = alpha
 		TT_GLOBAL.write(p.state.key, &new_entry)
 	}
 	return alpha
 }
 
-func (p *Position) ab_root(depth int) MoveScore {
+func (p *Position) ab_root(depth uint8) MoveScore {
 	alpha, beta, best_move := -MAX_SCORE, MAX_SCORE, Move(0)
-	initPool()
 	for _, move := range p.generate_moves() {
 		p.do_move(move, &StateInfo{})
 		score := -p.ab(-beta, -alpha, depth-1)

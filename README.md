@@ -37,7 +37,8 @@ This is my third attempt at a chess engine.
 - [x] Cache best move
 - [x] Update alpha-beta to search best move first
 
-- [ ] Limit cache size/implement LRU/better cache clearing
+- [x] Limit cache entry size
+- [x] Implement LRU/better cache clearing (simple array)
 - [ ] Quiescence search
 - [ ] Iterative deepening with time limit
 - [ ] Flesh out frontend for better UX

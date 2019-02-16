@@ -1,61 +1,59 @@
 package main
 
 import (
-// "fmt"
-// "sync"
+	// "fmt"
+	"math"
+	// "sync"
 )
 
 type TT struct {
 	// lock sync.RWMutex
-	m map[Key]*TTEntry
+	m []*TTEntry
 }
 
 // alpha <= score <= beta
 // all moves explored
 // score is EXACT
-var PV_NODE int = 0
+var PV_NODE uint8 = 0
 
 // score >= beta, beta cutoff
 // fail-high nodes
 // returned score <= exact score
-var CUT_NODE int = 1
+var CUT_NODE uint8 = 1
 
 // fail-low nodes
 // all moves explored
 // no move's score exceeds alpha
 // score <= alpha
 // exact score <= returned score
-var ALL_NODE int = 2
+var ALL_NODE uint8 = 2
 
 type TTEntry struct {
 	best_move Move
-	depth     int
+	depth     uint8
 	key       Key
-	node_type int
+	node_type uint8
 	score     int
 }
 
-func createTT() *TT {
-	return &TT{m: make(map[Key]*TTEntry)}
-}
-
-func createTTs(depth int) []*TT {
-	TTS := make([]*TT, depth, depth)
-	for i := 0; i <= depth; i++ {
-		TTS[i] = createTT()
-	}
-	return TTS
+func createTT(cap_exp int) *TT {
+	exp := float64(cap_exp)
+	return &TT{m: make([]*TTEntry, int(math.Pow(2, exp)))}
 }
 
 func (t *TT) read(key Key) (*TTEntry, bool) {
 	// t.lock.RLock()
-	entry, ok := t.m[key]
+
+	// modulo 2^n with &
+	idx := key & Key((cap(t.m) - 1))
+	entry := t.m[idx]
 	// t.lock.RUnlock()
-	return entry, ok
+	return entry, entry == nil
 }
 
 func (t *TT) write(key Key, entry *TTEntry) {
 	// t.lock.Lock()
-	t.m[key] = entry
+	idx := key & Key((cap(t.m) - 1))
+	t.m[idx] = entry
 	// t.lock.Unlock()
 }
