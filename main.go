@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	// "os"
-	// "strconv"
+	"syscall/js"
 )
 
 func init() {
@@ -45,27 +44,52 @@ func init() {
 	init_pool()
 }
 
+func checkGameOver(i []js.Value) {
+	moves := BOARD_GLOBAL.generate_moves()
+	if len(moves) == 0 {
+		js.Global().Call("alert", "Game Over")
+		js.Global().Call("reload")
+	}
+}
+
+func makeHumanMove(i []js.Value) {
+	move_string := js.ValueOf(i[0].String()).String()
+	human_move := BOARD_GLOBAL.parse_move(move_string)
+	BOARD_GLOBAL.do_move(human_move, &StateInfo{})
+	js.Global().Get("board1").Call("position", BOARD_GLOBAL.String(), true)
+	js.Global().Set("humansTurn", false)
+}
+
+func makeComputerMove(i []js.Value) {
+	engine_move := BOARD_GLOBAL.ab_root(6)
+	BOARD_GLOBAL.do_move(engine_move.move, &StateInfo{})
+	js.Global().Get("board1").Call("position", BOARD_GLOBAL.String(), true)
+	js.Global().Call("clearInterval", "firstMoveInterval")
+	js.Global().Set("humansTurn", true)
+}
+
+// func validateHumanMove(i []js.Value) {
+// 	move_string := js.ValueOf(i[0].String()).String()
+// 	move := BOARD_GLOBAL.parse_move(move_string)
+// 	moves := BOARD_GLOBAL.generate_moves()
+// }
+
+var BOARD_GLOBAL Position
+
+
+
+func registerCallbacks() {
+    js.Global().Set("makeComputerMove", js.NewCallback(makeComputerMove))
+		js.Global().Set("makeHumanMove", js.NewCallback(makeHumanMove))
+		js.Global().Set("checkGameOver", js.NewCallback(checkGameOver))
+		// js.Global().Set("validateHumanMove", js.NewCallback(validateHumanMove))
+}
+
 func main() {
 	fmt.Println("OK")
-	// test_fen := "4k3/8/8/8/8/8/PPPP4/1N2K3 w - - 0 1"
-	// pos := parse_fen(INITIAL_FEN)
-
-	// fen := "2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2 w - - 0 1"
-	// fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-	// fen := "2bq1bn1/2pppk2/np2N3/r3P1p1/p2N2B1/8/PPPPKPP1/RNB2r2 w - - 0 2"
-
-	// fen := "8/2p4r/3p4/KP5k/5pP1/8/4P3/R7 b - g3 0 3"
-	// pos := parse_fen(fen)
-	// fmt.Println(len(pos.generate_moves()))
-	// fmt.Println(pos.generate_moves())
-	// for _, piece := range PIECES {
-	// 	fmt.Println(piece)
-	// 	fmt.Println(pos.placement[piece])
-	// }
-
-	// depth, _ := strconv.Atoi(os.Args[2])
-	// brk, _ := strconv.Atoi(os.Args[3])
-	// divide(os.Args[1], depth, brk)
-	startServer()
-	// pos.ab_root(4)
+	BOARD_GLOBAL = parse_fen(INITIAL_FEN)
+	// pattern cribbed from https://tutorialedge.net/golang/go-webassembly-tutorial/
+	c := make(chan struct{}, 0)
+	registerCallbacks()
+	<-c
 }

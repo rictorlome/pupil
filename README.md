@@ -2,6 +2,10 @@
 
 Pupil is a chess engine written in `Go`. The goal of writing this program was to create an engine capable of beating me in a 10 minute game.
 
+```bash
+GOARCH=wasm GOOS=js go build -o lib.wasm main.go attacks.go bitboard.go constants.go evaluate.go fen.go magic.go move_generation.go moves.go pieces.go pool.go position.go search.go state-info.go tt.go update_position.go zobrist.go
+```
+
 ---
 
 ## Description
