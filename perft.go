@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// Multithreaded perft tests require a custom Transposition Table
 type TTPerft struct {
 	lock sync.RWMutex
 	m    map[Key]perft
@@ -94,11 +95,8 @@ func get_perft_recursive(p *Position, depth int, move Move) perft {
 	return new_perft
 }
 
-func indicator(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
+func (p perft) String() string {
+	return fmt.Sprintf("depth %v: %v nodes, %v captures, %v enpassants, %v castles, %v promotions, %v checks, and %v checkmates", p.depth, p.nodes, p.captures, p.enpassants, p.castles, p.promotions, p.checks, p.checkmates)
 }
 
 func (p *perft) update_with_move(m Move) {
@@ -106,8 +104,4 @@ func (p *perft) update_with_move(m Move) {
 	p.enpassants += indicator(is_enpassant(m))
 	p.castles += indicator(is_castle(m))
 	p.promotions += indicator(is_promotion(m))
-}
-
-func (p perft) String() string {
-	return fmt.Sprintf("depth %v: %v nodes, %v captures, %v enpassants, %v castles, %v promotions, %v checks, and %v checkmates", p.depth, p.nodes, p.captures, p.enpassants, p.castles, p.promotions, p.checks, p.checkmates)
 }

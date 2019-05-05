@@ -34,6 +34,13 @@ func forward(color Color) int {
 	return SOUTH
 }
 
+func indicator(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
 func last_rank(color Color) int {
 	if color == WHITE {
 		return 7

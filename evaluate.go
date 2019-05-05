@@ -4,6 +4,23 @@ import (
 // "fmt"
 )
 
+func add_position_value(pt PieceType, color Color, sq Square) int {
+	idx := relative_square(sq, color)
+	value_arr := *POSITION_VALUES[pt]
+	return value_arr[idx]
+}
+
+func (p *Position) evaluate(checkmate bool) int {
+	if !checkmate {
+		score := 0
+		for piece, piece_bb := range p.placement {
+			score += serialize_for_evaluate(p.side_to_move(), Piece(piece), piece_bb)
+		}
+		return score
+	}
+	return -MAX_SCORE
+}
+
 func relative_multiplier(color Color) int {
 	if color == WHITE {
 		return 1
@@ -22,12 +39,6 @@ func relative_square_rank(sq Square, color Color) int {
 	return 7 - square_rank(sq)
 }
 
-func add_position_value(pt PieceType, color Color, sq Square) int {
-	idx := relative_square(sq, color)
-	value_arr := *POSITION_VALUES[pt]
-	return value_arr[idx]
-}
-
 func serialize_for_evaluate(us Color, piece Piece, piece_bb Bitboard) int {
 	score := 0
 	color, pt := piece_to_color(piece), piece_to_type(piece)
@@ -41,15 +52,4 @@ func serialize_for_evaluate(us Color, piece Piece, piece_bb Bitboard) int {
 		}
 	}
 	return score
-}
-
-func (p *Position) evaluate(checkmate bool) int {
-	if !checkmate {
-		score := 0
-		for piece, piece_bb := range p.placement {
-			score += serialize_for_evaluate(p.side_to_move(), Piece(piece), piece_bb)
-		}
-		return score
-	}
-	return -MAX_SCORE
 }

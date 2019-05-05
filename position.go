@@ -75,17 +75,13 @@ func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, forced_dsts Bit
 	}
 }
 
-func is_good_evasion(forced_dsts Bitboard, m Move) bool {
-	return occupied_at_sq(forced_dsts, move_dst(m)) ||
-		(is_enpassant(m) && occupied_at_sq(forced_dsts, cleanup_sq_for_ep_capture(move_dst(m))))
-}
-
 func (p *Position) get_color_attacks(color Color) Bitboard {
 	return attacks_by_color(p.occupancy(), p.placement, color)
 }
 
-func (p *Position) king_square(color Color) Square {
-	return Square(lsb(p.placement[color*6]))
+func is_good_evasion(forced_dsts Bitboard, m Move) bool {
+	return occupied_at_sq(forced_dsts, move_dst(m)) ||
+		(is_enpassant(m) && occupied_at_sq(forced_dsts, cleanup_sq_for_ep_capture(move_dst(m))))
 }
 
 func (p *Position) in_check() bool {
@@ -113,6 +109,10 @@ func (p *Position) is_legal(m Move) bool {
 		return is_castle(m) || !occupied_at_sq(p.opposite_color_attacks(), dst)
 	}
 	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, ksq)
+}
+
+func (p *Position) king_square(color Color) Square {
+	return Square(lsb(p.placement[color*6]))
 }
 
 func (p *Position) move_count() int {
@@ -157,6 +157,10 @@ func (p *Position) occupied_at(sq Square) bool {
 
 func (p *Position) opposite_color_attacks() Bitboard {
 	return p.state.opposite_color_attacks
+}
+
+func (p *Position) our_pt_bb(pt PieceType) Bitboard {
+	return p.placement[pt_to_p(pt, p.side_to_move())]
 }
 
 func (p *Position) parse_move(s string) Move {
@@ -212,10 +216,6 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 	}
 
 	return blockers
-}
-
-func (p *Position) our_pt_bb(pt PieceType) Bitboard {
-	return p.placement[pt_to_p(pt, p.side_to_move())]
 }
 
 func (p Position) String() string {

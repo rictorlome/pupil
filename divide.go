@@ -11,42 +11,8 @@ type Node struct {
 	children []Node
 }
 
-type Nodes []Node
-
-func (n Nodes) Len() int {
-	return len(n)
-}
-func (n Nodes) Swap(i, j int) {
-	n[i], n[j] = n[j], n[i]
-}
-func (n Nodes) Less(i, j int) bool {
-	return int(move_src(n[i].origin)) < int(move_src(n[j].origin))
-}
-
-func (n Node) String() string {
-	if n.parent == nil {
-		return fmt.Sprintf("%v", n.origin)
-	}
-	return fmt.Sprintf("%v -> %v", n.parent, n.origin)
-}
-
 func build_tree(p *Position, parent *Node, move Move, depth_left int, c chan Node) {
 	c <- build_tree_recursive(p, parent, move, depth_left)
-}
-
-func build_tree_recursive(p *Position, parent *Node, move Move, depth_left int) Node {
-	self := Node{parent, move, make([]Node, 0)}
-	if 0 < depth_left {
-		moves := (*p).generate_moves()
-		children := make([]Node, len(moves))
-		for i := 0; i < len(moves); i++ {
-			(*p).do_move(moves[i], &StateInfo{})
-			children[i] = build_tree_recursive(p, &self, moves[i], depth_left-1)
-			(*p).undo_move(moves[i])
-		}
-		self.children = children
-	}
-	return self
 }
 
 func build_tree_parallel(p *Position, depth_left int) Node {
@@ -64,6 +30,21 @@ func build_tree_parallel(p *Position, depth_left int) Node {
 		children[i] = <-c
 	}
 	self.children = children
+	return self
+}
+
+func build_tree_recursive(p *Position, parent *Node, move Move, depth_left int) Node {
+	self := Node{parent, move, make([]Node, 0)}
+	if 0 < depth_left {
+		moves := (*p).generate_moves()
+		children := make([]Node, len(moves))
+		for i := 0; i < len(moves); i++ {
+			(*p).do_move(moves[i], &StateInfo{})
+			children[i] = build_tree_recursive(p, &self, moves[i], depth_left-1)
+			(*p).undo_move(moves[i])
+		}
+		self.children = children
+	}
 	return self
 }
 
@@ -100,4 +81,11 @@ func divide_tree(prefix string, n Node, cur_depth int, max_depth int, i int) {
 	if 1 < cur_depth && cur_depth < i {
 		fmt.Println(fmt.Sprintf("%v. %v moves =        %v", cur_depth, prefix, n.count_leaves()))
 	}
+}
+
+func (n Node) String() string {
+	if n.parent == nil {
+		return fmt.Sprintf("%v", n.origin)
+	}
+	return fmt.Sprintf("%v -> %v", n.parent, n.origin)
 }
