@@ -44,45 +44,55 @@ func init() {
 	init_pool()
 }
 
-func checkGameOver(i []js.Value) {
+
+
+var makeHumanMove js.Func = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	move_string := js.ValueOf(args[0].String()).String()
+	human_move := BOARD_GLOBAL.parse_move(move_string)
+	BOARD_GLOBAL.do_move(human_move, &StateInfo{})
+	// js.Global().Get("board1").Call("position", BOARD_GLOBAL.String(), true)
+	js.Global().Set("humansTurn", false)
+	return BOARD_GLOBAL.String()
+})
+
+var validateHumanMove js.Func = js.FuncOf(func (this js.Value, args []js.Value) interface{} {
+	human_move_string := js.ValueOf(args[0].String()).String()
+	human_move := BOARD_GLOBAL.parse_move(human_move_string)
+	legal_moves := BOARD_GLOBAL.generate_moves()
+	for _, legal_move := range legal_moves {
+		if human_move == legal_move {
+			return true
+		}
+	}
+	return false
+})
+
+var BOARD_GLOBAL Position
+var checkGameOver js.Func = js.FuncOf(func (this js.Value, args []js.Value) interface{} {
 	moves := BOARD_GLOBAL.generate_moves()
 	if len(moves) == 0 {
 		js.Global().Call("alert", "Game Over")
 		js.Global().Call("reload")
+		return true
 	}
-}
-
-func makeHumanMove(i []js.Value) {
-	move_string := js.ValueOf(i[0].String()).String()
-	human_move := BOARD_GLOBAL.parse_move(move_string)
-	BOARD_GLOBAL.do_move(human_move, &StateInfo{})
-	js.Global().Get("board1").Call("position", BOARD_GLOBAL.String(), true)
-	js.Global().Set("humansTurn", false)
-}
-
-func makeComputerMove(i []js.Value) {
+	return false
+})
+var makeComputerMove js.Func = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 	engine_move := BOARD_GLOBAL.ab_root(6)
 	BOARD_GLOBAL.do_move(engine_move.move, &StateInfo{})
-	js.Global().Get("board1").Call("position", BOARD_GLOBAL.String(), true)
-	js.Global().Call("clearInterval", "firstMoveInterval")
+	// js.Global().Get("board1").Call("position", BOARD_GLOBAL.String(), true)
 	js.Global().Set("humansTurn", true)
-}
+	return BOARD_GLOBAL.String()
+})
 
-// func validateHumanMove(i []js.Value) {
-// 	move_string := js.ValueOf(i[0].String()).String()
-// 	move := BOARD_GLOBAL.parse_move(move_string)
-// 	moves := BOARD_GLOBAL.generate_moves()
-// }
-
-var BOARD_GLOBAL Position
 
 
 
 func registerCallbacks() {
-    js.Global().Set("makeComputerMove", js.NewCallback(makeComputerMove))
-		js.Global().Set("makeHumanMove", js.NewCallback(makeHumanMove))
-		js.Global().Set("checkGameOver", js.NewCallback(checkGameOver))
-		// js.Global().Set("validateHumanMove", js.NewCallback(validateHumanMove))
+    js.Global().Set("makeComputerMove", makeComputerMove)
+		js.Global().Set("makeHumanMove", makeHumanMove)
+		js.Global().Set("checkGameOver", checkGameOver)
+		js.Global().Set("validateHumanMove", validateHumanMove)
 }
 
 func main() {
