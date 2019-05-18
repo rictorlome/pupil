@@ -30,6 +30,7 @@ func (g *Game) BeginEndpoint(w http.ResponseWriter, r *http.Request) {
 func (g *Game) RestartEndpoint(w http.ResponseWriter, r *http.Request) {
 	p := parse_fen(INITIAL_FEN)
 	g.pos = &p
+	TT_GLOBAL = createTT(20)
 	json.NewEncoder(w).Encode("OK")
 }
 
