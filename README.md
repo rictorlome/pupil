@@ -1,5 +1,14 @@
 # Pupil
 
+## Deployments
+
+| Type                       | Address                          |
+| -------------------------- | -------------------------------- |
+| Kubernetes                 | http://35.245.193.227/           |
+| WebAssembly (Experimental) | www.thingsishow.com/pupil-deploy |
+
+## Overview
+
 Pupil is a chess engine written in `Go`. The goal of writing this program was to create an engine capable of beating me in a 10 minute game.
 
 [Perft tests](https://www.chessprogramming.org/Perft) pass for the [initial board state](https://www.chessprogramming.org/Perft_Results#Initial_Position) and for [kiwipete](https://www.chessprogramming.org/Perft_Results#Position_2) up to depths 6 and 5 respectively.
