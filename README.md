@@ -1,12 +1,6 @@
 # Pupil
 
-## Deployments
-
-| Type                       | Address                          |
-| -------------------------- | -------------------------------- |
-| Kubernetes                 | http://35.245.193.227/           |
-| WebAssembly (Experimental) | www.thingsishow.com/pupil-deploy |
-
+[Live link](https://pupil.fly.dev/)
 ## Overview
 
 Pupil is a chess engine written in `Go`. The goal of writing this program was to create an engine capable of beating me in a 10 minute game.
