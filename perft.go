@@ -41,27 +41,27 @@ func (p *perft) add(s perft) perft {
 	}
 }
 
-func get_perft(p *Position, depth int, move Move, c chan perft) {
-	c <- get_perft_recursive(p, depth, move)
+func getPerft(p *Position, depth int, move Move, c chan perft) {
+	c <- getPerftRecursive(p, depth, move)
 }
 
-func get_perft_parallel(p *Position, depth int) perft {
+func getPerftParallel(p *Position, depth int) perft {
 	if depth < 1 {
 		return perft{0, 1, 0, 0, 0, 0, 0, 0}
 	}
-	new_perft := perft{0, 0, 0, 0, 0, 0, 0, 0}
+	newPerft := perft{0, 0, 0, 0, 0, 0, 0, 0}
 	c := make(chan perft)
-	moves := p.generate_moves()
+	moves := p.generateMoves()
 	for i := 0; i < len(moves); i++ {
 		duped := p.dup()
-		duped.do_move(moves[i], &StateInfo{})
-		go get_perft(&duped, depth-1, moves[i], c)
+		duped.doMove(moves[i], &StateInfo{})
+		go getPerft(&duped, depth-1, moves[i], c)
 	}
 	for i := 0; i < len(moves); i++ {
-		new_perft = new_perft.add(<-c)
+		newPerft = newPerft.add(<-c)
 	}
-	new_perft.depth = depth
-	return new_perft
+	newPerft.depth = depth
+	return newPerft
 }
 
 var TT_TABLES = [10]*TTPerft{
@@ -69,39 +69,39 @@ var TT_TABLES = [10]*TTPerft{
 	createTTPerft(), createTTPerft(), createTTPerft(), createTTPerft(), createTTPerft(),
 }
 
-func get_perft_recursive(p *Position, depth int, move Move) perft {
-	new_perft := perft{0, 1, 0, 0, 0, 0, 0, 0}
-	tt_table := TT_TABLES[depth]
-	perft, ok := tt_table.read(p.state.key)
+func getPerftRecursive(p *Position, depth int, move Move) perft {
+	newPerft := perft{0, 1, 0, 0, 0, 0, 0, 0}
+	ttTable := TT_TABLES[depth]
+	perft, ok := ttTable.read(p.state.key)
 	if ok {
 		return perft
 	}
 	if depth == 0 {
-		new_perft.update_with_move(move)
-		new_perft.checks += indicator(p.in_check())
-		new_perft.checkmates += indicator(p.in_checkmate())
-		return new_perft
+		newPerft.updateWithMove(move)
+		newPerft.checks += indicator(p.inCheck())
+		newPerft.checkmates += indicator(p.inCheckmate())
+		return newPerft
 	}
-	new_perft.nodes = 0
-	for _, move := range p.generate_moves() {
-		s := si_pool.Get().(*StateInfo)
-		p.do_move(move, s)
-		new_perft = new_perft.add(get_perft_recursive(p, depth-1, move))
-		p.undo_move(move)
-		si_pool.Put(s)
+	newPerft.nodes = 0
+	for _, move := range p.generateMoves() {
+		s := siPool.Get().(*StateInfo)
+		p.doMove(move, s)
+		newPerft = newPerft.add(getPerftRecursive(p, depth-1, move))
+		p.undoMove(move)
+		siPool.Put(s)
 	}
-	new_perft.depth = depth
-	tt_table.write(p.state.key, new_perft)
-	return new_perft
+	newPerft.depth = depth
+	ttTable.write(p.state.key, newPerft)
+	return newPerft
 }
 
 func (p perft) String() string {
 	return fmt.Sprintf("depth %v: %v nodes, %v captures, %v enpassants, %v castles, %v promotions, %v checks, and %v checkmates", p.depth, p.nodes, p.captures, p.enpassants, p.castles, p.promotions, p.checks, p.checkmates)
 }
 
-func (p *perft) update_with_move(m Move) {
-	p.captures += indicator(is_capture(m))
-	p.enpassants += indicator(is_enpassant(m))
-	p.castles += indicator(is_castle(m))
-	p.promotions += indicator(is_promotion(m))
+func (p *perft) updateWithMove(m Move) {
+	p.captures += indicator(isCapture(m))
+	p.enpassants += indicator(isEnpassant(m))
+	p.castles += indicator(isCastle(m))
+	p.promotions += indicator(isPromotion(m))
 }

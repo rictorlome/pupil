@@ -5,117 +5,117 @@ import (
 )
 
 func (p *Position) dup() Position {
-	new_placement := make([]Bitboard, len(p.placement))
-	new_placement_by_square := make([]Piece, len(p.placement_by_square))
-	copy(new_placement, p.placement)
-	copy(new_placement_by_square, p.placement_by_square)
+	newPlacement := make([]Bitboard, len(p.placement))
+	newPlacementBySquare := make([]Piece, len(p.placementBySquare))
+	copy(newPlacement, p.placement)
+	copy(newPlacementBySquare, p.placementBySquare)
 	return Position{
 		p.occ,
-		new_placement,
-		new_placement_by_square,
+		newPlacement,
+		newPlacementBySquare,
 		p.ply,
 		p.state.dup(),
 		p.stm,
 	}
 }
 
-func (p *Position) generate_evasions(pl *[]Move, ml *[]Move) {
-	us, them := p.side_to_move(), opposite(p.side_to_move())
-	king_sq := p.king_square(us)
+func (p *Position) generateEvasions(pl *[]Move, ml *[]Move) {
+	us, them := p.sideToMove(), opposite(p.sideToMove())
+	kingSq := p.kingSquare(us)
 
-	occ, self_occ := p.occupancy(), p.occupancy_by_color(us)
-	occ_without_king := occ &^ SQUARE_BBS[king_sq]
+	occ, selfOcc := p.occupancy(), p.occupancyByColor(us)
+	occWithoutKing := occ &^ SQUARE_BBS[kingSq]
 
-	checkers := attackers_to_sq_by_color(p.placement, king_sq, them)
-	atks := attacks_by_color(occ_without_king, p.placement, them)
+	checkers := attackersToSqByColor(p.placement, kingSq, them)
+	atks := attacksByColor(occWithoutKing, p.placement, them)
 
 	// King evasions
-	serialize_normal_moves(ml, king_sq, king_attacks(occ, king_sq)&^(self_occ|atks), occ)
+	serializeNormalMoves(ml, kingSq, kingAttacks(occ, kingSq)&^(selfOcc|atks), occ)
 	if popcount(checkers) > 1 {
 		return
 	}
-	checker_sq := Square(lsb(checkers))
-	// Regular moves (duplicate king evasions are excluded in pseudo_legals_by_color)
-	p.generate_non_evasions(pl, ml, BETWEEN_BBS[king_sq][checker_sq]|checkers)
+	checkerSq := Square(lsb(checkers))
+	// Regular moves (duplicate king evasions are excluded in pseudoLegalsByColor)
+	p.generateNonEvasions(pl, ml, BETWEEN_BBS[kingSq][checkerSq]|checkers)
 }
 
-func (p *Position) generate_moves() []Move {
-	pseudo_legal_move_list := make([]Move, 0, MAX_BRANCHING)
-	move_list := make([]Move, 0, MAX_BRANCHING)
-	if p.in_check() {
-		p.generate_evasions(&pseudo_legal_move_list, &move_list)
+func (p *Position) generateMoves() []Move {
+	pseudoLegalMoveList := make([]Move, 0, MAX_BRANCHING)
+	moveList := make([]Move, 0, MAX_BRANCHING)
+	if p.inCheck() {
+		p.generateEvasions(&pseudoLegalMoveList, &moveList)
 	} else {
-		p.generate_non_evasions(&pseudo_legal_move_list, &move_list, Bitboard(0))
+		p.generateNonEvasions(&pseudoLegalMoveList, &moveList, Bitboard(0))
 	}
-	return move_list
+	return moveList
 }
 
 // NOTE: pseudolegal moves include those that cause check. these have to be filtered out in move generation
-func (p *Position) generate_pseudo_legals(pl *[]Move, forced_dsts Bitboard) {
-	us := p.side_to_move()
-	occ, self_occ := p.occupancy(), p.occupancy_by_color(us)
+func (p *Position) generatePseudoLegals(pl *[]Move, forcedDsts Bitboard) {
+	us := p.sideToMove()
+	occ, selfOcc := p.occupancy(), p.occupancyByColor(us)
 
-	serialize_for_pseudos_pawns(pl, p.our_pt_bb(PAWN), occ, self_occ, us, p.state.ep_sq)
-	serialize_for_pseudos_other(pl, p.our_pt_bb(KNIGHT), occ, self_occ, knight_attacks)
-	serialize_for_pseudos_other(pl, p.our_pt_bb(ROOK), occ, self_occ, rook_attacks)
-	serialize_for_pseudos_other(pl, p.our_pt_bb(BISHOP), occ, self_occ, bishop_attacks)
-	serialize_for_pseudos_other(pl, p.our_pt_bb(QUEEN), occ, self_occ, queen_attacks)
+	serializeForPseudosPawns(pl, p.ourPtBb(PAWN), occ, selfOcc, us, p.state.epSq)
+	serializeForPseudosOther(pl, p.ourPtBb(KNIGHT), occ, selfOcc, knightAttacks)
+	serializeForPseudosOther(pl, p.ourPtBb(ROOK), occ, selfOcc, rookAttacks)
+	serializeForPseudosOther(pl, p.ourPtBb(BISHOP), occ, selfOcc, bishopAttacks)
+	serializeForPseudosOther(pl, p.ourPtBb(QUEEN), occ, selfOcc, queenAttacks)
 
-	if empty(forced_dsts) {
-		serialize_for_pseudos_king(pl, p.our_pt_bb(KING), occ, self_occ, us, p.state.castling_rights, p.state.opposite_color_attacks)
+	if empty(forcedDsts) {
+		serializeForPseudosKing(pl, p.ourPtBb(KING), occ, selfOcc, us, p.state.castlingRights, p.state.oppositeColorAttacks)
 	}
 }
 
-func (p *Position) generate_non_evasions(pl *[]Move, ml *[]Move, forced_dsts Bitboard) {
-	p.generate_pseudo_legals(pl, forced_dsts)
-	for _, pseudo_legal := range *pl {
-		if p.is_legal(pseudo_legal) && (empty(forced_dsts) || is_good_evasion(forced_dsts, pseudo_legal)) {
-			*ml = append(*ml, pseudo_legal)
+func (p *Position) generateNonEvasions(pl *[]Move, ml *[]Move, forcedDsts Bitboard) {
+	p.generatePseudoLegals(pl, forcedDsts)
+	for _, pseudoLegal := range *pl {
+		if p.isLegal(pseudoLegal) && (empty(forcedDsts) || isGoodEvasion(forcedDsts, pseudoLegal)) {
+			*ml = append(*ml, pseudoLegal)
 		}
 	}
 }
 
-func (p *Position) get_color_attacks(color Color) Bitboard {
-	return attacks_by_color(p.occupancy(), p.placement, color)
+func (p *Position) getColorAttacks(color Color) Bitboard {
+	return attacksByColor(p.occupancy(), p.placement, color)
 }
 
-func is_good_evasion(forced_dsts Bitboard, m Move) bool {
-	return occupied_at_sq(forced_dsts, move_dst(m)) ||
-		(is_enpassant(m) && occupied_at_sq(forced_dsts, cleanup_sq_for_ep_capture(move_dst(m))))
+func isGoodEvasion(forcedDsts Bitboard, m Move) bool {
+	return occupiedAtSq(forcedDsts, moveDst(m)) ||
+		(isEnpassant(m) && occupiedAtSq(forcedDsts, cleanupSqForEpCapture(moveDst(m))))
 }
 
-func (p *Position) in_check() bool {
-	color := p.side_to_move()
-	atks := p.opposite_color_attacks()
-	return occupied_at_sq(atks, p.king_square(color))
+func (p *Position) inCheck() bool {
+	color := p.sideToMove()
+	atks := p.oppositeColorAttacks()
+	return occupiedAtSq(atks, p.kingSquare(color))
 }
 
-func (p *Position) in_checkmate() bool {
-	return p.in_check() && len(p.generate_moves()) == 0
+func (p *Position) inCheckmate() bool {
+	return p.inCheck() && len(p.generateMoves()) == 0
 }
 
-func (p *Position) is_legal(m Move) bool {
-	src, dst := move_src(m), move_dst(m)
-	us, them := p.side_to_move(), opposite(p.side_to_move())
-	ksq := p.king_square(us)
+func (p *Position) isLegal(m Move) bool {
+	src, dst := moveSrc(m), moveDst(m)
+	us, them := p.sideToMove(), opposite(p.sideToMove())
+	ksq := p.kingSquare(us)
 
-	if is_enpassant(m) {
-		their_queens := p.placement[pt_to_p(QUEEN, them)]
+	if isEnpassant(m) {
+		theirQueens := p.placement[ptToP(QUEEN, them)]
 		// No discovered slider attacks on the king.
-		return empty(rook_attacks(p.occupancy()&^(SQUARE_BBS[src]|SQUARE_BBS[cleanup_sq_for_ep_capture(dst)]), ksq)&(p.placement[pt_to_p(ROOK, them)]|their_queens)) &&
-			empty(bishop_attacks(p.occupancy()&^SQUARE_BBS[src], ksq)&(p.placement[pt_to_p(BISHOP, them)]|their_queens))
+		return empty(rookAttacks(p.occupancy()&^(SQUARE_BBS[src]|SQUARE_BBS[cleanupSqForEpCapture(dst)]), ksq)&(p.placement[ptToP(ROOK, them)]|theirQueens)) &&
+			empty(bishopAttacks(p.occupancy()&^SQUARE_BBS[src], ksq)&(p.placement[ptToP(BISHOP, them)]|theirQueens))
 	}
-	if p.piece_type_at(src) == KING {
-		return is_castle(m) || !occupied_at_sq(p.opposite_color_attacks(), dst)
+	if p.pieceTypeAt(src) == KING {
+		return isCastle(m) || !occupiedAtSq(p.oppositeColorAttacks(), dst)
 	}
-	return !occupied_at_sq(p.state.blockers_for_king, src) || aligned(src, dst, ksq)
+	return !occupiedAtSq(p.state.blockersForKing, src) || aligned(src, dst, ksq)
 }
 
-func (p *Position) king_square(color Color) Square {
+func (p *Position) kingSquare(color Color) Square {
 	return Square(lsb(p.placement[color*6]))
 }
 
-func (p *Position) move_count() int {
+func (p *Position) moveCount() int {
 	return p.ply / 2
 }
 
@@ -123,95 +123,95 @@ func (p *Position) occupancy() Bitboard {
 	return p.occ
 }
 
-func (p *Position) occupancy_by_color(c Color) Bitboard {
-	return occupied_squares_by_color(p.placement, c)
+func (p *Position) occupancyByColor(c Color) Bitboard {
+	return occupiedSquaresByColor(p.placement, c)
 }
 
-func (p *Position) occupancy_by_piece(pc Piece) Bitboard {
+func (p *Position) occupancyByPiece(pc Piece) Bitboard {
 	return p.placement[pc]
 }
 
-func (p *Position) occupancy_by_pieces(pieces ...Piece) Bitboard {
+func (p *Position) occupancyByPieces(pieces ...Piece) Bitboard {
 	var occupancy Bitboard
 	for _, piece := range pieces {
-		occupancy |= p.occupancy_by_piece(piece)
+		occupancy |= p.occupancyByPiece(piece)
 	}
 	return occupancy
 }
 
-func (p *Position) occupancy_by_piece_type(pt PieceType) Bitboard {
-	return p.occupancy_by_pieces(pt_to_p(pt, WHITE), pt_to_p(pt, BLACK))
+func (p *Position) occupancyByPieceType(pt PieceType) Bitboard {
+	return p.occupancyByPieces(ptToP(pt, WHITE), ptToP(pt, BLACK))
 }
 
-func (p *Position) occupancy_by_piece_types(pts ...PieceType) Bitboard {
+func (p *Position) occupancyByPieceTypes(pts ...PieceType) Bitboard {
 	var occupancy Bitboard
 	for _, pt := range pts {
-		occupancy |= p.occupancy_by_piece_type(pt)
+		occupancy |= p.occupancyByPieceType(pt)
 	}
 	return occupancy
 }
 
-func (p *Position) occupied_at(sq Square) bool {
-	return p.piece_at(sq) != NULL_PIECE
+func (p *Position) occupiedAt(sq Square) bool {
+	return p.pieceAt(sq) != NULL_PIECE
 }
 
-func (p *Position) opposite_color_attacks() Bitboard {
-	return p.state.opposite_color_attacks
+func (p *Position) oppositeColorAttacks() Bitboard {
+	return p.state.oppositeColorAttacks
 }
 
-func (p *Position) our_pt_bb(pt PieceType) Bitboard {
-	return p.placement[pt_to_p(pt, p.side_to_move())]
+func (p *Position) ourPtBb(pt PieceType) Bitboard {
+	return p.placement[ptToP(pt, p.sideToMove())]
 }
 
-func (p *Position) parse_move(s string) Move {
-	src := parse_square(s[:2])
-	dst := parse_square(s[2:4])
-	mover_type, captured := piece_to_type(p.piece_at(src)), p.piece_at(dst)
-	return to_move(dst, src, parse_move_type(s[4:], p.occupancy(), src, dst, mover_type, captured))
+func (p *Position) parseMove(s string) Move {
+	src := parseSquare(s[:2])
+	dst := parseSquare(s[2:4])
+	moverType, captured := pieceToType(p.pieceAt(src)), p.pieceAt(dst)
+	return toMove(dst, src, parseMoveType(s[4:], p.occupancy(), src, dst, moverType, captured))
 }
 
-func (p *Position) piece_at(sq Square) Piece {
-	return p.placement_by_square[sq]
+func (p *Position) pieceAt(sq Square) Piece {
+	return p.placementBySquare[sq]
 }
 
-func (p *Position) piece_type_at(sq Square) PieceType {
-	return piece_to_type(p.piece_at(sq))
+func (p *Position) pieceTypeAt(sq Square) PieceType {
+	return pieceToType(p.pieceAt(sq))
 }
 
-func (p *Position) to_zobrist() Key {
+func (p *Position) toZobrist() Key {
 	var ResKey Key
-	for sq, piece := range p.placement_by_square {
+	for sq, piece := range p.placementBySquare {
 		if piece != NULL_PIECE {
 			ResKey ^= ZOBRIST_PSQ[sq][piece]
 		}
 	}
-	ResKey ^= ZOBRIST_CSTL[p.state.castling_rights]
-	ResKey ^= ZOBRIST_EPSQ[p.state.ep_sq]
+	ResKey ^= ZOBRIST_CSTL[p.state.castlingRights]
+	ResKey ^= ZOBRIST_EPSQ[p.state.epSq]
 	ResKey ^= ZOBRIST_SIDE * Key(p.stm)
 	return ResKey
 }
 
-func (p *Position) side_to_move() Color {
+func (p *Position) sideToMove() Color {
 	return p.stm
 }
 
 // Returns bitboard of all pieces blocking attacks to sq from sliders of color c.
-func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
+func (p *Position) sliderBlockers(c Color, sq Square) Bitboard {
 	var blockers Bitboard
 
 	occ := p.occupancy()
 
 	// QUESTION: is the attack mask sufficient here, or do we need pseudolegal moves?
-	queen_occ := p.occupancy_by_piece(pt_to_p(QUEEN, c))
-	possible_snipers := ((p.occupancy_by_piece(pt_to_p(BISHOP, c)) | queen_occ) & BISHOP_ATTACK_MASKS[sq]) |
-		((p.occupancy_by_piece(pt_to_p(ROOK, c)) | queen_occ) & ROOK_ATTACK_MASKS[sq])
+	queenOcc := p.occupancyByPiece(ptToP(QUEEN, c))
+	possibleSnipers := ((p.occupancyByPiece(ptToP(BISHOP, c)) | queenOcc) & BISHOP_ATTACK_MASKS[sq]) |
+		((p.occupancyByPiece(ptToP(ROOK, c)) | queenOcc) & ROOK_ATTACK_MASKS[sq])
 
-	for cursor := possible_snipers; cursor != 0; cursor &= cursor - 1 {
-		sniper_sq := Square(lsb(cursor))
-		intermediate_pieces := BETWEEN_BBS[sq][sniper_sq] & occ
+	for cursor := possibleSnipers; cursor != 0; cursor &= cursor - 1 {
+		sniperSq := Square(lsb(cursor))
+		intermediatePieces := BETWEEN_BBS[sq][sniperSq] & occ
 		// NOTE: can set pinners in this if as well, when I start keeping track of them.
-		if popcount(intermediate_pieces) == 1 {
-			blockers |= intermediate_pieces
+		if popcount(intermediatePieces) == 1 {
+			blockers |= intermediatePieces
 		}
 	}
 
@@ -219,5 +219,5 @@ func (p *Position) slider_blockers(c Color, sq Square) Bitboard {
 }
 
 func (p Position) String() string {
-	return generate_fen(p)
+	return generateFen(p)
 }

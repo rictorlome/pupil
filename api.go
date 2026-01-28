@@ -2,8 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -12,9 +10,9 @@ type Game struct {
 }
 
 func (g *Game) validateMove(m Move) bool {
-	legal_moves := g.pos.generate_moves()
-	for _, legal_move := range legal_moves {
-		if m == legal_move {
+	legalMoves := g.pos.generateMoves()
+	for _, legalMove := range legalMoves {
+		if m == legalMove {
 			return true
 		}
 	}
@@ -22,13 +20,13 @@ func (g *Game) validateMove(m Move) bool {
 }
 
 func (g *Game) BeginEndpoint(w http.ResponseWriter, r *http.Request) {
-	engine_move := g.pos.ab_root(6)
-	g.pos.do_move(engine_move.move, &StateInfo{})
+	engineMove := g.pos.abRoot(6)
+	g.pos.doMove(engineMove.move, &StateInfo{})
 	json.NewEncoder(w).Encode(g.pos.String())
 }
 
 func (g *Game) RestartEndpoint(w http.ResponseWriter, r *http.Request) {
-	p := parse_fen(INITIAL_FEN)
+	p := parseFen(INITIAL_FEN)
 	g.pos = &p
 	TT_GLOBAL = createTT(20)
 	json.NewEncoder(w).Encode("OK")
@@ -36,27 +34,41 @@ func (g *Game) RestartEndpoint(w http.ResponseWriter, r *http.Request) {
 
 func (g *Game) ThinkEndpoint(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	client_move := g.pos.parse_move(r.Form["move"][0])
-	if g.validateMove(client_move) {
-		g.pos.do_move(client_move, &StateInfo{})
-		engine_move := g.pos.ab_root(6)
-		g.pos.do_move(engine_move.move, &StateInfo{})
+	clientMove := g.pos.parseMove(r.Form["move"][0])
+	if g.validateMove(clientMove) {
+		g.pos.doMove(clientMove, &StateInfo{})
+		engineMove := g.pos.abRoot(6)
+		g.pos.doMove(engineMove.move, &StateInfo{})
 	}
 	json.NewEncoder(w).Encode(g.pos.String())
 }
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, HEAD, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func startServer() {
-	router := mux.NewRouter()
-	p := parse_fen(INITIAL_FEN)
+	mux := http.NewServeMux()
+	p := parseFen(INITIAL_FEN)
 	g := Game{&p}
-	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"})
-	origins := handlers.AllowedOrigins([]string{"*"})
-	router.HandleFunc("/begin", g.BeginEndpoint).Methods("POST")
-	router.HandleFunc("/restart", g.RestartEndpoint).Methods("POST")
-	router.HandleFunc("/think", g.ThinkEndpoint).Methods("POST")
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
-	if err := http.ListenAndServe(":8080", handlers.CORS(headers, methods, origins)(router)); err != nil {
+
+	mux.HandleFunc("POST /begin", g.BeginEndpoint)
+	mux.HandleFunc("POST /restart", g.RestartEndpoint)
+	mux.HandleFunc("POST /think", g.ThinkEndpoint)
+	mux.Handle("/", http.FileServer(http.Dir("./static/")))
+
+	if err := http.ListenAndServe(":8080", corsMiddleware(mux)); err != nil {
 		panic(err)
 	}
 }

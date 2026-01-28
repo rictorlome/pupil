@@ -15,28 +15,28 @@ type Magic struct {
 	shift uint
 }
 
-func attack_index(m *Magic, occ Bitboard) uint {
+func attackIndex(m *Magic, occ Bitboard) uint {
 	return uint(((occ & m.mask) * m.magic) >> m.shift)
 }
 
-func attack_index_with_offset(m *Magic, occ Bitboard) uint {
+func attackIndexWithOffset(m *Magic, occ Bitboard) uint {
 	return m.offset + uint(((occ&m.mask)*m.magic)>>m.shift)
 }
 
-func find_magic(sq Square, bishop bool) Magic {
+func findMagic(sq Square, bishop bool) Magic {
 	m := Magic{}
 	var occupancy, reference [4096]Bitboard
 	// Rook by default
 	magics := RookMagics
-	attack_table := RookAttackTable
-	attack_func := slider_rook_attacks
+	attackTable := RookAttackTable
+	attackFunc := sliderRookAttacks
 	m.mask = RELEVANT_ROOK_OCCUPANCY[sq]
 	// Use precomputed values for speedup
 	m.magic = Bitboard(RookMagicNums[sq])
 	if bishop {
 		magics = BishopMagics
-		attack_table = BishopAttackTable
-		attack_func = slider_bishop_attacks
+		attackTable = BishopAttackTable
+		attackFunc = sliderBishopAttacks
 		m.mask = RELEVANT_BISHOP_OCCUPANCY[sq]
 		// Use precomputed value for speedup
 		m.magic = Bitboard(BishopMagicNums[sq])
@@ -53,7 +53,7 @@ func find_magic(sq Square, bishop bool) Magic {
 	for first := true; first || occ != 0; occ = (occ - m.mask) & m.mask {
 		first = false
 		occupancy[size] = occ
-		reference[size] = attack_func(occ, sq)
+		reference[size] = attackFunc(occ, sq)
 		size++
 	}
 	m.size = size
@@ -62,16 +62,16 @@ OUTER:
 	for i := 0; i < 100000000; i++ {
 		var used [4096]Bitboard
 		if popcount((m.magic*m.mask)>>56) < 6 {
-			m.magic = rand_few_bits()
+			m.magic = randFewBits()
 			continue
 		}
 		for j := uint(0); j < size; j++ {
-			idx := attack_index(&m, occupancy[j])
+			idx := attackIndex(&m, occupancy[j])
 			if used[idx] == 0 {
 				used[idx] = reference[j]
-				attack_table[m.offset+idx] = used[idx]
+				attackTable[m.offset+idx] = used[idx]
 			} else if used[idx] != reference[j] {
-				m.magic = rand_few_bits()
+				m.magic = randFewBits()
 				continue OUTER
 			}
 		}
@@ -81,14 +81,14 @@ OUTER:
 	return m
 }
 
-func init_magics() {
+func initMagics() {
 	for _, sq := range SQUARES {
-		BishopMagics[sq] = find_magic(sq, true)
-		RookMagics[sq] = find_magic(sq, false)
+		BishopMagics[sq] = findMagic(sq, true)
+		RookMagics[sq] = findMagic(sq, false)
 	}
 }
 
 // https://www.chessprogramming.org/Looking_for_Magics#Feeding_in_Randoms
-func rand_few_bits() Bitboard {
+func randFewBits() Bitboard {
 	return Bitboard(rand.Uint64() & rand.Uint64() & rand.Uint64())
 }

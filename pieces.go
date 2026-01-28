@@ -4,32 +4,32 @@ import (
 // "fmt"
 )
 
-func piece_on_sq(pieces []Bitboard, sq Square) Piece {
+func pieceOnSq(pieces []Bitboard, sq Square) Piece {
 	for piece, bb := range pieces {
-		if occupied_at_sq(bb, sq) {
+		if occupiedAtSq(bb, sq) {
 			return Piece(piece)
 		}
 	}
 	return NULL_PIECE
 }
 
-func piece_to_color(p Piece) Color {
+func pieceToColor(p Piece) Color {
 	return Color(p / 6)
 }
 
-func piece_to_type(p Piece) PieceType {
+func pieceToType(p Piece) PieceType {
 	return PIECE_TYPES[p]
 }
 
-func placement_to_placement_by_square(placement []Bitboard) []Piece {
-	placement_by_square := make([]Piece, 64)
+func placementToPlacementBySquare(placement []Bitboard) []Piece {
+	placementBySquare := make([]Piece, 64)
 	for _, SQ := range SQUARES {
-		placement_by_square[SQ] = piece_on_sq(placement, SQ)
+		placementBySquare[SQ] = pieceOnSq(placement, SQ)
 	}
-	return placement_by_square
+	return placementBySquare
 }
 
-func pt_to_p(pt PieceType, color Color) Piece {
+func ptToP(pt PieceType, color Color) Piece {
 	return Piece(pt + PieceType(6*color))
 }
 

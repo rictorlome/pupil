@@ -1,60 +1,59 @@
 package main
 
 import (
-	// "fmt"
 	"strconv"
 	"strings"
 )
 
-func bitboards_to_grid(bitboards []Bitboard) [8][8]string {
+func bitboardsToGrid(bitboards []Bitboard) [8][8]string {
 	var grid [8][8]string
 	for _, s := range SQUARES {
 		for _, piece := range PIECES {
-			if occupied_at_sq(bitboards[piece], s) {
-				grid[7-square_rank(s)][square_file(s)] = piece.String()
+			if occupiedAtSq(bitboards[piece], s) {
+				grid[7-squareRank(s)][squareFile(s)] = piece.String()
 			}
 		}
 	}
 	return grid
 }
 
-func generate_castle_string(s StateInfo) string {
-	var castle_string string
+func generateCastleString(s StateInfo) string {
+	var castleString string
 	// Reversed because bit indices are right to left
 	for idx, char := range "qkQK" {
-		if has_right(s.castling_rights, uint(idx)) {
-			castle_string = string(char) + castle_string
+		if hasRight(s.castlingRights, uint(idx)) {
+			castleString = string(char) + castleString
 		}
 	}
-	if castle_string == "" {
+	if castleString == "" {
 		return "-"
 	}
-	return castle_string
+	return castleString
 }
 
-func generate_color_string(pos Position) string {
-	if pos.side_to_move() == WHITE {
+func generateColorString(pos Position) string {
+	if pos.sideToMove() == WHITE {
 		return "w"
 	}
 	return "b"
 }
 
-func generate_rule_50_string(s StateInfo) string {
-	return strconv.Itoa(s.rule_50)
+func generateRule50String(s StateInfo) string {
+	return strconv.Itoa(s.rule50)
 }
 
-func generate_fen(pos Position) string {
+func generateFen(pos Position) string {
 	var fenArr []string
-	fenArr = append(fenArr, grid_to_fen(bitboards_to_grid(pos.placement)))
-	fenArr = append(fenArr, generate_color_string(pos))
-	fenArr = append(fenArr, generate_castle_string(*pos.state))
-	fenArr = append(fenArr, pos.state.ep_sq.String())
-	fenArr = append(fenArr, generate_rule_50_string(*pos.state))
-	fenArr = append(fenArr, strconv.Itoa(pos.move_count()))
+	fenArr = append(fenArr, gridToFen(bitboardsToGrid(pos.placement)))
+	fenArr = append(fenArr, generateColorString(pos))
+	fenArr = append(fenArr, generateCastleString(*pos.state))
+	fenArr = append(fenArr, pos.state.epSq.String())
+	fenArr = append(fenArr, generateRule50String(*pos.state))
+	fenArr = append(fenArr, strconv.Itoa(pos.moveCount()))
 	return strings.Join(fenArr, " ")
 }
 
-func grid_to_fen(grid [8][8]string) string {
+func gridToFen(grid [8][8]string) string {
 	var fenArr []string
 	for _, row := range grid {
 		fenString := ""
@@ -79,32 +78,32 @@ func grid_to_fen(grid [8][8]string) string {
 	return strings.Join(fenArr, "/")
 }
 
-func parse_color(s string) Color {
+func parseColor(s string) Color {
 	if s == "w" {
 		return WHITE
 	}
 	return BLACK
 }
 
-func parse_fen(fen string) Position {
+func parseFen(fen string) Position {
 	fields := strings.Split(fen, " ")
-	move_count, _ := strconv.Atoi(fields[5])
+	moveCount, _ := strconv.Atoi(fields[5])
 	// Core fen info
 	p := Position{}
 	p.state = &StateInfo{}
-	p.set_fen_info(fields[0], fields[1], fields[2], fields[3], fields[4], move_count)
+	p.setFenInfo(fields[0], fields[1], fields[2], fields[3], fields[4], moveCount)
 	// Additional state info
-	p.state.key = p.to_zobrist()
-	p.state.opposite_color_attacks = p.get_color_attacks(opposite(p.side_to_move()))
-	p.state.blockers_for_king = p.slider_blockers(opposite(p.side_to_move()), p.king_square(p.side_to_move()))
+	p.state.key = p.toZobrist()
+	p.state.oppositeColorAttacks = p.getColorAttacks(opposite(p.sideToMove()))
+	p.state.blockersForKing = p.sliderBlockers(opposite(p.sideToMove()), p.kingSquare(p.sideToMove()))
 	p.state.prev = nil
 
 	return p
 }
 
-func parse_move_type(promstring string, occ Bitboard, src Square, dst Square, mover_type PieceType, captured Piece) MoveType {
-	file_diff := square_file(dst) - square_file(src)
-	rank_diff := square_rank(dst) - square_rank(src)
+func parseMoveType(promstring string, occ Bitboard, src Square, dst Square, moverType PieceType, captured Piece) MoveType {
+	fileDiff := squareFile(dst) - squareFile(src)
+	rankDiff := squareRank(dst) - squareRank(src)
 	// Promotion
 	var mt MoveType
 	if promstring != "" {
@@ -112,47 +111,47 @@ func parse_move_type(promstring string, occ Bitboard, src Square, dst Square, mo
 		mt = MoveType(idx<<12) | MoveType(PROMOTION_MASK)
 	}
 	// Capture
-	mt |= cap_or_quiet(occ, dst)
+	mt |= capOrQuiet(occ, dst)
 	// En passant
-	if mover_type == PAWN && square_file(dst) != square_file(src) && captured == NULL_PIECE {
+	if moverType == PAWN && squareFile(dst) != squareFile(src) && captured == NULL_PIECE {
 		mt |= EP_CAPTURE
 	}
 	// Double Pawn Push
-	if mover_type == PAWN && (rank_diff == 2 || rank_diff == -2) {
+	if moverType == PAWN && (rankDiff == 2 || rankDiff == -2) {
 		mt |= DOUBLE_PAWN_PUSH
 	}
 	// Castles
-	if mover_type == KING && file_diff == 2 {
+	if moverType == KING && fileDiff == 2 {
 		mt |= KING_CASTLE
 	}
-	if mover_type == KING && file_diff == -2 {
+	if moverType == KING && fileDiff == -2 {
 		mt |= QUEEN_CASTLE
 	}
 	return mt
 }
 
-func parse_positions(positions string) []Bitboard {
-	result_bbs := make([]Bitboard, 12)
+func parsePositions(positions string) []Bitboard {
+	resultBBs := make([]Bitboard, 12)
 	ranks := strings.Split(positions, "/")
-	for rank, rank_string := range ranks {
+	for rank, rankString := range ranks {
 		offset := 0
-		for file, sq := range rank_string {
+		for file, sq := range rankString {
 			if strings.Contains(PIECE_STRING, string(sq)) {
-				index := make_piece(string(sq))
-				sq_num := make_square(RANK_8-rank, file+offset)
-				result_bbs[index] |= SQUARE_BBS[sq_num]
+				index := makePiece(string(sq))
+				sqNum := makeSquare(RANK_8-rank, file+offset)
+				resultBBs[index] |= SQUARE_BBS[sqNum]
 			} else {
 				offset += int(sq-'0') - 1
 			}
 		}
 	}
-	return result_bbs
+	return resultBBs
 }
 
-func parse_square(sq string) Square {
+func parseSquare(sq string) Square {
 	if sq == "-" {
 		return NULL_SQ
 	}
 	rank := int(sq[1]-'0') - 1
-	return make_square(rank, strings.Index(FILES, sq[0:1]))
+	return makeSquare(rank, strings.Index(FILES, sq[0:1]))
 }

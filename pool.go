@@ -4,10 +4,10 @@ import (
 	"sync"
 )
 
-var si_pool *sync.Pool
+var siPool *sync.Pool
 
-func init_pool() {
-	si_pool = &sync.Pool{
+func initPool() {
+	siPool = &sync.Pool{
 		New: func() interface{} {
 			return new(StateInfo)
 		},

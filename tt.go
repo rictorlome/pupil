@@ -29,15 +29,15 @@ var CUT_NODE uint8 = 1
 var ALL_NODE uint8 = 2
 
 type TTEntry struct {
-	best_move Move
-	depth     uint8
-	key       Key
-	node_type uint8
-	score     int
+	bestMove Move
+	depth    uint8
+	key      Key
+	nodeType uint8
+	score    int
 }
 
-func createTT(cap_exp int) *TT {
-	exp := float64(cap_exp)
+func createTT(capExp int) *TT {
+	exp := float64(capExp)
 	return &TT{m: make([]*TTEntry, int(math.Pow(2, exp)))}
 }
 

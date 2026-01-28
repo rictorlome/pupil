@@ -17,7 +17,6 @@ Table of Contents:
 12. CastlingRights (int)
 13. Move
 14. AttackFuncs
-
 */
 type AttackFunc func(Bitboard, Square) Bitboard
 type Bitboard uint64
@@ -28,25 +27,25 @@ type MoveType uint16
 type Piece uint
 type PieceType uint
 type Position struct {
-	occ                 Bitboard
-	placement           []Bitboard
-	placement_by_square []Piece
-	ply                 int
-	state               *StateInfo
-	stm                 Color
+	occ               Bitboard
+	placement         []Bitboard
+	placementBySquare []Piece
+	ply               int
+	state             *StateInfo
+	stm               Color
 }
 type Square uint
 type StateInfo struct {
 	// Core fen info
-	castling_rights int
-	ep_sq           Square
-	rule_50         int
+	castlingRights int
+	epSq           Square
+	rule50         int
 	// Additional info
-	key                    Key
-	opposite_color_attacks Bitboard
-	blockers_for_king      Bitboard
-	prev                   *StateInfo
-	captured               Piece
+	key                  Key
+	oppositeColorAttacks Bitboard
+	blockersForKing      Bitboard
+	prev                 *StateInfo
+	captured             Piece
 }
 
 // 1. COLORS
@@ -95,13 +94,13 @@ var ROOK_DIRECTIONS = []int{
 
 // 3. FILE BITBOARDS
 var FILE_ABB Bitboard = 0x101010101010101
-var FILE_BBB Bitboard = signed_shift(FILE_ABB, EAST*1)
-var FILE_CBB Bitboard = signed_shift(FILE_ABB, EAST*2)
-var FILE_DBB Bitboard = signed_shift(FILE_ABB, EAST*3)
-var FILE_EBB Bitboard = signed_shift(FILE_ABB, EAST*4)
-var FILE_FBB Bitboard = signed_shift(FILE_ABB, EAST*5)
-var FILE_GBB Bitboard = signed_shift(FILE_ABB, EAST*6)
-var FILE_HBB Bitboard = signed_shift(FILE_ABB, EAST*7)
+var FILE_BBB Bitboard = signedShift(FILE_ABB, EAST*1)
+var FILE_CBB Bitboard = signedShift(FILE_ABB, EAST*2)
+var FILE_DBB Bitboard = signedShift(FILE_ABB, EAST*3)
+var FILE_EBB Bitboard = signedShift(FILE_ABB, EAST*4)
+var FILE_FBB Bitboard = signedShift(FILE_ABB, EAST*5)
+var FILE_GBB Bitboard = signedShift(FILE_ABB, EAST*6)
+var FILE_HBB Bitboard = signedShift(FILE_ABB, EAST*7)
 var FILE_BBS = []Bitboard{
 	FILE_ABB, FILE_BBB, FILE_CBB, FILE_DBB,
 	FILE_EBB, FILE_FBB, FILE_GBB, FILE_HBB,
@@ -110,13 +109,13 @@ var FILES string = "abcdefgh"
 
 // 4. RANK BITBOARDS
 var RANK_1BB Bitboard = 0xff
-var RANK_2BB Bitboard = signed_shift(RANK_1BB, NORTH*1)
-var RANK_3BB Bitboard = signed_shift(RANK_1BB, NORTH*2)
-var RANK_4BB Bitboard = signed_shift(RANK_1BB, NORTH*3)
-var RANK_5BB Bitboard = signed_shift(RANK_1BB, NORTH*4)
-var RANK_6BB Bitboard = signed_shift(RANK_1BB, NORTH*5)
-var RANK_7BB Bitboard = signed_shift(RANK_1BB, NORTH*6)
-var RANK_8BB Bitboard = signed_shift(RANK_1BB, NORTH*7)
+var RANK_2BB Bitboard = signedShift(RANK_1BB, NORTH*1)
+var RANK_3BB Bitboard = signedShift(RANK_1BB, NORTH*2)
+var RANK_4BB Bitboard = signedShift(RANK_1BB, NORTH*3)
+var RANK_5BB Bitboard = signedShift(RANK_1BB, NORTH*4)
+var RANK_6BB Bitboard = signedShift(RANK_1BB, NORTH*5)
+var RANK_7BB Bitboard = signedShift(RANK_1BB, NORTH*6)
+var RANK_8BB Bitboard = signedShift(RANK_1BB, NORTH*7)
 var RANK_BBS = []Bitboard{
 	RANK_1BB, RANK_2BB, RANK_3BB, RANK_4BB,
 	RANK_5BB, RANK_6BB, RANK_7BB, RANK_8BB,
@@ -379,10 +378,10 @@ var PROMOTION_STRINGS = []string{
 	"n", "b", "r", "q", "n", "b", "r", "q",
 }
 
-var BLACK_KINGSIDE Move = to_move(SQ_G8, SQ_E8, KING_CASTLE)
-var BLACK_QUEENSIDE Move = to_move(SQ_C8, SQ_E8, QUEEN_CASTLE)
-var WHITE_KINGSIDE Move = to_move(SQ_G1, SQ_E1, KING_CASTLE)
-var WHITE_QUEENSIDE Move = to_move(SQ_C1, SQ_E1, QUEEN_CASTLE)
+var BLACK_KINGSIDE Move = toMove(SQ_G8, SQ_E8, KING_CASTLE)
+var BLACK_QUEENSIDE Move = toMove(SQ_C8, SQ_E8, QUEEN_CASTLE)
+var WHITE_KINGSIDE Move = toMove(SQ_G1, SQ_E1, KING_CASTLE)
+var WHITE_QUEENSIDE Move = toMove(SQ_C1, SQ_E1, QUEEN_CASTLE)
 
 var CASTLE_MOVES = []Move{
 	WHITE_KINGSIDE, WHITE_QUEENSIDE, BLACK_KINGSIDE, BLACK_QUEENSIDE,
@@ -390,9 +389,9 @@ var CASTLE_MOVES = []Move{
 
 // 14. AttackFuncs
 // For indexing by PieceType.
-// PAWN returns null_attacks because pawn attacks are computed separately, in bulk.
+// PAWN returns nullAttacks because pawn attacks are computed separately, in bulk.
 var AttackFuncs = []AttackFunc{
-	king_attacks, queen_attacks, bishop_attacks, knight_attacks, rook_attacks, null_attacks,
+	kingAttacks, queenAttacks, bishopAttacks, knightAttacks, rookAttacks, nullAttacks,
 }
 
 // 15. Magics

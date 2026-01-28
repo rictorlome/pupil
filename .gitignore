@@ -1,4 +1,4 @@
 util
 *.prof
 pupil.test
-
+.claude/

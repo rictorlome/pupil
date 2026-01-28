@@ -9,7 +9,7 @@ var ZOBRIST_CSTL [16]Key
 var ZOBRIST_EPSQ [65]Key // room for null sq. this really only needs the files.
 var ZOBRIST_SIDE Key
 
-func init_zobrists() {
+func initZobrists() {
 
 	for _, sq := range SQUARES {
 		for _, p := range PIECES {

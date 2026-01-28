@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	// "sort"
 )
 
 type Node struct {
@@ -11,75 +10,75 @@ type Node struct {
 	children []Node
 }
 
-func build_tree(p *Position, parent *Node, move Move, depth_left int, c chan Node) {
-	c <- build_tree_recursive(p, parent, move, depth_left)
+func buildTree(p *Position, parent *Node, move Move, depthLeft int, c chan Node) {
+	c <- buildTreeRecursive(p, parent, move, depthLeft)
 }
 
-func build_tree_parallel(p *Position, depth_left int) Node {
-	moves := (*p).generate_moves()
-	moves_len := len(moves)
-	children := make([]Node, moves_len)
+func buildTreeParallel(p *Position, depthLeft int) Node {
+	moves := (*p).generateMoves()
+	movesLen := len(moves)
+	children := make([]Node, movesLen)
 	c := make(chan Node)
-	self := Node{nil, Move(0), make([]Node, moves_len)}
-	for i := 0; i < moves_len; i++ {
+	self := Node{nil, Move(0), make([]Node, movesLen)}
+	for i := 0; i < movesLen; i++ {
 		duped := (*p).dup()
-		duped.do_move(moves[i], &StateInfo{})
-		go build_tree(&duped, &self, moves[i], depth_left-1, c)
+		duped.doMove(moves[i], &StateInfo{})
+		go buildTree(&duped, &self, moves[i], depthLeft-1, c)
 	}
-	for i := 0; i < moves_len; i++ {
+	for i := 0; i < movesLen; i++ {
 		children[i] = <-c
 	}
 	self.children = children
 	return self
 }
 
-func build_tree_recursive(p *Position, parent *Node, move Move, depth_left int) Node {
+func buildTreeRecursive(p *Position, parent *Node, move Move, depthLeft int) Node {
 	self := Node{parent, move, make([]Node, 0)}
-	if 0 < depth_left {
-		moves := (*p).generate_moves()
+	if 0 < depthLeft {
+		moves := (*p).generateMoves()
 		children := make([]Node, len(moves))
 		for i := 0; i < len(moves); i++ {
-			(*p).do_move(moves[i], &StateInfo{})
-			children[i] = build_tree_recursive(p, &self, moves[i], depth_left-1)
-			(*p).undo_move(moves[i])
+			(*p).doMove(moves[i], &StateInfo{})
+			children[i] = buildTreeRecursive(p, &self, moves[i], depthLeft-1)
+			(*p).undoMove(moves[i])
 		}
 		self.children = children
 	}
 	return self
 }
 
-func (n *Node) count_leaves() int {
+func (n *Node) countLeaves() int {
 	if len(n.children) == 0 {
 		return 1
 	}
-	child_leaves := 0
+	childLeaves := 0
 	for _, child := range n.children {
-		child_leaves += child.count_leaves()
+		childLeaves += child.countLeaves()
 	}
-	return child_leaves
+	return childLeaves
 }
 
-func divide(fen string, max_depth int, dividor int) {
-	pos := parse_fen(fen)
-	for i := 1; i <= max_depth; i++ {
-		n := build_tree_recursive(&pos, nil, Move(0), i)
+func divide(fen string, maxDepth int, dividor int) {
+	pos := parseFen(fen)
+	for i := 1; i <= maxDepth; i++ {
+		n := buildTreeRecursive(&pos, nil, Move(0), i)
 		if 2 < i {
-			divide_tree("", n, 1, dividor, i)
+			divideTree("", n, 1, dividor, i)
 		}
-		fmt.Println(fmt.Sprintf("perft( %v)=          %--v", i, n.count_leaves()))
+		fmt.Println(fmt.Sprintf("perft( %v)=          %--v", i, n.countLeaves()))
 	}
 }
 
-func divide_tree(prefix string, n Node, cur_depth int, max_depth int, i int) {
-	if max_depth < cur_depth {
+func divideTree(prefix string, n Node, curDepth int, maxDepth int, i int) {
+	if maxDepth < curDepth {
 		return
 	}
 	for i, child := range n.children {
-		new_prefix := fmt.Sprintf("%v %v", prefix, child.origin)
-		divide_tree(new_prefix, child, cur_depth+1, max_depth, i)
+		newPrefix := fmt.Sprintf("%v %v", prefix, child.origin)
+		divideTree(newPrefix, child, curDepth+1, maxDepth, i)
 	}
-	if 1 < cur_depth && cur_depth < i {
-		fmt.Println(fmt.Sprintf("%v. %v moves =        %v", cur_depth, prefix, n.count_leaves()))
+	if 1 < curDepth && curDepth < i {
+		fmt.Println(fmt.Sprintf("%v. %v moves =        %v", curDepth, prefix, n.countLeaves()))
 	}
 }
 

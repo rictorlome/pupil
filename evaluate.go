@@ -1,54 +1,50 @@
 package main
 
-import (
-// "fmt"
-)
-
-func add_position_value(pt PieceType, color Color, sq Square) int {
-	idx := relative_square(sq, color)
-	value_arr := *POSITION_VALUES[pt]
-	return value_arr[idx]
+func addPositionValue(pt PieceType, color Color, sq Square) int {
+	idx := relativeSquare(sq, color)
+	valueArr := *POSITION_VALUES[pt]
+	return valueArr[idx]
 }
 
 func (p *Position) evaluate(checkmate bool) int {
 	if !checkmate {
 		score := 0
-		for piece, piece_bb := range p.placement {
-			score += serialize_for_evaluate(p.side_to_move(), Piece(piece), piece_bb)
+		for piece, pieceBB := range p.placement {
+			score += serializeForEvaluate(p.sideToMove(), Piece(piece), pieceBB)
 		}
 		return score
 	}
 	return -MAX_SCORE
 }
 
-func relative_multiplier(color Color) int {
+func relativeMultiplier(color Color) int {
 	if color == WHITE {
 		return 1
 	}
 	return -1
 }
 
-func relative_square(sq Square, color Color) Square {
-	return make_square(relative_square_rank(sq, color), square_file(sq))
+func relativeSquare(sq Square, color Color) Square {
+	return makeSquare(relativeSquareRank(sq, color), squareFile(sq))
 }
 
-func relative_square_rank(sq Square, color Color) int {
+func relativeSquareRank(sq Square, color Color) int {
 	if color == BLACK {
-		return square_rank(sq)
+		return squareRank(sq)
 	}
-	return 7 - square_rank(sq)
+	return 7 - squareRank(sq)
 }
 
-func serialize_for_evaluate(us Color, piece Piece, piece_bb Bitboard) int {
+func serializeForEvaluate(us Color, piece Piece, pieceBB Bitboard) int {
 	score := 0
-	color, pt := piece_to_color(piece), piece_to_type(piece)
-	for cursor := piece_bb; !empty(cursor); cursor &= cursor - 1 {
+	color, pt := pieceToColor(piece), pieceToType(piece)
+	for cursor := pieceBB; !empty(cursor); cursor &= cursor - 1 {
 		if color == us {
 			score += MATERIAL_VALUES[pt]
-			score += add_position_value(pt, color, Square(lsb(cursor)))
+			score += addPositionValue(pt, color, Square(lsb(cursor)))
 		} else {
 			score -= MATERIAL_VALUES[pt]
-			score -= add_position_value(pt, color, Square(lsb(cursor)))
+			score -= addPositionValue(pt, color, Square(lsb(cursor)))
 		}
 	}
 	return score
