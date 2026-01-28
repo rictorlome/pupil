@@ -66,7 +66,7 @@ func startServer() {
 	mux.HandleFunc("POST /begin", g.BeginEndpoint)
 	mux.HandleFunc("POST /restart", g.RestartEndpoint)
 	mux.HandleFunc("POST /think", g.ThinkEndpoint)
-	mux.Handle("/", http.FileServer(http.Dir("./static/")))
+	mux.Handle("/", http.FileServer(http.Dir("./docs/")))
 
 	if err := http.ListenAndServe(":8080", corsMiddleware(mux)); err != nil {
 		panic(err)
