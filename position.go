@@ -101,9 +101,12 @@ func (p *Position) isLegal(m Move) bool {
 
 	if isEnpassant(m) {
 		theirQueens := p.placement[ptToP(QUEEN, them)]
+		capturedSq := cleanupSqForEpCapture(dst)
+		// Occupancy after en passant: remove src and captured pawn, add dst
+		occAfterEp := (p.occupancy() &^ (SQUARE_BBS[src] | SQUARE_BBS[capturedSq])) | SQUARE_BBS[dst]
 		// No discovered slider attacks on the king.
-		return empty(rookAttacks(p.occupancy()&^(SQUARE_BBS[src]|SQUARE_BBS[cleanupSqForEpCapture(dst)]), ksq)&(p.placement[ptToP(ROOK, them)]|theirQueens)) &&
-			empty(bishopAttacks(p.occupancy()&^SQUARE_BBS[src], ksq)&(p.placement[ptToP(BISHOP, them)]|theirQueens))
+		return empty(rookAttacks(occAfterEp, ksq)&(p.placement[ptToP(ROOK, them)]|theirQueens)) &&
+			empty(bishopAttacks(occAfterEp, ksq)&(p.placement[ptToP(BISHOP, them)]|theirQueens))
 	}
 	if p.pieceTypeAt(src) == KING {
 		return isCastle(m) || !occupiedAtSq(p.oppositeColorAttacks(), dst)
