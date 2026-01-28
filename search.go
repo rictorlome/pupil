@@ -28,9 +28,17 @@ func (p *Position) ab(alpha int, beta int, depth uint8) int {
 	score := 0
 	moves := p.generateMoves()
 
+	// Terminal position: no legal moves
+	if len(moves) == 0 {
+		if p.inCheck() {
+			return -MAX_SCORE // Checkmate
+		}
+		return 0 // Stalemate
+	}
+
 	// Leaf node
 	if depth == 0 {
-		score = p.evaluate(len(moves) == 0 && p.inCheck())
+		score = p.evaluate()
 		if empty || p.state.key&1 == 1 || depth >= ttEntry.depth {
 			newEntry.score = score
 			newEntry.nodeType = PV_NODE

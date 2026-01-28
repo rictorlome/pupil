@@ -44,8 +44,15 @@ func TestMateInTwos(t *testing.T) {
 
 func (p *Position) negamax(depth int) int {
 	moves := p.generateMoves()
+	// Terminal position: no legal moves
+	if len(moves) == 0 {
+		if p.inCheck() {
+			return -MAX_SCORE // Checkmate
+		}
+		return 0 // Stalemate
+	}
 	if depth == 0 {
-		return p.evaluate(len(moves) == 0 && p.inCheck())
+		return p.evaluate()
 	}
 	best := -MAX_SCORE
 	for _, move := range moves {
@@ -106,5 +113,37 @@ func TestNegaEqualsAB(t *testing.T) {
 				t.Errorf("Depth %v, Pos: %v\nAb not equal nega.\nAb: %v\nNega:%v", j, fen, abBest, negaBest)
 			}
 		}
+	}
+}
+
+func TestTerminalPositions(t *testing.T) {
+	tests := []struct {
+		name     string
+		fen      string
+		expected int
+	}{
+		// Stalemate: should return 0
+		{"Stalemate", "8/8/8/8/8/5k2/5p2/5K2 w - - 0 1", 0},
+		// Checkmate: should return -MAX_SCORE
+		{"Checkmate", "4R1k1/5ppp/8/8/8/8/8/6K1 b - - 0 1", -MAX_SCORE},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			pos := parseFen(test.fen)
+			moves := pos.generateMoves()
+
+			if len(moves) != 0 {
+				t.Fatalf("Expected terminal position (0 moves), got %d moves", len(moves))
+			}
+
+			// Test at depth 0, 1, 2
+			for depth := uint8(0); depth <= 2; depth++ {
+				score := pos.ab(-MAX_SCORE, MAX_SCORE, depth)
+				if score != test.expected {
+					t.Errorf("depth=%d: expected %d, got %d", depth, test.expected, score)
+				}
+			}
+		})
 	}
 }

@@ -6,15 +6,12 @@ func addPositionValue(pt PieceType, color Color, sq Square) int {
 	return valueArr[idx]
 }
 
-func (p *Position) evaluate(checkmate bool) int {
-	if !checkmate {
-		score := 0
-		for piece, pieceBB := range p.placement {
-			score += serializeForEvaluate(p.sideToMove(), Piece(piece), pieceBB)
-		}
-		return score
+func (p *Position) evaluate() int {
+	score := 0
+	for piece, pieceBB := range p.placement {
+		score += serializeForEvaluate(p.sideToMove(), Piece(piece), pieceBB)
 	}
-	return -MAX_SCORE
+	return score
 }
 
 func relativeMultiplier(color Color) int {
