@@ -1,19 +1,24 @@
 # Pupil
 
-[Live link](https://pupil.fly.dev/)
+[Live link](https://rictorlome.github.io/pupil/)
 ## Overview
 
 Pupil is a chess engine written in `Go`. The goal of writing this program was to create an engine capable of beating me in a 10 minute game.
 
-[Perft tests](https://www.chessprogramming.org/Perft) pass for the [initial board state](https://www.chessprogramming.org/Perft_Results#Initial_Position) and for [kiwipete](https://www.chessprogramming.org/Perft_Results#Position_2) up to depths 6 and 5 respectively.
+[Perft tests](https://www.chessprogramming.org/Perft) pass for the [initial board state](https://www.chessprogramming.org/Perft_Results#Initial_Position) and for [kiwipete](https://www.chessprogramming.org/Perft_Results#Position_2) up to depths 8 and 6 respectively.
 
-Some of the major optimizations include: [bitboard](https://www.chessprogramming.org/Bitboards) piece representation, [magic bitboards](https://www.chessprogramming.org/Magic_Bitboards) for move generation, multi-threaded perft tests (for development speed), object pooling, and a transposition table keyed via [zobrist hashes](https://www.chessprogramming.org/Zobrist_Hashing).
+Some of the major optimizations include: [bitboard](https://www.chessprogramming.org/Bitboards) piece representation, [magic bitboards](https://www.chessprogramming.org/Magic_Bitboards) for move generation, [quiescence search](https://www.chessprogramming.org/Quiescence_Search), [killer move heuristic](https://www.chessprogramming.org/Killer_Heuristic), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA) move ordering, object pooling, and a [transposition table](https://www.chessprogramming.org/Transposition_Table) keyed via [zobrist hashes](https://www.chessprogramming.org/Zobrist_Hashing).
 
 Although nowhere near as complete, the code is heavily inspired by the open-source [Stockfish](https://github.com/official-stockfish/Stockfish) project, whose source code I dipped into heavily.
 
-#### Note to anyone reading the code:
+## Running the code
 
-Apologies for the weird code style. I began this project before installing a linter in my editor/becoming familiar with the golang style guide. I haven't been able to find a good codemod/script to automatically clean it up. If you know of any, please let me know.
+```bash
+GOOS=js GOARCH=wasm go build -o docs/pupil.wasm     # fresh build of wasm
+go run .                                            # start local server
+```
+
+Then visit `http://localhost:8080`.
 
 ---
 
@@ -26,7 +31,7 @@ Apologies for the weird code style. I began this project before installing a lin
 | Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                                                                                                                                                                                                                              |
 | Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                                                                                                                                                                                                                                     |
 | Move Generation        | [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards)                                                                                                                                                                                                                                                               |
-| Search                 | [AlphaBeta search](https://www.chessprogramming.org/Alpha-Beta) within the [Negamax](https://www.chessprogramming.org/Negamax) framework. Currently uses [transposition tables](https://www.chessprogramming.org/Transposition_Table) to cache information about the different [node types](https://www.chessprogramming.org/Node_Types). |
+| Search                 | [Alpha-beta](https://www.chessprogramming.org/Alpha-Beta) with [quiescence search](https://www.chessprogramming.org/Quiescence_Search), [transposition tables](https://www.chessprogramming.org/Transposition_Table), [killer moves](https://www.chessprogramming.org/Killer_Heuristic), and [MVV-LVA](https://www.chessprogramming.org/MVV-LVA) move ordering. |
 | Evaluation             | [Simplified Evaluation Function](https://www.chessprogramming.org/Simplified_Evaluation_Function): Material value and positional value based on precomputed arrays.                                                                                                                                                                       |
 
 ---
@@ -53,11 +58,14 @@ This is my third attempt at a chess engine.
 - [x] Implement LRU/better cache clearing (simple array)
 - [x] Flesh out frontend for better UX
 - [x] Experiment compiling to WebAssembly
-- [x] Deploy (WebAssembly or no)
+- [x] Deploy with WebAssembly
+- [x] Quiescence search
+- [x] Killer moves
+- [x] MVV-LVA move ordering
+- [x] Move list pooling
+- [x] Lint
 
 ## Nice to haves:
 
-- [ ] Quiescence search
 - [ ] Iterative deepening with time limit
 - [ ] Concurrent alpha-beta
-- [ ] Lint
