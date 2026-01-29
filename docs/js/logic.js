@@ -5,6 +5,25 @@ var color = colors[Math.floor(Math.random() * colors.length)];
 var humansTurn = color === "white";
 var gameOver = false;
 
+var depthLabels = {
+  3: "Casual",
+  4: "Easy",
+  5: "Medium",
+  6: "Normal",
+  7: "Hard",
+  8: "Expert",
+  9: "Master"
+};
+
+function getSearchDepth() {
+  return parseInt(document.getElementById("depth-slider").value);
+}
+
+function updateDepthLabel() {
+  var depth = getSearchDepth();
+  document.getElementById("depth-label").textContent = depthLabels[depth];
+}
+
 // Load WASM
 const go = new Go();
 WebAssembly.instantiateStreaming(fetch("pupil.wasm"), go.importObject).then((result) => {
@@ -100,8 +119,8 @@ function makeMove(move) {
 
   // Let the engine respond (use setTimeout to not block UI)
   setTimeout(() => {
-    var engineResult = pupilGetEngineMove();
-    console.log("Engine played:", engineResult.move);
+    var engineResult = pupilGetEngineMove(getSearchDepth());
+    console.log("Engine played:", engineResult.move, "at depth", getSearchDepth());
     console.log("After engine move - FEN:", engineResult.fen);
     board1.position(engineResult.fen, true);
 
@@ -139,8 +158,8 @@ function restartGame() {
   if (!humansTurn) {
     setStatus("Engine thinking...");
     setTimeout(() => {
-      var engineResult = pupilGetEngineMove();
-      console.log("Engine played:", engineResult.move);
+      var engineResult = pupilGetEngineMove(getSearchDepth());
+      console.log("Engine played:", engineResult.move, "at depth", getSearchDepth());
       board1.position(engineResult.fen, true);
       humansTurn = true;
       setStatus("Your turn!");

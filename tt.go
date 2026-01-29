@@ -8,7 +8,7 @@ import (
 
 type TT struct {
 	// lock sync.RWMutex
-	m []*TTEntry
+	m []TTEntry
 }
 
 // alpha <= score <= beta
@@ -38,28 +38,24 @@ type TTEntry struct {
 
 func createTT(capExp int) *TT {
 	exp := float64(capExp)
-	return &TT{m: make([]*TTEntry, int(math.Pow(2, exp)))}
+	return &TT{m: make([]TTEntry, int(math.Pow(2, exp)))}
 }
 
-func (t *TT) read(key Key) (*TTEntry, bool) {
-	// t.lock.RLock()
-
+func (t *TT) read(key Key) (TTEntry, bool) {
 	// modulo 2^n with &
 	idx := key & Key((cap(t.m) - 1))
 	entry := t.m[idx]
-	// t.lock.RUnlock()
-	return entry, entry == nil
+	// Empty entries have key=0, so check if key matches or entry is unset
+	return entry, entry.key == 0
 }
 
-func (t *TT) write(key Key, entry *TTEntry) {
-	// t.lock.Lock()
+func (t *TT) write(key Key, entry TTEntry) {
 	idx := key & Key((cap(t.m) - 1))
 	t.m[idx] = entry
-	// t.lock.Unlock()
 }
 
 func (t *TT) clear() {
 	for i := range t.m {
-		t.m[i] = nil
+		t.m[i] = TTEntry{}
 	}
 }

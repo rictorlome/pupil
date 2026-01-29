@@ -217,7 +217,7 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int, allowNull bool)
 				newEntry.score = score
 				newEntry.nodeType = CUT_NODE
 				newEntry.bestMove = move
-				TT_GLOBAL.write(p.state.key, &newEntry)
+				TT_GLOBAL.write(p.state.key, newEntry)
 			}
 			putMoveList(moves)
 			return beta
@@ -232,7 +232,7 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int, allowNull bool)
 	// Cache node
 	if isEmpty || p.state.key&1 == 1 || depth > ttEntry.depth {
 		newEntry.score = alpha
-		TT_GLOBAL.write(p.state.key, &newEntry)
+		TT_GLOBAL.write(p.state.key, newEntry)
 	}
 	putMoveList(moves)
 	return alpha

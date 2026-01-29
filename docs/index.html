@@ -28,6 +28,24 @@
         cursor: pointer;
         margin: 5px;
       }
+      .slider-container {
+        margin: 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .slider-container label {
+        font-size: 14px;
+        color: #333;
+      }
+      .slider-container input[type="range"] {
+        width: 150px;
+      }
+      .slider-container span {
+        font-size: 14px;
+        color: #666;
+        min-width: 60px;
+      }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="js/wasm_exec.js"></script>
@@ -40,6 +58,11 @@
       <a href="https://github.com/rictorlome/pupil" target="_blank" style="color: #0366d6;">View source on GitHub</a>
     </p>
     <div id="status">Loading engine...</div>
+    <div class="slider-container">
+      <label for="depth-slider">Thinking:</label>
+      <input type="range" id="depth-slider" min="3" max="9" value="6" oninput="updateDepthLabel()">
+      <span id="depth-label">Normal</span>
+    </div>
     <div id="board1" style="width: 400px"></div>
     <div>
       <button onclick="restartGame()">New Game</button>

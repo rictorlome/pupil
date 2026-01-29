@@ -20,8 +20,7 @@ func addPositionValue(pt PieceType, color Color, sq Square, isEndgame bool) int 
 	if pt == KING && isEndgame {
 		return KING_SQUARE_VALUES_ENDGAME[idx]
 	}
-	valueArr := *POSITION_VALUES[pt]
-	return valueArr[idx]
+	return POSITION_VALUES[pt][idx]
 }
 
 func (p *Position) evaluate() int {
@@ -30,7 +29,7 @@ func (p *Position) evaluate() int {
 
 	// Calculate total material (excluding kings) to detect endgame
 	totalMaterial := 0
-	for _, pt := range []PieceType{QUEEN, ROOK, BISHOP, KNIGHT} {
+	for _, pt := range MAJOR_MINOR_PIECE_TYPES {
 		totalMaterial += popcount(p.placement[ptToP(pt, WHITE)]) * MATERIAL_VALUES[pt]
 		totalMaterial += popcount(p.placement[ptToP(pt, BLACK)]) * MATERIAL_VALUES[pt]
 	}
