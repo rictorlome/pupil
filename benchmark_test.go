@@ -20,6 +20,15 @@ func BenchmarkAlphaBetaKiwipete4(b *testing.B) {
 func BenchmarkAlphaBetaKiwipete5(b *testing.B) {
 	benchmarkAlphaBeta(KIWIPETE_FEN, 5, b)
 }
+func BenchmarkAlphaBetaKiwipete6(b *testing.B) {
+	benchmarkAlphaBeta(KIWIPETE_FEN, 6, b)
+}
+func BenchmarkAlphaBetaKiwipete7(b *testing.B) {
+	benchmarkAlphaBeta(KIWIPETE_FEN, 7, b)
+}
+func BenchmarkAlphaBetaKiwipete8(b *testing.B) {
+	benchmarkAlphaBeta(KIWIPETE_FEN, 8, b)
+}
 func BenchmarkAlphaBetaInitial2(b *testing.B) {
 	benchmarkAlphaBeta(INITIAL_FEN, 2, b)
 }
@@ -31,4 +40,13 @@ func BenchmarkAlphaBetaInitial4(b *testing.B) {
 }
 func BenchmarkAlphaBetaInitial5(b *testing.B) {
 	benchmarkAlphaBeta(INITIAL_FEN, 5, b)
+}
+func BenchmarkAlphaBetaInitial6(b *testing.B) {
+	benchmarkAlphaBeta(INITIAL_FEN, 6, b)
+}
+func BenchmarkAlphaBetaInitial7(b *testing.B) {
+	benchmarkAlphaBeta(INITIAL_FEN, 7, b)
+}
+func BenchmarkAlphaBetaInitial8(b *testing.B) {
+	benchmarkAlphaBeta(INITIAL_FEN, 8, b)
 }

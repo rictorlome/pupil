@@ -3,6 +3,7 @@ var board1 = null;
 var colors = ["black", "white"];
 var color = colors[Math.floor(Math.random() * colors.length)];
 var humansTurn = color === "white";
+var gameOver = false;
 
 // Load WASM
 const go = new Go();
@@ -36,6 +37,7 @@ function initGame() {
 
 function onDrop(source, target, piece, newPos, oldPos, orientation) {
   if (!wasmReady) return "snapback";
+  if (gameOver) return "snapback";
   if (piece[0] !== orientation[0]) return "snapback";
   if (!humansTurn) return "snapback";
   if (target === "offboard") return "snapback";
@@ -47,6 +49,28 @@ function onDrop(source, target, piece, newPos, oldPos, orientation) {
   setTimeout(() => {
     makeMove(source + target);
   }, 10);
+}
+
+function checkGameStatus() {
+  var status = pupilGetGameStatus();
+
+  if (status.status === "checkmate") {
+    gameOver = true;
+    if (status.winner === color) {
+      setStatus("Checkmate! You win!");
+    } else {
+      setStatus("Checkmate! Engine wins!");
+    }
+    return true;
+  }
+
+  if (status.status === "stalemate") {
+    gameOver = true;
+    setStatus("Stalemate! It's a draw.");
+    return true;
+  }
+
+  return false;
 }
 
 function makeMove(move) {
@@ -63,22 +87,44 @@ function makeMove(move) {
     return;
   }
 
+  console.log("After human move - FEN:", result.fen);
   board1.position(result.fen, true);
+
+  // Check if game ended after human's move
+  if (checkGameStatus()) {
+    console.log("Game over after human move");
+    return;
+  }
+
   setStatus("Engine thinking...");
 
   // Let the engine respond (use setTimeout to not block UI)
   setTimeout(() => {
-    var engineResult = pupilGetEngineMove(5); // depth 5
+    var engineResult = pupilGetEngineMove();
     console.log("Engine played:", engineResult.move);
+    console.log("After engine move - FEN:", engineResult.fen);
     board1.position(engineResult.fen, true);
+
+    // Check if game ended after engine's move
+    if (checkGameStatus()) {
+      console.log("Game over after engine move");
+      return;
+    }
+
     humansTurn = true;
-    setStatus("Your turn!");
+    var status = pupilGetGameStatus();
+    if (status.inCheck) {
+      setStatus("Check! Your turn.");
+    } else {
+      setStatus("Your turn!");
+    }
   }, 50);
 }
 
 function restartGame() {
   if (!wasmReady) return;
 
+  gameOver = false;
   color = colors[Math.floor(Math.random() * colors.length)];
   humansTurn = color === "white";
 
@@ -93,7 +139,7 @@ function restartGame() {
   if (!humansTurn) {
     setStatus("Engine thinking...");
     setTimeout(() => {
-      var engineResult = pupilGetEngineMove(5);
+      var engineResult = pupilGetEngineMove();
       console.log("Engine played:", engineResult.move);
       board1.position(engineResult.fen, true);
       humansTurn = true;

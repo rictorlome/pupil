@@ -57,3 +57,9 @@ func (t *TT) write(key Key, entry *TTEntry) {
 	t.m[idx] = entry
 	// t.lock.Unlock()
 }
+
+func (t *TT) clear() {
+	for i := range t.m {
+		t.m[i] = nil
+	}
+}

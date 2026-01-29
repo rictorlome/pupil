@@ -52,12 +52,14 @@ func getPerftParallel(p *Position, depth int) perft {
 	newPerft := perft{0, 0, 0, 0, 0, 0, 0, 0}
 	c := make(chan perft)
 	moves := p.generateMoves()
-	for i := 0; i < len(moves); i++ {
+	numMoves := len(*moves)
+	for i := 0; i < numMoves; i++ {
 		duped := p.dup()
-		duped.doMove(moves[i], &StateInfo{})
-		go getPerft(&duped, depth-1, moves[i], c)
+		duped.doMove((*moves)[i], &StateInfo{})
+		go getPerft(&duped, depth-1, (*moves)[i], c)
 	}
-	for i := 0; i < len(moves); i++ {
+	putMoveList(moves)
+	for i := 0; i < numMoves; i++ {
 		newPerft = newPerft.add(<-c)
 	}
 	newPerft.depth = depth
@@ -83,13 +85,15 @@ func getPerftRecursive(p *Position, depth int, move Move) perft {
 		return newPerft
 	}
 	newPerft.nodes = 0
-	for _, move := range p.generateMoves() {
+	moves := p.generateMoves()
+	for _, move := range *moves {
 		s := siPool.Get().(*StateInfo)
 		p.doMove(move, s)
 		newPerft = newPerft.add(getPerftRecursive(p, depth-1, move))
 		p.undoMove(move)
 		siPool.Put(s)
 	}
+	putMoveList(moves)
 	newPerft.depth = depth
 	ttTable.write(p.state.key, newPerft)
 	return newPerft

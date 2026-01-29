@@ -39,14 +39,16 @@ func (p *Position) generateEvasions(pl *[]Move, ml *[]Move) {
 	p.generateNonEvasions(pl, ml, BETWEEN_BBS[kingSq][checkerSq]|checkers)
 }
 
-func (p *Position) generateMoves() []Move {
-	pseudoLegalMoveList := make([]Move, 0, MAX_BRANCHING)
-	moveList := make([]Move, 0, MAX_BRANCHING)
+// generateMoves returns a pooled slice - caller must call putMoveList when done
+func (p *Position) generateMoves() *[]Move {
+	pseudoLegalMoveList := getMoveList()
+	moveList := getMoveList()
 	if p.inCheck() {
-		p.generateEvasions(&pseudoLegalMoveList, &moveList)
+		p.generateEvasions(pseudoLegalMoveList, moveList)
 	} else {
-		p.generateNonEvasions(&pseudoLegalMoveList, &moveList, Bitboard(0))
+		p.generateNonEvasions(pseudoLegalMoveList, moveList, Bitboard(0))
 	}
+	putMoveList(pseudoLegalMoveList)
 	return moveList
 }
 
@@ -91,7 +93,13 @@ func (p *Position) inCheck() bool {
 }
 
 func (p *Position) inCheckmate() bool {
-	return p.inCheck() && len(p.generateMoves()) == 0
+	if !p.inCheck() {
+		return false
+	}
+	moves := p.generateMoves()
+	result := len(*moves) == 0
+	putMoveList(moves)
+	return result
 }
 
 func (p *Position) isLegal(m Move) bool {

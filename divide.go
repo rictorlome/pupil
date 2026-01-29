@@ -16,15 +16,16 @@ func buildTree(p *Position, parent *Node, move Move, depthLeft int, c chan Node)
 
 func buildTreeParallel(p *Position, depthLeft int) Node {
 	moves := (*p).generateMoves()
-	movesLen := len(moves)
+	movesLen := len(*moves)
 	children := make([]Node, movesLen)
 	c := make(chan Node)
 	self := Node{nil, Move(0), make([]Node, movesLen)}
 	for i := 0; i < movesLen; i++ {
 		duped := (*p).dup()
-		duped.doMove(moves[i], &StateInfo{})
-		go buildTree(&duped, &self, moves[i], depthLeft-1, c)
+		duped.doMove((*moves)[i], &StateInfo{})
+		go buildTree(&duped, &self, (*moves)[i], depthLeft-1, c)
 	}
+	putMoveList(moves)
 	for i := 0; i < movesLen; i++ {
 		children[i] = <-c
 	}
@@ -36,12 +37,13 @@ func buildTreeRecursive(p *Position, parent *Node, move Move, depthLeft int) Nod
 	self := Node{parent, move, make([]Node, 0)}
 	if 0 < depthLeft {
 		moves := (*p).generateMoves()
-		children := make([]Node, len(moves))
-		for i := 0; i < len(moves); i++ {
-			(*p).doMove(moves[i], &StateInfo{})
-			children[i] = buildTreeRecursive(p, &self, moves[i], depthLeft-1)
-			(*p).undoMove(moves[i])
+		children := make([]Node, len(*moves))
+		for i := 0; i < len(*moves); i++ {
+			(*p).doMove((*moves)[i], &StateInfo{})
+			children[i] = buildTreeRecursive(p, &self, (*moves)[i], depthLeft-1)
+			(*p).undoMove((*moves)[i])
 		}
+		putMoveList(moves)
 		self.children = children
 	}
 	return self

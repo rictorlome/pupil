@@ -40,7 +40,7 @@ func makeMove(this js.Value, args []js.Value) interface{} {
 }
 
 func getEngineMove(this js.Value, args []js.Value) interface{} {
-	depth := uint8(5) // Default depth 5 for faster response in browser
+	depth := uint8(6) // Default depth 6 fast, strong play
 	if len(args) > 0 {
 		depth = uint8(args[0].Int())
 	}
@@ -61,6 +61,48 @@ func getFen(this js.Value, args []js.Value) interface{} {
 	return game.pos.String()
 }
 
+func getGameStatus(this js.Value, args []js.Value) interface{} {
+	if game == nil {
+		return js.ValueOf(map[string]interface{}{
+			"status": "no_game",
+		})
+	}
+
+	moves := game.pos.generateMoves()
+	inCheck := game.pos.inCheck()
+	numMoves := len(*moves)
+	putMoveList(moves)
+
+	if numMoves == 0 {
+		if inCheck {
+			// Checkmate - current side to move loses
+			winner := "white"
+			if game.pos.sideToMove() == WHITE {
+				winner = "black"
+			}
+			return js.ValueOf(map[string]interface{}{
+				"status": "checkmate",
+				"winner": winner,
+			})
+		}
+		// Stalemate
+		return js.ValueOf(map[string]interface{}{
+			"status": "stalemate",
+		})
+	}
+
+	// Game ongoing
+	turn := "white"
+	if game.pos.sideToMove() == BLACK {
+		turn = "black"
+	}
+	return js.ValueOf(map[string]interface{}{
+		"status":  "ongoing",
+		"inCheck": inCheck,
+		"turn":    turn,
+	})
+}
+
 func main() {
 	c := make(chan struct{}, 0)
 
@@ -68,6 +110,7 @@ func main() {
 	js.Global().Set("pupilMakeMove", js.FuncOf(makeMove))
 	js.Global().Set("pupilGetEngineMove", js.FuncOf(getEngineMove))
 	js.Global().Set("pupilGetFen", js.FuncOf(getFen))
+	js.Global().Set("pupilGetGameStatus", js.FuncOf(getGameStatus))
 
 	println("Pupil Chess Engine (WASM) loaded")
 

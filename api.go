@@ -11,11 +11,13 @@ type Game struct {
 
 func (g *Game) validateMove(m Move) bool {
 	legalMoves := g.pos.generateMoves()
-	for _, legalMove := range legalMoves {
+	for _, legalMove := range *legalMoves {
 		if m == legalMove {
+			putMoveList(legalMoves)
 			return true
 		}
 	}
+	putMoveList(legalMoves)
 	return false
 }
 
