@@ -7,7 +7,7 @@ Pupil is a chess engine written in `Go`. The goal of writing this program was to
 
 [Perft tests](https://www.chessprogramming.org/Perft) pass for the [initial board state](https://www.chessprogramming.org/Perft_Results#Initial_Position) and for [kiwipete](https://www.chessprogramming.org/Perft_Results#Position_2) up to depths 8 and 6 respectively.
 
-Some of the major optimizations include: [bitboard](https://www.chessprogramming.org/Bitboards) piece representation, [magic bitboards](https://www.chessprogramming.org/Magic_Bitboards) for move generation, [quiescence search](https://www.chessprogramming.org/Quiescence_Search), [killer move heuristic](https://www.chessprogramming.org/Killer_Heuristic), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA) move ordering, object pooling, and a [transposition table](https://www.chessprogramming.org/Transposition_Table) keyed via [zobrist hashes](https://www.chessprogramming.org/Zobrist_Hashing).
+Some of the major optimizations include: [bitboard](https://www.chessprogramming.org/Bitboards) piece representation, [magic bitboards](https://www.chessprogramming.org/Magic_Bitboards) for move generation, [quiescence search](https://www.chessprogramming.org/Quiescence_Search), [null move pruning](https://www.chessprogramming.org/Null_Move_Pruning), [killer move heuristic](https://www.chessprogramming.org/Killer_Heuristic), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA) move ordering, object pooling, and a [transposition table](https://www.chessprogramming.org/Transposition_Table) keyed via [zobrist hashes](https://www.chessprogramming.org/Zobrist_Hashing).
 
 Although nowhere near as complete, the code is heavily inspired by the open-source [Stockfish](https://github.com/official-stockfish/Stockfish) project, whose source code I dipped into heavily.
 
@@ -31,8 +31,8 @@ Then visit `http://localhost:8080`.
 | Bitboard Serialization | [Forward-scanning](https://www.chessprogramming.org/Bitboard_Serialization#Scanning_Forward)                                                                                                                                                                                                                                              |
 | Move encoding          | [16 bit From-to based](https://www.chessprogramming.org/Encoding_Moves#From-To_Based)                                                                                                                                                                                                                                                     |
 | Move Generation        | [Magic Bitboard approach](https://www.chessprogramming.org/Magic_Bitboards)                                                                                                                                                                                                                                                               |
-| Search                 | [Alpha-beta](https://www.chessprogramming.org/Alpha-Beta) with [quiescence search](https://www.chessprogramming.org/Quiescence_Search), [transposition tables](https://www.chessprogramming.org/Transposition_Table), [killer moves](https://www.chessprogramming.org/Killer_Heuristic), and [MVV-LVA](https://www.chessprogramming.org/MVV-LVA) move ordering. |
-| Evaluation             | [Simplified Evaluation Function](https://www.chessprogramming.org/Simplified_Evaluation_Function): Material value and positional value based on precomputed arrays.                                                                                                                                                                       |
+| Search                 | [Alpha-beta](https://www.chessprogramming.org/Alpha-Beta) with [quiescence search](https://www.chessprogramming.org/Quiescence_Search), [null move pruning](https://www.chessprogramming.org/Null_Move_Pruning), [transposition tables](https://www.chessprogramming.org/Transposition_Table), [killer moves](https://www.chessprogramming.org/Killer_Heuristic), and [MVV-LVA](https://www.chessprogramming.org/MVV-LVA) move ordering. |
+| Evaluation             | Material, piece-square tables, pawn structure (doubled/isolated/passed pawns), bishop pair, rook on open files, king safety (pawn shield), and endgame-specific king tables. |
 
 ---
 
@@ -63,6 +63,8 @@ This is my third attempt at a chess engine.
 - [x] Killer moves
 - [x] MVV-LVA move ordering
 - [x] Move list pooling
+- [x] Null move pruning
+- [x] Improved evaluation (pawn structure, king safety, endgame)
 - [x] Lint
 
 ## Nice to haves:

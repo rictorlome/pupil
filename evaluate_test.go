@@ -28,8 +28,8 @@ var PositionValueTests = []PositionValueTest{
 
 func TestAddPositionVal(t *testing.T) {
 	for _, test := range PositionValueTests {
-		if test.val != addPositionValue(test.pt, test.c, test.sq) {
-			t.Errorf("Test: %v, Got: %v, Expected %v.", test, addPositionValue(test.pt, test.c, test.sq), test.val)
+		if test.val != addPositionValue(test.pt, test.c, test.sq, false) {
+			t.Errorf("Test: %v, Got: %v, Expected %v.", test, addPositionValue(test.pt, test.c, test.sq, false), test.val)
 		}
 	}
 }

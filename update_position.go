@@ -102,6 +102,42 @@ func (p *Position) setFenInfo(positions string, color string, castles string, en
 	p.state.rule50 = rule50Int
 }
 
+// Null move: just swap sides without making a move
+func (p *Position) doNullMove(newState *StateInfo) {
+	us := p.sideToMove()
+	them := opposite(us)
+
+	// Update key: flip side, clear ep square
+	newKey := p.state.key ^ ZOBRIST_SIDE ^ ZOBRIST_EPSQ[p.state.epSq]
+
+	// Copy state info
+	newState.castlingRights = p.state.castlingRights
+	newState.epSq = NULL_SQ // Clear ep square
+	newState.rule50 = p.state.rule50 + 1
+
+	// Update key with new ep square (NULL_SQ)
+	newKey ^= ZOBRIST_EPSQ[newState.epSq]
+	newState.key = newKey
+
+	// Update attacks and blockers for the new side to move
+	newState.oppositeColorAttacks = p.getColorAttacks(us)
+	newState.blockersForKing = p.sliderBlockers(us, p.kingSquare(them))
+
+	// Link states
+	newState.prev = p.state
+	p.state = newState
+
+	// Swap sides
+	p.ply += 1
+	p.stm = them
+}
+
+func (p *Position) undoNullMove() {
+	p.ply -= 1
+	p.stm = opposite(p.stm)
+	p.state = p.state.prev
+}
+
 func (p *Position) undoMove(m Move) {
 	src, dst := moveSrc(m), moveDst(m)
 	mover := p.pieceAt(dst)

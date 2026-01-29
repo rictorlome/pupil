@@ -16,6 +16,9 @@ type MoveScore struct {
 // Maximum depth for quiescence search
 const MAX_QUIESCE_DEPTH = 10
 
+// Null move pruning reduction
+const NULL_MOVE_R = 2
+
 // Killer moves: 2 slots per ply, up to 64 ply deep
 const MAX_PLY = 64
 const KILLERS_PER_PLY = 2
@@ -48,6 +51,17 @@ func isKiller(ply int, move Move) bool {
 		return false
 	}
 	return killerMoves[ply][0] == move || killerMoves[ply][1] == move
+}
+
+// Check if position has only king and pawns (zugzwang-prone)
+func (p *Position) onlyKingAndPawns() bool {
+	us := p.sideToMove()
+	// Check if we have any pieces besides king and pawns
+	queens := p.placement[ptToP(QUEEN, us)]
+	rooks := p.placement[ptToP(ROOK, us)]
+	bishops := p.placement[ptToP(BISHOP, us)]
+	knights := p.placement[ptToP(KNIGHT, us)]
+	return empty(queens) && empty(rooks) && empty(bishops) && empty(knights)
 }
 
 // Quiescence search: continue searching captures to avoid horizon effect
@@ -107,9 +121,9 @@ func (p *Position) quiesce(alpha int, beta int, depth int) int {
 	return alpha
 }
 
-func (p *Position) ab(alpha int, beta int, depth uint8, ply int) int {
-	ttEntry, empty := TT_GLOBAL.read(p.state.key)
-	hit := !empty && ttEntry.key == p.state.key
+func (p *Position) ab(alpha int, beta int, depth uint8, ply int, allowNull bool) int {
+	ttEntry, isEmpty := TT_GLOBAL.read(p.state.key)
+	hit := !isEmpty && ttEntry.key == p.state.key
 
 	// TT cutoffs: use cached bounds when depth is sufficient
 	if hit && ttEntry.depth >= depth {
@@ -140,6 +154,25 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int) int {
 		}
 	}
 
+	inCheck := p.inCheck()
+
+	// Null Move Pruning: if we can skip our turn and still beat beta, prune
+	// Don't do null move when: in check, at low depth, only have king+pawns (zugzwang risk),
+	// or when beta is near mate score (to not miss forced mates)
+	// Require depth >= 4 to avoid pruning in tactical positions
+	if allowNull && !inCheck && depth >= 4 && !p.onlyKingAndPawns() && beta < MAX_SCORE-100 && beta > -MAX_SCORE+100 {
+		s := siPool.Get().(*StateInfo)
+		p.doNullMove(s)
+		// Search with reduced depth, disallow consecutive null moves
+		nullScore := -p.ab(-beta, -beta+1, depth-1-NULL_MOVE_R, ply+1, false)
+		p.undoNullMove()
+		siPool.Put(s)
+
+		if nullScore >= beta {
+			return beta // Null move cutoff
+		}
+	}
+
 	// Default the newEntry to ALL_NODE
 	newEntry := TTEntry{depth: depth, nodeType: ALL_NODE, key: p.state.key}
 	score := 0
@@ -148,7 +181,7 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int) int {
 	// Terminal position: no legal moves
 	if len(*moves) == 0 {
 		putMoveList(moves)
-		if p.inCheck() {
+		if inCheck {
 			return -MAX_SCORE // Checkmate
 		}
 		return 0 // Stalemate
@@ -172,7 +205,7 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int) int {
 	for _, move := range *moves {
 		s := siPool.Get().(*StateInfo)
 		p.doMove(move, s)
-		score = -p.ab(-beta, -alpha, depth-1, ply+1)
+		score = -p.ab(-beta, -alpha, depth-1, ply+1, true)
 		p.undoMove(move)
 		siPool.Put(s)
 		if score >= beta {
@@ -180,7 +213,7 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int) int {
 			if !isCapture(move) {
 				updateKillers(ply, move)
 			}
-			if empty || p.state.key&1 == 1 || depth >= ttEntry.depth {
+			if isEmpty || p.state.key&1 == 1 || depth >= ttEntry.depth {
 				newEntry.score = score
 				newEntry.nodeType = CUT_NODE
 				newEntry.bestMove = move
@@ -197,7 +230,7 @@ func (p *Position) ab(alpha int, beta int, depth uint8, ply int) int {
 	}
 
 	// Cache node
-	if empty || p.state.key&1 == 1 || depth > ttEntry.depth {
+	if isEmpty || p.state.key&1 == 1 || depth > ttEntry.depth {
 		newEntry.score = alpha
 		TT_GLOBAL.write(p.state.key, &newEntry)
 	}
@@ -213,7 +246,7 @@ func (p *Position) abRoot(depth uint8) MoveScore {
 	p.orderMoves(moves, Move(0), 0, len(*moves))
 	for _, move := range *moves {
 		p.doMove(move, &StateInfo{})
-		score := -p.ab(-beta, -alpha, depth-1, 1)
+		score := -p.ab(-beta, -alpha, depth-1, 1, true)
 		p.undoMove(move)
 		if score >= beta {
 			putMoveList(moves)

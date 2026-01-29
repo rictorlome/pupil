@@ -146,6 +146,11 @@ var BETWEEN_BBS [64][64]Bitboard
 var CASTLE_MOVE_SQS [4]Bitboard
 var CASTLE_CHECK_SQS [4]Bitboard
 
+// Evaluation bitboards (initialized in init)
+var ADJACENT_FILES [8]Bitboard         // Adjacent files for each file
+var PASSED_PAWN_MASKS [64][2]Bitboard  // Passed pawn mask for each square/color
+var KING_SHIELD_MASKS [64][2]Bitboard  // Pawn shield mask for each king square/color
+
 // 6. SQUARES
 const (
 	SQ_A1 Square = iota

@@ -213,7 +213,7 @@ func TestTerminalPositions(t *testing.T) {
 
 			// Test at depth 0, 1, 2
 			for depth := uint8(0); depth <= 2; depth++ {
-				score := pos.ab(-MAX_SCORE, MAX_SCORE, depth, 0)
+				score := pos.ab(-MAX_SCORE, MAX_SCORE, depth, 0, true)
 				if score != test.expected {
 					t.Errorf("depth=%d: expected %d, got %d", depth, test.expected, score)
 				}

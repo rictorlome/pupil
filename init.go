@@ -37,4 +37,71 @@ func init() {
 	initMagics()
 	initZobrists()
 	initPool()
+	initEvalBitboards()
+}
+
+func initEvalBitboards() {
+	// Adjacent files
+	for file := FILE_A; file <= FILE_H; file++ {
+		ADJACENT_FILES[file] = Bitboard(0)
+		if file > FILE_A {
+			ADJACENT_FILES[file] |= FILE_BBS[file-1]
+		}
+		if file < FILE_H {
+			ADJACENT_FILES[file] |= FILE_BBS[file+1]
+		}
+	}
+
+	// Passed pawn masks and king shield masks
+	for _, sq := range SQUARES {
+		file := squareFile(sq)
+		rank := squareRank(sq)
+
+		// Passed pawn masks: all squares ahead on same and adjacent files
+		for _, color := range COLORS {
+			mask := Bitboard(0)
+			if color == WHITE {
+				for r := rank + 1; r <= RANK_8; r++ {
+					mask |= SQUARE_BBS[makeSquare(r, file)]
+					if file > FILE_A {
+						mask |= SQUARE_BBS[makeSquare(r, file-1)]
+					}
+					if file < FILE_H {
+						mask |= SQUARE_BBS[makeSquare(r, file+1)]
+					}
+				}
+			} else {
+				for r := rank - 1; r >= RANK_1; r-- {
+					mask |= SQUARE_BBS[makeSquare(r, file)]
+					if file > FILE_A {
+						mask |= SQUARE_BBS[makeSquare(r, file-1)]
+					}
+					if file < FILE_H {
+						mask |= SQUARE_BBS[makeSquare(r, file+1)]
+					}
+				}
+			}
+			PASSED_PAWN_MASKS[sq][color] = mask
+		}
+
+		// King shield masks: 3 squares directly in front of king
+		for _, color := range COLORS {
+			shield := Bitboard(0)
+			var shieldRank int
+			var validRank bool
+			if color == WHITE {
+				shieldRank = rank + 1
+				validRank = rank < RANK_8
+			} else {
+				shieldRank = rank - 1
+				validRank = rank > RANK_1
+			}
+			if validRank {
+				for f := max(FILE_A, file-1); f <= min(FILE_H, file+1); f++ {
+					shield |= SQUARE_BBS[makeSquare(shieldRank, f)]
+				}
+			}
+			KING_SHIELD_MASKS[sq][color] = shield
+		}
+	}
 }
